@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Header } from './components/Header/Header'
 import { CardBook } from './components/cardbook/CardBook'
 import { PgLogin } from './pages/PgLogin'
@@ -16,18 +16,26 @@ function Home() {
   );
 }
 
+function AppLayout() {
+  const location = useLocation();
+  const hideHeader = location.pathname === '/login';
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {!hideHeader && <Header />}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<PgLogin />} />
+      </Routes>
+    </div>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
-      <div>
-        <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<PgLogin />} />
-        </Routes>
-      </div>
+      <AppLayout />
     </BrowserRouter>
-  )
+  );
 }
 
 export default App
