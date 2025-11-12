@@ -1,6 +1,6 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { Header } from './components/Header/Header'
+import { Header } from './components/header/Header'
 import { CardBook } from './components/cardbook/CardBook'
 import { PgLogin } from './pages/PgLogin'
 

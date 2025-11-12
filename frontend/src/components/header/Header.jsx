@@ -7,8 +7,8 @@ export function Header() {
   return (
     <header className={styles.header}>
       <div className={styles.logoContainer}>
-        <img src={logo} alt="BookUniverse Logo" className={styles.logoImage} />
-        <span className={styles.logoText}>BookUniverse</span>
+        <img src={logo} alt="Estante Aberta Logo" className={styles.logoImage} />
+        <span className={styles.logoText}>Estante Aberta</span>
       </div>
 
       <div className={styles.searchContainer}>
