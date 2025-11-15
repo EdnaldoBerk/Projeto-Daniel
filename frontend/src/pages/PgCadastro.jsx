@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from '../styles/PgCadastro.module.css';
 import BgRight from '../assets/BackgroundRightLogin.jpg';
 import Logo from '../assets/Logo.png';
+import { registerUser } from '../services/api';
 
 export function PgCadastro() {
   const [nome, setNome] = useState('');
@@ -9,11 +11,22 @@ export function PgCadastro() {
   const [telefone, setTelefone] = useState('');
   const [cpf, setCpf] = useState('');
   const [senha, setSenha] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aqui você pode adicionar a lógica de cadastro
-    console.log('Cadastro tentado com:', { nome, email, telefone, cpf, senha });
+    setError('');
+    setLoading(true);
+    try {
+      await registerUser({ nome, email, telefone, cpf, senha });
+      navigate('/login');
+    } catch (err) {
+      setError(err.message || 'Erro ao cadastrar.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -89,18 +102,19 @@ export function PgCadastro() {
               />
             </div>
 
-            <button type="submit" className={styles.loginButton}>
-              Cadastrar
+            <button type="submit" className={styles.loginButton} disabled={loading}>
+              {loading ? 'Enviando...' : 'Cadastrar'}
             </button>
 
             <button
               type="button"
               className={styles.secondaryButton}
-              onClick={() => window.location.href = '/login'}
+              onClick={() => navigate('/login')}
             >
               Já tenho conta
             </button>
           </form>
+          {error && <p style={{ color: '#ff6b6b', marginTop: '0.75rem' }}>{error}</p>}
         </div>
       </section>
 

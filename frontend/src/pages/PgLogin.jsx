@@ -3,16 +3,29 @@ import { useNavigate } from 'react-router-dom';
 import styles from '../styles/PgLogin.module.css';
 import BgRight from '../assets/BackgroundRightLogin.jpg';
 import Logo from '../assets/Logo.png';
+import { loginUser } from '../services/api';
 
 export function PgLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aqui você pode adicionar a lógica de autenticação
-    console.log('Login tentado com:', { email, password });
+    setError('');
+    setLoading(true);
+    try {
+      const user = await loginUser({ email, senha: password });
+      // Exemplo simples: guardar usuário no localStorage
+      localStorage.setItem('user', JSON.stringify(user));
+      navigate('/');
+    } catch (err) {
+      setError(err.message || 'Erro ao fazer login.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,8 +62,8 @@ export function PgLogin() {
               />
             </div>
 
-            <button type="submit" className={styles.loginButton}>
-              Entrar
+            <button type="submit" className={styles.loginButton} disabled={loading}>
+              {loading ? 'Entrando...' : 'Entrar'}
             </button>
 
             <button
@@ -61,6 +74,7 @@ export function PgLogin() {
               Criar conta
             </button>
           </form>
+          {error && <p style={{ color: '#ff6b6b', marginTop: '0.75rem' }}>{error}</p>}
 
           <a href="#" className={styles.forgotPassword}>
             Esqueceu sua senha?

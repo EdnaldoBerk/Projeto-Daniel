@@ -1,9 +1,16 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styles from './Header.module.css'
 import logo from '../../assets/Logo.png'
 
 export function Header() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    setIsLoggedIn(!!user);
+  }, []);
+
   return (
     <header className={styles.header}>
       <div className={styles.logoContainer}>
@@ -31,13 +38,18 @@ export function Header() {
       </div>
 
       <div className={styles.authContainer}>
-        <Link to="/login" className={`${styles.authButton} ${styles.loginButton}`}>
-          Login
-        </Link>
-        <Link to="/cadastro" className={`${styles.authButton} ${styles.registerButton}`}>
-          Cadastro
-        </Link>
+        {isLoggedIn ? (
+          <> 
+            <Link to="/profile" className={`${styles.authButton} ${styles.profileButton}`}>Visualizar Perfil</Link>
+            <button onClick={() => { localStorage.removeItem('user'); setIsLoggedIn(false); }} className={`${styles.authButton} ${styles.logoutButton}`}>Logout</button>
+          </>
+        ) : (
+          <> 
+            <Link to="/login" className={`${styles.authButton} ${styles.loginButton}`}>Login</Link>
+            <Link to="/cadastro" className={`${styles.authButton} ${styles.registerButton}`}>Cadastro</Link>
+          </>
+        )}
       </div>
     </header>
-  )
+  );
 }

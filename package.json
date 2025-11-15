@@ -3,19 +3,34 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "vite",
+    "dev:frontend": "vite",
+    "dev:backend": "node backend/src/index.js",
+    "dev": "concurrently \"npm:dev:backend\" \"npm:dev:frontend\"",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
+  "prisma": {
+    "schema": "backend/src/prisma/schema.prisma"
+  },
   "dependencies": {
     "@vitejs/plugin-react": "^5.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.5",
-    "vite": "^7.1.12"
+    "vite": "^7.1.12",
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "@prisma/client": "^5.19.1",
+    "concurrently": "^9.1.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.19.1"
   }
 }
