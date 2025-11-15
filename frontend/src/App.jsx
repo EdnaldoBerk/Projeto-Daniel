@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Header } from './components/header/Header'
 import { CardBook } from './components/cardbook/CardBook'
 import { PgLogin } from './pages/PgLogin'
+import { PgCadastro } from './pages/PgCadastro'
 
 function Home() {
   return (
@@ -18,13 +19,14 @@ function Home() {
 
 function AppLayout() {
   const location = useLocation();
-  const hideHeader = location.pathname === '/login';
+  const hideHeader = location.pathname === '/login' || location.pathname === '/cadastro';
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {!hideHeader && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<PgLogin />} />
+        <Route path="/cadastro" element={<PgCadastro />} />
       </Routes>
     </div>
   );

@@ -34,7 +34,7 @@ export function Header() {
         <Link to="/login" className={`${styles.authButton} ${styles.loginButton}`}>
           Login
         </Link>
-        <Link to="/registro" className={`${styles.authButton} ${styles.registerButton}`}>
+        <Link to="/cadastro" className={`${styles.authButton} ${styles.registerButton}`}>
           Cadastro
         </Link>
       </div>
