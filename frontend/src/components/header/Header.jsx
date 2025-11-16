@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styles from './Header.module.css'
 import logo from '../../assets/Logo.png'
+import { Profile } from '../profile/Profile.user'
 
 export function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -9,6 +10,22 @@ export function Header() {
   useEffect(() => {
     const user = localStorage.getItem('user');
     setIsLoggedIn(!!user);
+
+    // Listener para atualizar o estado quando o login/logout acontecer
+    const handleStorageChange = () => {
+      const user = localStorage.getItem('user');
+      setIsLoggedIn(!!user);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Custom event para mudanças no mesmo tab
+    window.addEventListener('userChange', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('userChange', handleStorageChange);
+    };
   }, []);
 
   return (
@@ -39,10 +56,7 @@ export function Header() {
 
       <div className={styles.authContainer}>
         {isLoggedIn ? (
-          <> 
-            <Link to="/profile" className={`${styles.authButton} ${styles.profileButton}`}>Visualizar Perfil</Link>
-            <button onClick={() => { localStorage.removeItem('user'); setIsLoggedIn(false); }} className={`${styles.authButton} ${styles.logoutButton}`}>Logout</button>
-          </>
+          <Profile />
         ) : (
           <> 
             <Link to="/login" className={`${styles.authButton} ${styles.loginButton}`}>Login</Link>

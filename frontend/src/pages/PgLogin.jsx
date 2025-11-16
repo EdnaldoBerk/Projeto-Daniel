@@ -20,6 +20,8 @@ export function PgLogin() {
       const user = await loginUser({ email, senha: password });
       // Exemplo simples: guardar usuário no localStorage
       localStorage.setItem('user', JSON.stringify(user));
+      // Disparar evento para atualizar o header
+      window.dispatchEvent(new Event('userChange'));
       navigate('/');
     } catch (err) {
       setError(err.message || 'Erro ao fazer login.');
