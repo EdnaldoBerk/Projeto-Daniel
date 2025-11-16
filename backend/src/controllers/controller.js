@@ -9,7 +9,7 @@ async function registrarUsuario(req, res) {
       return res.status(409).json({ error: 'Email já cadastrado' });
     }
     const novo = await createUser({ nome, email, telefone, cpf, senha });
-    return res.status(201).json({ id: novo.id, email: novo.email });
+    return res.status(201).json({ id: novo.id, nome: novo.nome, email: novo.email });
   } catch (e) {
     console.error('Erro ao registrar usuário:', e); // Log detalhado do erro
     if (e.code === 'P2002' && Array.isArray(e.meta?.target)) {
@@ -31,7 +31,7 @@ async function logarUsuario(req, res) {
     // Comparar senha futuramente
     console.log('Comparando senhas:', { recebida: senha, armazenada: usuario.senha, iguais: usuario.senha === senha });
     if (usuario.senha !== senha) return res.status(401).json({ error: 'Credenciais inválidas' });
-    return res.json({ id: usuario.id, email: usuario.email });
+    return res.json({ id: usuario.id, nome: usuario.nome, email: usuario.email });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: 'Erro ao realizar login' });
@@ -39,3 +39,16 @@ async function logarUsuario(req, res) {
 }
 
 module.exports = { registrarUsuario, logarUsuario };
+async function obterUsuarioPorEmail(req, res) {
+  const { email } = req.params;
+  try {
+    const usuario = await findUserByEmail(email);
+    if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
+    return res.json({ id: usuario.id, nome: usuario.nome, email: usuario.email });
+  } catch (e) {
+    console.error('Erro ao buscar usuário:', e);
+    return res.status(500).json({ error: 'Erro ao buscar usuário' });
+  }
+}
+
+module.exports = { registrarUsuario, logarUsuario, obterUsuarioPorEmail };

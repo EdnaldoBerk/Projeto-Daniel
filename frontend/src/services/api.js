@@ -31,3 +31,8 @@ export async function loginUser({ email, senha }) {
   });
   return handleResponse(res);
 }
+
+export async function fetchUserByEmail(email) {
+  const res = await fetch(`${BASE_URL}/usuario/${encodeURIComponent(email)}`);
+  return handleResponse(res);
+}
