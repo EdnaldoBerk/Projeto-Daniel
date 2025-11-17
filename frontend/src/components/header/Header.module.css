@@ -29,8 +29,8 @@
 }
 
 :root {
-  --search-height: 46px; /* altura dos campos e botões da barra */
-  --search-max-width: 1100px; /* largura máxima da área de busca */
+  --search-height: 70px; /* altura dos campos e botões da barra */
+  --search-max-width: 950px; /* largura máxima da área de busca */
 }
 
 .searchContainer {
@@ -39,60 +39,154 @@
   gap: 1rem;
   flex: 1;
   max-width: var(--search-max-width);
-  margin: 0 2rem;
+  margin: 0 30rem 0 0;
 }
 
-.filterSelect {
-  padding: 0 1rem; /* padding vertical removido para usar height */
-  height: var(--search-height);
-  border-radius: 6px;
-  border: 1px solid #646cff;
-  background-color: #2a2a2a;
-  color: #fff;
-  min-width: 200px;
-  flex: 0 0 200px;
-  font-size: 1rem;
-}
-
-.searchBar {
+/* Wrapper that visually looks like the input + internal filter pill */
+.searchInputWrapper {
   display: flex;
-  flex: 1;
   align-items: center;
-}
-
-.searchInput {
-  flex: 1 1 auto;
+  flex: 1;
   min-width: 520px;
   height: var(--search-height);
-  padding: 0 1rem; /* apenas padding horizontal */
-  border: 1px solid #646cff;
-  border-right: none;
-  border-radius: 6px 0 0 6px;
   background-color: #2a2a2a;
+  border: 1px solid #646cff;
+  border-radius: 50px;
+  overflow: visible; /* needed for absolute dropdown */
+}
+
+/* Real input inside the wrapper: no border, fills the remaining space */
+.searchInput {
+  flex: 1 1 auto;
+  height: 100%;
+  padding: 0 1rem;
+  border: none;
+  background: transparent;
   color: #fff;
-  font-size: 1rem;
+  font-size: 1.25rem;
+  outline: none;
 }
 
 .searchInput::placeholder {
   color: #888;
 }
 
+/* Internal filter button (the right pill inside the input wrapper) */
+.filterButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 60%;
+  margin-right: 15px;
+  padding: 0 0.75rem;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  border-radius: 999px;
+  border: 1px solid rgba(100, 108, 255, 0.12);
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 1.2rem;
+}
+
+/* Small arrow icon styling (used inside .filterButton) */
+.chev {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  transform: translateY(1px);
+  opacity: 0.9;
+}
+
+/* Search button (to the right of the wrapper) */
 .searchButton {
   height: var(--search-height);
-  padding: 0 1.25rem; /* mais espaçamento horizontal */
+  padding: 0 1.25rem;
+  margin-left: 0.5rem;
   background-color: #646cff;
   border: 1px solid #646cff;
-  border-radius: 0 6px 6px 0;
+  border-radius: 60px;
   color: #fff;
   cursor: pointer;
   transition: background-color 0.2s;
-  font-size: 1rem;
+  font-size: 1.25rem;
 }
 
 .searchButton:hover {
   background-color: #7c83ff;
 }
 
+/* Botão Explorar com seta para baixo */
+.exploreButton {
+  height: var(--search-height);
+  padding: 0 1.25rem;
+  margin-left: 44rem;
+  background-color: transparent;
+  border: 1px solid #646cff;
+  border-radius: 60px;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+  font-size: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.exploreButton:hover {
+  background-color: #646cff;
+  border-color: #646cff;
+}
+
+/* Dropdown menu that appears under the filter button */
+.filterDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  min-width: 200px;
+  background-color: #2a2a2a;
+  border: 1px solid #646cff;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  padding: 0.25rem 0;
+}
+
+/* Individual dropdown items */
+.filterItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  color: #fff;
+  font-size: 1.2rem;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.filterItem:hover {
+  background: rgba(100, 108, 255, 0.08);
+}
+
+/* Checkmark for selected item */
+.filterCheck {
+  margin-left: auto;
+  opacity: 0.95;
+  color: #fff;
+}
+
+/* Search area relative wrapper so dropdown can be absolutely positioned */
+.searchBar {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+}
+
+/* Auth buttons */
 .authContainer {
   display: flex;
   gap: 1rem;
@@ -105,7 +199,7 @@
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 1rem;
+  font-size: 1.25rem;
   min-width: 120px;
   display: flex;
   align-items: center;

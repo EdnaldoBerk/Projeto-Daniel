@@ -1,0 +1,102 @@
+.slider {
+  position: relative;
+  padding: 8px 4px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(26,26,26,0.98), rgba(26,26,26,0.92));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* A viewport esconde o overflow */
+.viewport {
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Track é a linha flex dos slides */
+.track {
+  display: flex;
+  align-items: stretch;
+  will-change: transform;
+  padding-bottom: 4px;
+}
+
+/* Slide individual - largura fixa definida inline pelo componente */
+.slide {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  /* garante que os cards dentro ocupem toda a largura do slide */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* FORÇA os filhos a ocuparem 100% da largura do slide (resolve lacunas quando o card tinha max-width menor) */
+.slide > * {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Setas */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: none;
+  background: #646cff; /* cor da marca */
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(100, 108, 255, 0.22);
+  transition: transform 0.12s, opacity 0.12s;
+}
+.arrow:hover { 
+  transform: translateY(-50%) scale(1.05);
+  background: #7c83ff;
+}
+.arrow:disabled { opacity: 0.45; cursor: default; transform: translateY(-50%); }
+
+.prev { left: 12px; }
+.next { right: 12px; }
+
+/* Pontos (dots) */
+.dots {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.activeDot {
+  background: #646cff;
+  box-shadow: 0 6px 10px rgba(100,108,255,0.24);
+}
+
+/* Ajustes responsivos para diferentes layouts */
+@media (max-width: 1024px) {
+  .slider { padding: 18px; border-radius: 10px; }
+  .arrow { width: 36px; height: 36px; font-size: 18px; }
+}
+@media (max-width: 480px) {
+  .slider { padding: 12px; }
+  .arrow { width: 32px; height: 32px; font-size: 16px; }
+  .dot { width: 10px; height: 10px; }
+}
