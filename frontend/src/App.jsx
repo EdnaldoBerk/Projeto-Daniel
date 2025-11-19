@@ -51,12 +51,6 @@ const booksData = [
     title: "O Pequeno Príncipe",
     author: "Antoine de Saint-Exupéry"
   },
-  {
-    id: 8,
-    image: "https://m.media-amazon.com/images/I/71rpa1-kyvL._AC_UF1000,1000_QL80_.jpg",
-    title: "O Pequeno Príncipe",
-    author: "Antoine de Saint-Exupéry"
-  }
 ];
 
 function Home() {

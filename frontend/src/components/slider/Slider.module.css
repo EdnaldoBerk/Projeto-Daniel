@@ -1,6 +1,6 @@
 .slider {
   position: relative;
-  padding: 8px 4px;
+  padding: 6px 2px;
   border-radius: 12px;
   background: linear-gradient(180deg, rgba(26,26,26,0.98), rgba(26,26,26,0.92));
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
