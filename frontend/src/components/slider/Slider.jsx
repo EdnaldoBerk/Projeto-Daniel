@@ -14,6 +14,7 @@ import styles from './Slider.module.css'
   - autoplay: boolean (default false)
   - autoplayInterval: number ms (default 4000)
   - maxItemWidth: number (px) largura máxima de cada item/slide (default 288)
+  - title: string (opcional) - título a ser exibido acima do slider
 */
 
 export default function Slider({
@@ -26,6 +27,7 @@ export default function Slider({
   autoplay = false,
   autoplayInterval = 4000,
   maxItemWidth = 288, // nova prop para limitar largura do slide
+  title, // título opcional
 }) {
   const containerRef = useRef(null)
   const trackRef = useRef(null)
@@ -141,6 +143,7 @@ export default function Slider({
 
   return (
     <div className={styles.slider}>
+      {title && <h2 className={styles.sliderTitle}>{title}</h2>}
       <div className={styles.viewport} ref={containerRef}>
         <div
           className={styles.track}

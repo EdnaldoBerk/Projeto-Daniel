@@ -49,13 +49,18 @@ const booksData = [
     image: "https://m.media-amazon.com/images/I/71rpa1-kyvL._AC_UF1000,1000_QL80_.jpg",
     title: "O Pequeno Príncipe",
     author: "Antoine de Saint-Exupéry"
+  },
+  {
+    id: 8,
+    image: "https://m.media-amazon.com/images/I/71rpa1-kyvL._AC_UF1000,1000_QL80_.jpg",
+    title: "O Pequeno Príncipe",
+    author: "Antoine de Saint-Exupéry"
   }
 ];
 
 function Home() {
   return (
     <main style={{ padding: '2rem' }}>
-      <h2 style={{ marginBottom: '1.5rem', fontSize: '2.25rem', color: '#ffffffff', textAlign: 'center' }}>Livros em Destaque</h2>
       <Slider 
         items={booksData}
         renderItem={(book) => (
@@ -71,6 +76,7 @@ function Home() {
         autoplay={true}
         autoplayInterval={5000}
         infinite={true}
+        title="Livros em Destaque"
       />
     </main>
   );
