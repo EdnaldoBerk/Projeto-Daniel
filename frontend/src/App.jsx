@@ -6,6 +6,7 @@ import { CardBook } from './components/cardbook/CardBook'
 import Slider from './components/slider/Slider'
 import { PgLogin } from './pages/PgLogin'
 import { PgCadastro } from './pages/PgCadastro'
+import PgResenha from './pages/PgResenha'
 
 const booksData = [
   {
@@ -92,6 +93,7 @@ function AppLayout() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<PgLogin />} />
         <Route path="/cadastro" element={<PgCadastro />} />
+        <Route path="/resenha" element={<PgResenha />} />
       </Routes>
       {!hideHeaderFooter && <Footer />}
     </div>

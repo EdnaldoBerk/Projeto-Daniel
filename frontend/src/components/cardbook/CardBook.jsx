@@ -1,7 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './CardBook.module.css';
 
 export function CardBook({ image, title, author }) {
+  const navigate = useNavigate();
+
+  function goToReview() {
+    // Passa dados mínimos; PgResenha irá mesclar com defaults
+    navigate('/resenha', { state: { book: { title, author, coverImage: image } } });
+  }
+
   return (
     <div className={styles.cardContainer}>
       <div className={styles.imageContainer}>
@@ -18,7 +26,7 @@ export function CardBook({ image, title, author }) {
       </div>
 
       <div className={styles.buttonContainer}>
-        <button className={`${styles.button} ${styles.reviewButton}`}>
+        <button className={`${styles.button} ${styles.reviewButton}`} onClick={goToReview}>
           Ler Resenhas
         </button>
         <button className={`${styles.button} ${styles.favoriteButton}`}>
