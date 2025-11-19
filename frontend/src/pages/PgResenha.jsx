@@ -1,222 +1,279 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import styles from "../styles/PgResenha.module.css";
 
 /**
  * PgResenha.jsx
- * Página de resenha estática (sem backend) para exibir um livro.
+ * Página de Resenha de Livro (Dark Mode) - sem Header/Footer
+ *
+ * Coloque este arquivo em src/pages/ e o CSS em src/pages/PgResenha.module.css
  *
  * Uso:
- * - Importe e coloque <PgResenha /> em App.jsx ou na rota desejada.
- * - Opcional: passe um objeto "book" via prop para popular dinamicamente:
- *     <PgResenha book={meuLivro} />
- *
- * Observações:
- * - Layout responsivo: imagem ajustável, coluna esquerda (imagem) + coluna direita (dados).
- * - Relacionados: carrossel horizontal com scroll nativo.
- * - Comentários: formulário local (simula enviar, guarda em estado local).
+ *  <PgResenha />
  */
 
-const defaultBook = {
-  title: "Felicidade ordinária",
-  author: "Vera Iaconelli",
-  authorUrl: "#",
-  publisher: "Zahar",
-  year: 2024,
-  isbn: "9786559791910",
-  rating: 4.5,
-  reviewsCount: 3,
-  coverImage:
-    "https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=0b7f0fb7ebd5d2c6b309719a1c9d7c0b", // troque pela sua capa local se preferir
-  shortDescription:
-    "Sofremos todos, mas não da mesma forma. Em textos memoráveis, a conceituada psicanalista propõe leituras surpreendentes do cotidiano brasileiro e oferece um retrato vívido das angústias contemporâneas.",
-  fullDescription:
-    "Descrição completa do livro. Aqui você pode colocar o texto longo da sinopse. Atualmente a página funciona sem backend; quando o backend estiver disponível, substitua por dados reais.",
-  related: [
-    {
-      title: "Resenha: Minha Querida Menina – Jennifer McMahon",
-      cover:
-        "https://images.unsplash.com/photo-1496104679561-38d5a4b8e548?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&s=4c8e8a0f1a6b23d3b7b8b3b37a2c2a97",
-      url: "#",
-    },
-    {
-      title: "Resenha: Rosa Egipcíaca – Luiz Mott",
-      cover:
-        "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&s=6a5b2c5f1c0d9b9c9dd6f8f5a7d0c0a9",
-      url: "#",
-    },
-    {
-      title: "Resenha: O Pássaro Pintado – Jerzy Kosinski",
-      cover:
-        "https://images.unsplash.com/photo-1453728013993-6d66e9c9123a?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&s=9b0a7a6b4a3f1d4e5c1d3f2b6a7c8d9e",
-      url: "#",
-    },
+const defaultData = {
+  title: "Tudo que acontece aqui dentro – Resenha",
+  author: "Júlio Hermann",
+  publisher: "Faro",
+  year: "2018",
+  pages: "192",
+  isbn: "",
+  date: "05/08/2025",
+  short:
+    "Tudo que acontece aqui dentro é um livro diferente de todos que já li; não se trata de uma história apenas, mas de várias cartas que trazem emoção, lembranças e linguagem poética.",
+  full:
+    "Não é um livro que você precisa ler na sequência; as histórias são independentes e os personagens também. Algumas cartas são intensas e é preciso ser mais sensível para entender essa proposta. É importante entender que não há um enredo formado e você nunca sabe o que virá na próxima carta. São sentimentos e emoções de outras pessoas que em alguns momentos podem fazer sentido para você e em outros não. Em alguns momentos a intensidade também pode te incomodar e você pode deixar o livro de lado por algum tempo.",
+  excerpts: [
+    `"Quando a gente não diz o que sente, o outro vai embora sem saber que talvez tivesse um motivo para ficar". (p.27)`,
+    `"Autossabotagem é a gente morrer engasgado vendo a outra pessoa partir". (p.27)`,
+    `"Dia desses a gente se encontra e eu te conto que todas essas metáforas que eu crio sobre o amor são sobre você". (p.40)`,
   ],
+  gallery: ["https://placehold.co/1000x380?text=Galeria+do+Livro"],
+  avatar: "https://placehold.co/128x128?text=U",
+  hero: "https://placehold.co/1600x480?text=Banner+do+Livro",
+  tags: ["#CARTAS", "#PENSAMENTOS", "#POESIA", "#ROMANCE"],
 };
 
-export default function PgResenha({ book }) {
+function StarRating({ value = 4.2 }) {
+  const full = Math.floor(value);
+  const half = value - full >= 0.5;
+  const empty = 5 - full - (half ? 1 : 0);
+  return (
+    <div className={styles.stars} aria-label={`Avaliação ${value} de 5`}>
+      {Array.from({ length: full }).map((_, i) => (
+        <span key={`f${i}`}>★</span>
+      ))}
+      {half && <span key="half">★</span>}
+      {Array.from({ length: empty }).map((_, i) => (
+        <span key={`e${i}`}>☆</span>
+      ))}
+    </div>
+  );
+}
+
+export default function PgResenha({ data }) {
   const location = useLocation();
   const stateBook = location?.state?.book;
-  const mergedBook = { ...defaultBook, ...(book || {}), ...(stateBook || {}) };
-
-  const [showFull, setShowFull] = useState(false);
+  const book = { ...defaultData, ...(data || {}), ...(stateBook || {}) };
+  const [reaction, setReaction] = useState(null);
+  const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
-  const [form, setForm] = useState({ comment: "", name: "", email: "", site: "" });
-  const [errors, setErrors] = useState({});
 
-  const carouselRef = useRef(null);
-
-  const validate = useCallback(() => {
-    const newErrors = {};
-    if (!form.comment.trim()) newErrors.comment = "Digite um comentário";
-    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) newErrors.email = "E-mail inválido";
-    return newErrors;
-  }, [form]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((s) => ({ ...s, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
+  function handlePostComment(e) {
     e.preventDefault();
-    const v = validate();
-    setErrors(v);
-    if (Object.keys(v).length) return;
-    const newComment = { id: Date.now(), ...form, createdAt: new Date().toISOString() };
-    setComments((c) => [newComment, ...c]);
-    setForm({ comment: "", name: "", email: "", site: "" });
-  };
-
-  const scrollCarousel = (dir) => {
-    const el = carouselRef.current;
-    if (!el) return;
-    const amount = el.clientWidth * 0.8; // scroll chunk
-    el.scrollBy({ left: dir === 'next' ? amount : -amount, behavior: 'smooth' });
-  };
-
-  const renderStars = (rating) => {
-    const full = Math.floor(rating);
-    const half = rating - full >= 0.5;
-    const empty = 5 - full - (half ? 1 : 0);
-    return (
-      <span aria-label={`Avaliação ${rating} de 5`}>
-        {Array.from({ length: full }).map((_, i) => <span key={`f${i}`}>★</span>)}
-        {half && <span key="half">☆</span>}
-        {Array.from({ length: empty }).map((_, i) => <span key={`e${i}`}>☆</span>)}
-      </span>
-    );
-  };
+    if (!commentText.trim()) return;
+    const c = {
+      id: Date.now(),
+      text: commentText.trim(),
+      date: new Date().toISOString(),
+    };
+    setComments((s) => [c, ...s]);
+    setCommentText("");
+  }
 
   return (
     <div className={styles.page}>
-      <div className={styles.wrapper}>
-        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-          <span>Home</span> <span className={styles.sep}>/</span>
-          <span>{mergedBook.publisher}</span> <span className={styles.sep}>/</span>
-          <a href={mergedBook.authorUrl}>{mergedBook.author}</a> <span className={styles.sep}>/</span>
-          <span className={styles.current}>{mergedBook.title}</span>
-        </nav>
+      {/* Banner */}
+      <div
+        className={styles.banner}
+        role="img"
+        aria-label={`Banner: ${book.title}`}
+        style={{ backgroundImage: `url(${book.hero})` }}
+      >
+        <div className={styles.bannerFade} />
+      </div>
 
-        <section className={styles.hero}>
-          <div className={styles.coverCol}>
-            <figure className={styles.figure}>
-              <img src={mergedBook.coverImage} alt={`Capa do livro ${mergedBook.title}`} className={styles.coverImage} />
-              <figcaption className={styles.caption}>imagem ilustrativa</figcaption>
-            </figure>
-          </div>
-          <div className={styles.detailsCol}>
-            <h1 className={styles.title}>{mergedBook.title}</h1>
-            <a className={styles.authorLink} href={mergedBook.authorUrl}>{mergedBook.author}</a>
-            <div className={styles.ratingRow}>
-              <div className={styles.stars}>{renderStars(mergedBook.rating)}</div>
-              <div className={styles.ratingInfo}>
-                <strong>{mergedBook.rating.toFixed(1)}</strong> | <a href="#comments">{mergedBook.reviewsCount} avaliações</a>
+      {/* Card container overlapping banner */}
+      <main className={styles.container}>
+
+        {/* Header */}
+        <header className={styles.header}>
+          <div className={styles.headerLeft}>
+            <div className={styles.avatarWrap}>
+              <img src={book.avatar} alt="ícone do resenhista" className={styles.avatar} />
+            </div>
+            <div className={styles.titleBlock}>
+              <h1 className={styles.title}>{book.title}</h1>
+              <div className={styles.metaRow}>
+                <span className={styles.author}>{book.author}</span>
+                <span className={styles.separator}>•</span>
+                <StarRating value={4.3} />
               </div>
             </div>
-            <ul className={styles.metaList}>
-              <li><strong>Editora:</strong> {mergedBook.publisher}</li>
-              <li><strong>Ano:</strong> {mergedBook.year}</li>
-              <li><strong>ISBN:</strong> {mergedBook.isbn}</li>
-            </ul>
-            <div className={styles.synopsis}>
-              <p>{showFull ? mergedBook.fullDescription : mergedBook.shortDescription}</p>
-              {!showFull && (
-                <button type="button" className={styles.readMore} onClick={() => setShowFull(true)} aria-expanded={showFull}>
-                  Ler sinopse completa →
-                </button>
-              )}
-            </div>
-            <div className={styles.heroActions}>
-              <button className={styles.primaryGhost} aria-label="Salvar edição">♡ Salvar</button>
-              <button className={styles.primaryGhost} aria-label="Compartilhar">🔗 Compartilhar</button>
-            </div>
+          </div>
+        </header>
+
+        {/* Lead / Texto principal */}
+        <section className={styles.leadSection}>
+          <p className={styles.lead}>{book.short}</p>
+
+          <div className={styles.articleText}>
+            <p>{book.full}</p>
+            <p>
+              Algumas cartas são intensas, outras mais sutis. A leitura exige disponibilidade emocional e permite que o leitor
+              se reconheça em trechos e imagens, sem a necessidade de um enredo linear.
+            </p>
+            <p>
+              A linguagem poética do autor cria momentos de grande sensibilidade e também desconforto — o que é, muitas vezes,
+              sinal de uma obra que provoca e não apenas entretém.
+            </p>
           </div>
         </section>
 
-        <section className={styles.relatedSection} aria-labelledby="relacionados-heading">
-          <header className={styles.sectionHeader}>
-            <h2 id="relacionados-heading" className={styles.sectionTitle}>Artigos relacionados</h2>
-            <div className={styles.carouselControls}>
-              <button type="button" className={styles.arrowBtn} onClick={() => scrollCarousel('prev')} aria-label="Anterior">←</button>
-              <button type="button" className={styles.arrowBtn} onClick={() => scrollCarousel('next')} aria-label="Próximo">→</button>
+        {/* Trechos Marcantes */}
+        <section className={styles.excerptsSection}>
+          <h2 className={styles.sectionTitle}>Trechos marcantes de {book.title}</h2>
+          <div className={styles.excerpts}>
+            {book.excerpts.map((q, i) => (
+              <blockquote key={i} className={styles.quote}>
+                <em>{q}</em>
+              </blockquote>
+            ))}
+          </div>
+        </section>
+
+        {/* Galeria + link */}
+        <section className={styles.gallerySection}>
+          <figure className={styles.galleryFigure}>
+            <img src={book.gallery[0]} alt="Ilustrações do livro" className={styles.galleryImg} />
+            <figcaption className={styles.galleryCaption}>O livro possui lindas ilustrações.</figcaption>
+          </figure>
+
+          <p className={styles.amazonLink}>
+            Encontre o livro no site Amazon{" "}
+            <a href="#" className={styles.inlineLink} rel="noopener noreferrer"> (clique aqui) </a>
+          </p>
+        </section>
+
+        {/* Ficha Técnica (tabela) */}
+        <section className={styles.metaSection}>
+          <table className={styles.metaTable}>
+            <tbody>
+              <tr>
+                <th>Título</th>
+                <td>{book.title}</td>
+              </tr>
+              <tr>
+                <th>Autor</th>
+                <td>{book.author}</td>
+              </tr>
+              <tr>
+                <th>Ano</th>
+                <td>{book.year}</td>
+              </tr>
+              <tr>
+                <th>Editora</th>
+                <td>{book.publisher}</td>
+              </tr>
+              <tr>
+                <th>Páginas</th>
+                <td>{book.pages}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        {/* Post footer: date + tags */}
+        <section className={styles.postFooter}>
+          <div className={styles.postInfo}>
+            <span className={styles.calendar} aria-hidden>📅</span>
+            <time dateTime="2025-08-05" className={styles.postDate}>{book.date}</time>
+          </div>
+          <div className={styles.tags}>
+            {book.tags.map((t) => (
+              <span key={t} className={styles.tag}>{t}</span>
+            ))}
+          </div>
+        </section>
+
+        {/* Comentários / estilo Disqus-like */}
+        <section className={styles.commentsWrap}>
+          <h2 className={styles.sectionTitle}>Comentários</h2>
+
+          {/* Policy card */}
+          <div className={styles.policyCard}>
+            <div className={styles.policyText}>
+              <strong>Política de comentários</strong>
+              <p>Por favor, leia nossa política de comentários antes de postar.</p>
             </div>
-          </header>
-          <div className={styles.carouselWrapper}>
-            <div ref={carouselRef} className={styles.carousel} role="list">
-              {mergedBook.related.map((r, idx) => (
-                <a className={styles.relatedCard} role="listitem" key={idx} href={r.url}>
-                  <div className={styles.relatedImgWrap}>
-                    <img src={r.cover} alt={r.title} loading="lazy" />
-                  </div>
-                  <div className={styles.relatedTitle}>{r.title}</div>
-                </a>
+            <button className={styles.policyButton}>Compreendi</button>
+          </div>
+
+          {/* Reactions */}
+          <div className={styles.reactionsRow}>
+            <div className={styles.reactionsTitle}>O que você achou?</div>
+            <div className={styles.reactionButtons}>
+              {[
+                { id: "like", emoji: "👍", label: "Gostei" },
+                { id: "fun", emoji: "😆", label: "Engraçado" },
+                { id: "love", emoji: "😍", label: "Amei" },
+                { id: "wow", emoji: "😮", label: "Uau" },
+                { id: "sad", emoji: "😢", label: "Triste" },
+              ].map((r) => (
+                <button
+                  key={r.id}
+                  className={`${styles.reactionBtn} ${reaction === r.id ? styles.reactionActive : ""}`}
+                  onClick={() => setReaction(r.id)}
+                  aria-pressed={reaction === r.id}
+                  title={r.label}
+                >
+                  <span className={styles.emoji}>{r.emoji}</span>
+                  <small className={styles.reactionLabel}>{r.label}</small>
+                </button>
               ))}
             </div>
           </div>
-        </section>
 
-        <section id="comments" className={styles.commentsSection} aria-labelledby="comentarios-heading">
-          <h2 id="comentarios-heading" className={styles.sectionTitle}>Comentários</h2>
-          <form onSubmit={handleSubmit} className={styles.commentForm} noValidate>
-            <div className={styles.fieldGroup}>
-              <label htmlFor="comment" className={styles.label}>Comentário *</label>
-              <textarea id="comment" name="comment" rows={6} value={form.comment} onChange={handleChange} className={`${styles.textarea} ${errors.comment ? styles.invalid : ''}`} aria-invalid={!!errors.comment} required />
-              {errors.comment && <div className={styles.errorMsg}>{errors.comment}</div>}
-            </div>
-            <div className={styles.inlineGrid}>
-              <div className={styles.fieldGroup}>
-                <label htmlFor="name" className={styles.label}>Nome</label>
-                <input id="name" name="name" value={form.name} onChange={handleChange} className={styles.input} placeholder="Seu nome" />
+          {/* Comment input with social icons (simulated) */}
+          <div className={styles.commentCard}>
+            <div className={styles.commentInputRow}>
+              <div className={styles.socialIcons}>
+                <button className={styles.socialIcon} title="Login com Google">G</button>
+                <button className={styles.socialIcon} title="Login com Facebook">f</button>
+                <button className={styles.socialIcon} title="Login com Apple"></button>
               </div>
-              <div className={styles.fieldGroup}>
-                <label htmlFor="email" className={styles.label}>E-mail</label>
-                <input id="email" name="email" value={form.email} onChange={handleChange} className={`${styles.input} ${errors.email ? styles.invalid : ''}`} placeholder="voce@exemplo.com" aria-invalid={!!errors.email} />
-                {errors.email && <div className={styles.errorMsg}>{errors.email}</div>}
-              </div>
-              <div className={styles.fieldGroup}>
-                <label htmlFor="site" className={styles.label}>Site</label>
-                <input id="site" name="site" value={form.site} onChange={handleChange} className={styles.input} placeholder="https://" />
-              </div>
+
+              <form onSubmit={handlePostComment} className={styles.commentForm}>
+                <input
+                  type="text"
+                  placeholder="Iniciar debate..."
+                  className={styles.commentInput}
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                />
+                <div className={styles.commentActions}>
+                  <button type="submit" className={styles.postButton}>Publicar</button>
+                </div>
+              </form>
             </div>
-            <div className={styles.formActions}>
-              <button type="submit" className={styles.submitBtn}>Postar Comentário</button>
+
+            {/* Small footer links under comment area */}
+            <div className={styles.commentFooter}>
+              <a href="#" className={styles.footerLink}>Subscrever</a>
+              <a href="#" className={styles.footerLink}>Privacidade</a>
+              <a href="#" className={styles.footerLink}>Não vender os meus dados</a>
             </div>
-          </form>
+          </div>
+
+          {/* Comment list */}
           <div className={styles.commentList}>
-            {comments.length === 0 && <p className={styles.emptyState}>Nenhum comentário ainda. Seja o primeiro!</p>}
+            {comments.length === 0 && <div className={styles.emptyComments}>Seja o primeiro a comentar!</div>}
             {comments.map((c) => (
-              <article key={c.id} className={styles.comment} aria-label="Comentário">
-                <header className={styles.commentMeta}>
-                  <strong>{c.name || 'Anônimo'}</strong>
-                  <time className={styles.commentDate} dateTime={c.createdAt}>{new Date(c.createdAt).toLocaleString()}</time>
-                </header>
-                <p className={styles.commentBody}>{c.comment}</p>
+              <article key={c.id} className={styles.commentItem}>
+                <div className={styles.commentHeader}>
+                  <div className={styles.commentAvatar}>U</div>
+                  <div className={styles.commentMeta}>
+                    <strong>Anônimo</strong>
+                    <time dateTime={c.date} className={styles.commentTime}>{new Date(c.date).toLocaleString()}</time>
+                  </div>
+                </div>
+                <p className={styles.commentText}>{c.text}</p>
               </article>
             ))}
           </div>
         </section>
-      </div>
+      </main>
     </div>
   );
 }

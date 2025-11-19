@@ -14,7 +14,8 @@
   align-items: center;
   gap: 16px;
   padding: 0 12px; /* reduzido levemente para que os botões fiquem mais próximos da borda */
-  background-color: var(--bg);
+  background: linear-gradient(#1a1a1a);
+  border-bottom: 1px solid rgba(100, 108, 255, 0.2);
   box-shadow: 0 2px 4px rgba(0,0,0,0.08);
   width: 100%;
   height: var(--header-height);
@@ -27,6 +28,8 @@
   align-items: center;
   gap: 12px;
   flex: 0 0 auto;
+  text-decoration: none;
+  cursor: pointer;
 }
 .logoImage {
   width: 56px;
