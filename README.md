@@ -74,7 +74,17 @@ No terminal da pasta `frontend`:
 npm run dev
 ```
 
-O aplicativo estará disponível em `http://localhost:5173`
+O frontend está configurado para rodar em `http://localhost:3000` (ver `vite.config.js`).
+
+### Executar tudo em um único comando (raiz)
+
+Na raiz do projeto você também pode usar:
+
+```bash
+npm run dev
+```
+
+Esse script utiliza `concurrently` para subir backend (porta 3001) e frontend (porta 3000) juntos.
 
 ## 📁 Estrutura do Projeto
 
@@ -147,7 +157,7 @@ npm run preview      # Preview do build de produção
 ## 📝 Notas Importantes
 
 1. **Banco de Dados**: Certifique-se de que o PostgreSQL está rodando antes de iniciar o backend
-2. **Portas**: Backend usa porta 3001, Frontend usa porta 5173
+2. **Portas**: Backend usa porta 3001, Frontend usa porta 3000
 3. **CORS**: O backend já está configurado para aceitar requisições do frontend
 
 ## 🤝 Equipe
@@ -160,3 +170,4 @@ npm run preview      # Preview do build de produção
 ## 📄 Licença
 
 Este projeto é privado e de uso acadêmico.
+
