@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Header } from './components/header/Header'
 import { Footer } from './components/footer/Footer'
@@ -12,63 +12,55 @@ import { PgAdminLogin } from './pages/PgAdminLogin'
 import { PgAdminDashboard } from './pages/PgAdminDashboard'
 import { PgAdminUsers } from './pages/PgAdminUsers'
 import PgAdminBooks from './pages/PgAdminBooks'
-
-const booksData = [
-  {
-    id: 1,
-    image: "https://m.media-amazon.com/images/I/71FxgtFKcQL._AC_UF1000,1000_QL80_.jpg",
-    title: "O Senhor dos Anéis",
-    author: "J.R.R. Tolkien"
-  },
-  {
-    id: 2,
-    image: "https://m.media-amazon.com/images/I/81YkqyaFVEL._AC_UF1000,1000_QL80_.jpg",
-    title: "Harry Potter e a Pedra Filosofal",
-    author: "J.K. Rowling"
-  },
-  {
-    id: 3,
-    image: "https://m.media-amazon.com/images/I/81ibfYk4qmL._AC_UF1000,1000_QL80_.jpg",
-    title: "1984",
-    author: "George Orwell"
-  },
-  {
-    id: 4,
-    image: "https://m.media-amazon.com/images/I/71nXPGovoTL._AC_UF1000,1000_QL80_.jpg",
-    title: "O Hobbit",
-    author: "J.R.R. Tolkien"
-  },
-  {
-    id: 5,
-    image: "https://m.media-amazon.com/images/I/81bGKUa1e0L._AC_UF1000,1000_QL80_.jpg",
-    title: "Cem Anos de Solidão",
-    author: "Gabriel García Márquez"
-  },
-  {
-    id: 6,
-    image: "https://m.media-amazon.com/images/I/71yJLhQekBL._AC_UF1000,1000_QL80_.jpg",
-    title: "A Revolução dos Bichos",
-    author: "George Orwell"
-  },
-  {
-    id: 7,
-    image: "https://m.media-amazon.com/images/I/71rpa1-kyvL._AC_UF1000,1000_QL80_.jpg",
-    title: "O Pequeno Príncipe",
-    author: "Antoine de Saint-Exupéry"
-  },
-];
+import api from './services/api'
 
 function Home() {
+  const [livros, setLivros] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    carregarLivros();
+  }, []);
+
+  async function carregarLivros() {
+    try {
+      const response = await api.get('/admin/livros');
+      // Filtrar apenas livros ativos
+      const livrosAtivos = (response.data || []).filter(livro => livro.ativo !== false);
+      setLivros(livrosAtivos);
+    } catch (error) {
+      console.error('Erro ao carregar livros:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <main style={{ padding: '2rem', textAlign: 'center', color: '#fff' }}>
+        <p>Carregando livros...</p>
+      </main>
+    );
+  }
+
+  if (livros.length === 0) {
+    return (
+      <main style={{ padding: '2rem', textAlign: 'center', color: '#fff' }}>
+        <p>Nenhum livro disponível no momento.</p>
+      </main>
+    );
+  }
+
   return (
     <main style={{ padding: '2rem' }}>
       <Slider 
-        items={booksData}
-        renderItem={(book) => (
+        items={livros}
+        renderItem={(livro) => (
           <CardBook 
-            key={book.id}
-            image={book.image}
-            title={book.title}
-            author={book.author}
+            key={livro.id}
+            image={livro.fotoCapa ? `http://localhost:3001${livro.fotoCapa}` : '/placeholder.png'}
+            title={livro.titulo}
+            author={livro.autor}
           />
         )}
         slidesToShow={5}
