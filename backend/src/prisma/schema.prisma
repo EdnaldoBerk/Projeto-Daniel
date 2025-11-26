@@ -17,3 +17,22 @@ model Usuario {
   isAdmin   Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+model Livro {
+  id          Int      @id @default(autoincrement())
+  titulo      String
+  autor       String
+  ano         Int
+  editora     String
+  paginas     Int
+  isbn        String?  @unique
+  categoria   String?
+  sinopse     String?  @db.Text
+  idioma      String   @default("Português")
+  edicao      String?
+  fotoCapa    String
+  galeria     String[]
+  ativo       Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

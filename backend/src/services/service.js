@@ -30,4 +30,42 @@ async function deleteUser(id) {
   return prisma.usuario.delete({ where: { id: parseInt(id) } });
 }
 
-module.exports = { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser };
+// Funções de Livros
+async function createBook(data) {
+  return prisma.livro.create({ data });
+}
+
+async function getAllBooks() {
+  return prisma.livro.findMany({
+    orderBy: { createdAt: 'desc' }
+  });
+}
+
+async function getBookById(id) {
+  return prisma.livro.findUnique({ where: { id: parseInt(id) } });
+}
+
+async function updateBook(id, data) {
+  return prisma.livro.update({
+    where: { id: parseInt(id) },
+    data
+  });
+}
+
+async function deleteBook(id) {
+  return prisma.livro.delete({ where: { id: parseInt(id) } });
+}
+
+module.exports = { 
+  createUser, 
+  findUserByEmail, 
+  getAllUsers, 
+  getUserById, 
+  updateUser, 
+  deleteUser,
+  createBook,
+  getAllBooks,
+  getBookById,
+  updateBook,
+  deleteBook
+};

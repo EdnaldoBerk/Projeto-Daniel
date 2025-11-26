@@ -11,6 +11,7 @@ import PgPerfil from './pages/PgPerfil'
 import { PgAdminLogin } from './pages/PgAdminLogin'
 import { PgAdminDashboard } from './pages/PgAdminDashboard'
 import { PgAdminUsers } from './pages/PgAdminUsers'
+import PgAdminBooks from './pages/PgAdminBooks'
 
 const booksData = [
   {
@@ -98,6 +99,7 @@ function AppLayout() {
         <Route path="/admin/login" element={<PgAdminLogin />} />
         <Route path="/admin/dashboard" element={<PgAdminDashboard />} />
         <Route path="/admin/usuarios" element={<PgAdminUsers />} />
+        <Route path="/admin/livros" element={<PgAdminBooks />} />
       </Routes>
       {!hideHeaderFooter && <Footer />}
     </div>

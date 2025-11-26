@@ -10,6 +10,15 @@ export function PgAdminUsers() {
   const [error, setError] = useState('');
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({});
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newUser, setNewUser] = useState({
+    nome: '',
+    email: '',
+    telefone: '',
+    cpf: '',
+    senha: '',
+    isAdmin: false
+  });
 
   useEffect(() => {
     // Verificar se está logado como admin
@@ -89,6 +98,36 @@ export function PgAdminUsers() {
     }
   };
 
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const response = await fetch('http://localhost:3001/api/registro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newUser)
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Erro ao criar usuário');
+      }
+      
+      setShowCreateModal(false);
+      setNewUser({
+        nome: '',
+        email: '',
+        telefone: '',
+        cpf: '',
+        senha: '',
+        isAdmin: false
+      });
+      carregarUsuarios();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('admin');
     window.dispatchEvent(new Event('adminChange'));
@@ -147,6 +186,10 @@ export function PgAdminUsers() {
             <h1 className={styles.pageTitle}>Gerenciar Usuários</h1>
             <p className={styles.pageSubtitle}>Total: {usuarios.length} usuários cadastrados</p>
           </div>
+          <button className={styles.createButton} onClick={() => setShowCreateModal(true)}>
+            <span>➕</span>
+            Criar Novo Usuário
+          </button>
         </header>
 
         {loading && <div className={styles.loading}>Carregando usuários...</div>}
@@ -273,6 +316,92 @@ export function PgAdminUsers() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {showCreateModal && (
+          <div className={styles.modal} onClick={() => setShowCreateModal(false)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h2>Criar Novo Usuário</h2>
+                <button className={styles.closeButton} onClick={() => setShowCreateModal(false)}>✖</button>
+              </div>
+              
+              <form onSubmit={handleCreateUser} className={styles.modalForm}>
+                <div className={styles.formGroup}>
+                  <label>Nome Completo *</label>
+                  <input
+                    type="text"
+                    value={newUser.nome}
+                    onChange={(e) => setNewUser({ ...newUser, nome: e.target.value })}
+                    required
+                    className={styles.modalInput}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Email *</label>
+                  <input
+                    type="email"
+                    value={newUser.email}
+                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                    required
+                    className={styles.modalInput}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Telefone</label>
+                  <input
+                    type="text"
+                    value={newUser.telefone}
+                    onChange={(e) => setNewUser({ ...newUser, telefone: e.target.value })}
+                    className={styles.modalInput}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>CPF *</label>
+                  <input
+                    type="text"
+                    value={newUser.cpf}
+                    onChange={(e) => setNewUser({ ...newUser, cpf: e.target.value })}
+                    required
+                    className={styles.modalInput}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Senha *</label>
+                  <input
+                    type="password"
+                    value={newUser.senha}
+                    onChange={(e) => setNewUser({ ...newUser, senha: e.target.value })}
+                    required
+                    className={styles.modalInput}
+                  />
+                </div>
+
+                <div className={styles.formGroupCheckbox}>
+                  <input
+                    type="checkbox"
+                    id="isAdminCreate"
+                    checked={newUser.isAdmin}
+                    onChange={(e) => setNewUser({ ...newUser, isAdmin: e.target.checked })}
+                  />
+                  <label htmlFor="isAdminCreate">Conceder privilégios de administrador</label>
+                </div>
+
+                <div className={styles.modalActions}>
+                  <button type="button" className={styles.btnCancelModal} onClick={() => setShowCreateModal(false)}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className={styles.btnSubmitModal}>
+                    Criar Usuário
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </main>

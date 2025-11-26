@@ -33,14 +33,21 @@ export function PgAdminDashboard() {
 
   const carregarEstatisticas = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/usuarios');
-      if (response.ok) {
-        const usuarios = await response.json();
-        setStats(prev => ({
-          ...prev,
+      // Carregar usuários
+      const usuariosResponse = await fetch('http://localhost:3001/api/admin/usuarios');
+      if (usuariosResponse.ok) {
+        const usuarios = await usuariosResponse.json();
+        
+        // Carregar livros
+        const livrosResponse = await fetch('http://localhost:3001/api/admin/livros');
+        const livros = livrosResponse.ok ? await livrosResponse.json() : [];
+        
+        setStats({
           totalUsers: usuarios.length,
-          activeUsers: usuarios.filter(u => !u.isAdmin).length
-        }));
+          activeUsers: usuarios.filter(u => !u.isAdmin).length,
+          totalBooks: livros.length,
+          totalReviews: 0
+        });
       }
     } catch (err) {
       console.error('Erro ao carregar estatísticas:', err);
@@ -74,7 +81,7 @@ export function PgAdminDashboard() {
             <span className={styles.navIcon}>👥</span>
             Usuários
           </button>
-          <button className={styles.navItem}>
+          <button className={styles.navItem} onClick={() => navigate('/admin/livros')}>
             <span className={styles.navIcon}>📚</span>
             Livros
           </button>
@@ -166,11 +173,11 @@ export function PgAdminDashboard() {
           <div className={styles.panel}>
             <h3 className={styles.panelTitle}>Ações Rápidas</h3>
             <div className={styles.actionButtons}>
-              <button className={styles.actionButton}>
+              <button className={styles.actionButton} onClick={() => navigate('/admin/livros')}>
                 <span>➕</span>
                 Adicionar Livro
               </button>
-              <button className={styles.actionButton}>
+              <button className={styles.actionButton} onClick={() => navigate('/admin/usuarios')}>
                 <span>👤</span>
                 Criar Usuário
               </button>

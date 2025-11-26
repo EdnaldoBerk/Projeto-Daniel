@@ -36,3 +36,45 @@ export async function fetchUserByEmail(email) {
   const res = await fetch(`${BASE_URL}/usuario/${encodeURIComponent(email)}`);
   return handleResponse(res);
 }
+
+// API object para importação default
+const api = {
+  get: async (endpoint) => {
+    const res = await fetch(`${BASE_URL}${endpoint}`);
+    return handleResponse(res);
+  },
+  post: async (endpoint, data, config = {}) => {
+    const headers = config.headers || { 'Content-Type': 'application/json' };
+    const body = headers['Content-Type'] === 'application/json' 
+      ? JSON.stringify(data) 
+      : data;
+    
+    const res = await fetch(`${BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: headers['Content-Type'] === 'multipart/form-data' ? {} : headers,
+      body
+    });
+    return handleResponse(res);
+  },
+  put: async (endpoint, data, config = {}) => {
+    const headers = config.headers || { 'Content-Type': 'application/json' };
+    const body = headers['Content-Type'] === 'application/json' 
+      ? JSON.stringify(data) 
+      : data;
+    
+    const res = await fetch(`${BASE_URL}${endpoint}`, {
+      method: 'PUT',
+      headers: headers['Content-Type'] === 'multipart/form-data' ? {} : headers,
+      body
+    });
+    return handleResponse(res);
+  },
+  delete: async (endpoint) => {
+    const res = await fetch(`${BASE_URL}${endpoint}`, {
+      method: 'DELETE'
+    });
+    return handleResponse(res);
+  }
+};
+
+export default api;

@@ -1,4 +1,4 @@
-const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser } = require('../services/service');
+const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook } = require('../services/service');
 
 async function registrarUsuario(req, res) {
   // TODO: validação e hashing de senha
@@ -165,4 +165,141 @@ async function deletarUsuario(req, res) {
   }
 }
 
-module.exports = { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario };
+// Controladores de Livros
+async function criarLivro(req, res) {
+  try {
+    const { titulo, autor, ano, editora, paginas, isbn, categoria, sinopse, idioma, edicao } = req.body;
+    
+    // Foto da capa (obrigatória)
+    if (!req.files || !req.files.fotoCapa || req.files.fotoCapa.length === 0) {
+      return res.status(400).json({ error: 'Foto da capa é obrigatória' });
+    }
+
+    const fotoCapa = `/uploads/books/${req.files.fotoCapa[0].filename}`;
+    
+    // Galeria (opcional)
+    let galeria = [];
+    if (req.files.galeria) {
+      galeria = req.files.galeria.map(file => `/uploads/books/${file.filename}`);
+    }
+
+    const livro = await createBook({
+      titulo,
+      autor,
+      ano: parseInt(ano),
+      editora,
+      paginas: parseInt(paginas),
+      isbn: isbn || null,
+      categoria: categoria || null,
+      sinopse: sinopse || null,
+      idioma: idioma || 'Português',
+      edicao: edicao || null,
+      fotoCapa,
+      galeria
+    });
+
+    return res.status(201).json(livro);
+  } catch (e) {
+    console.error('Erro ao criar livro:', e);
+    if (e.code === 'P2002') {
+      return res.status(409).json({ error: 'ISBN já cadastrado' });
+    }
+    return res.status(500).json({ error: 'Erro ao criar livro' });
+  }
+}
+
+async function listarLivros(req, res) {
+  try {
+    const livros = await getAllBooks();
+    return res.json(livros);
+  } catch (e) {
+    console.error('Erro ao listar livros:', e);
+    return res.status(500).json({ error: 'Erro ao listar livros' });
+  }
+}
+
+async function buscarLivroPorId(req, res) {
+  const { id } = req.params;
+  try {
+    const livro = await getBookById(id);
+    if (!livro) {
+      return res.status(404).json({ error: 'Livro não encontrado' });
+    }
+    return res.json(livro);
+  } catch (e) {
+    console.error('Erro ao buscar livro:', e);
+    return res.status(500).json({ error: 'Erro ao buscar livro' });
+  }
+}
+
+async function atualizarLivro(req, res) {
+  const { id } = req.params;
+  try {
+    const { titulo, autor, ano, editora, paginas, isbn, categoria, sinopse, idioma, edicao, ativo } = req.body;
+    
+    const dataToUpdate = {};
+    if (titulo !== undefined) dataToUpdate.titulo = titulo;
+    if (autor !== undefined) dataToUpdate.autor = autor;
+    if (ano !== undefined) dataToUpdate.ano = parseInt(ano);
+    if (editora !== undefined) dataToUpdate.editora = editora;
+    if (paginas !== undefined) dataToUpdate.paginas = parseInt(paginas);
+    if (isbn !== undefined) dataToUpdate.isbn = isbn || null;
+    if (categoria !== undefined) dataToUpdate.categoria = categoria || null;
+    if (sinopse !== undefined) dataToUpdate.sinopse = sinopse || null;
+    if (idioma !== undefined) dataToUpdate.idioma = idioma;
+    if (edicao !== undefined) dataToUpdate.edicao = edicao || null;
+    if (ativo !== undefined) dataToUpdate.ativo = ativo;
+
+    // Atualizar foto da capa se fornecida
+    if (req.files && req.files.fotoCapa && req.files.fotoCapa.length > 0) {
+      dataToUpdate.fotoCapa = `/uploads/books/${req.files.fotoCapa[0].filename}`;
+    }
+
+    // Atualizar galeria se fornecida
+    if (req.files && req.files.galeria) {
+      const novasImagens = req.files.galeria.map(file => `/uploads/books/${file.filename}`);
+      // Mesclar com galeria existente ou substituir
+      const livroAtual = await getBookById(id);
+      dataToUpdate.galeria = [...livroAtual.galeria, ...novasImagens];
+    }
+
+    const livro = await updateBook(id, dataToUpdate);
+    return res.json(livro);
+  } catch (e) {
+    console.error('Erro ao atualizar livro:', e);
+    if (e.code === 'P2002') {
+      return res.status(409).json({ error: 'ISBN já cadastrado' });
+    }
+    return res.status(500).json({ error: 'Erro ao atualizar livro' });
+  }
+}
+
+async function deletarLivro(req, res) {
+  const { id } = req.params;
+  try {
+    await deleteBook(id);
+    return res.json({ message: 'Livro deletado com sucesso' });
+  } catch (e) {
+    console.error('Erro ao deletar livro:', e);
+    if (e.code === 'P2025') {
+      return res.status(404).json({ error: 'Livro não encontrado' });
+    }
+    return res.status(500).json({ error: 'Erro ao deletar livro' });
+  }
+}
+
+module.exports = { 
+  registrarUsuario, 
+  logarUsuario, 
+  logarAdmin, 
+  obterUsuarioPorEmail, 
+  listarUsuarios, 
+  buscarUsuarioPorId, 
+  atualizarUsuario, 
+  deletarUsuario,
+  criarLivro,
+  listarLivros,
+  buscarLivroPorId,
+  atualizarLivro,
+  deletarLivro
+};
