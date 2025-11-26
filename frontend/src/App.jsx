@@ -12,6 +12,7 @@ import { PgAdminLogin } from './pages/PgAdminLogin'
 import { PgAdminDashboard } from './pages/PgAdminDashboard'
 import { PgAdminUsers } from './pages/PgAdminUsers'
 import PgAdminBooks from './pages/PgAdminBooks'
+import { PgAdminResenhas } from './pages/PgAdminResenhas'
 import api from './services/api'
 
 function Home() {
@@ -58,6 +59,7 @@ function Home() {
         renderItem={(livro) => (
           <CardBook 
             key={livro.id}
+            id={livro.id}
             image={livro.fotoCapa ? `http://localhost:3001${livro.fotoCapa}` : '/placeholder.png'}
             title={livro.titulo}
             author={livro.autor}
@@ -92,6 +94,7 @@ function AppLayout() {
         <Route path="/admin/dashboard" element={<PgAdminDashboard />} />
         <Route path="/admin/usuarios" element={<PgAdminUsers />} />
         <Route path="/admin/livros" element={<PgAdminBooks />} />
+        <Route path="/admin/resenhas" element={<PgAdminResenhas />} />
       </Routes>
       {!hideHeaderFooter && <Footer />}
     </div>

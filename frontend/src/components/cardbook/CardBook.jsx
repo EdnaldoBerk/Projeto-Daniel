@@ -2,12 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CardBook.module.css';
 
-export function CardBook({ image, title, author }) {
+export function CardBook({ id, image, title, author }) {
   const navigate = useNavigate();
 
   function goToReview() {
-    // Passa dados mínimos; PgResenha irá mesclar com defaults
-    navigate('/resenha', { state: { book: { title, author, coverImage: image } } });
+    // Passa o ID do livro para buscar as resenhas
+    navigate('/resenha', { state: { livroId: id, livro: { id, titulo: title, autor: author, fotoCapa: image } } });
   }
 
   return (

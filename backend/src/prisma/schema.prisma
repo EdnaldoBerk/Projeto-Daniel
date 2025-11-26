@@ -8,31 +8,54 @@ datasource db {
 }
 
 model Usuario {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   nome      String
-  email     String   @unique
+  email     String    @unique
   telefone  String?
-  cpf       String   @unique
+  cpf       String    @unique
   senha     String
-  isAdmin   Boolean  @default(false)
-  createdAt DateTime @default(now())
+  isAdmin   Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  resenhas  Resenha[]
 }
 
 model Livro {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   titulo      String
   autor       String
   ano         Int
   editora     String
   paginas     Int
-  isbn        String?  @unique
+  isbn        String?   @unique
   categoria   String?
-  sinopse     String?  @db.Text
-  idioma      String   @default("Português")
+  sinopse     String?   @db.Text
+  idioma      String    @default("Português")
   edicao      String?
   fotoCapa    String
   galeria     String[]
-  ativo       Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  ativo       Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  resenhas    Resenha[]
 }
+
+model Resenha {
+  id              Int      @id @default(autoincrement())
+  livroId         Int
+  usuarioId       Int
+  titulo          String
+  textoResumo     String   @db.Text
+  textoCompleto   String   @db.Text
+  avaliacao       Float    // 0.0 a 5.0
+  trechosMarcantes String[] // Array de citações
+  ativo           Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  livro           Livro    @relation(fields: [livroId], references: [id], onDelete: Cascade)
+  usuario         Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  
+  @@index([livroId])
+  @@index([usuarioId])
+}
+

@@ -56,6 +56,95 @@ async function deleteBook(id) {
   return prisma.livro.delete({ where: { id: parseInt(id) } });
 }
 
+// Funções de Resenhas
+async function createResenha(data) {
+  return prisma.resenha.create({ 
+    data,
+    include: {
+      livro: true,
+      usuario: {
+        select: {
+          id: true,
+          nome: true,
+          email: true
+        }
+      }
+    }
+  });
+}
+
+async function getAllResenhas() {
+  return prisma.resenha.findMany({
+    include: {
+      livro: true,
+      usuario: {
+        select: {
+          id: true,
+          nome: true,
+          email: true
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+}
+
+async function getResenhasByLivroId(livroId) {
+  return prisma.resenha.findMany({
+    where: { 
+      livroId: parseInt(livroId),
+      ativo: true
+    },
+    include: {
+      usuario: {
+        select: {
+          id: true,
+          nome: true,
+          email: true
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+}
+
+async function getResenhaById(id) {
+  return prisma.resenha.findUnique({ 
+    where: { id: parseInt(id) },
+    include: {
+      livro: true,
+      usuario: {
+        select: {
+          id: true,
+          nome: true,
+          email: true
+        }
+      }
+    }
+  });
+}
+
+async function updateResenha(id, data) {
+  return prisma.resenha.update({
+    where: { id: parseInt(id) },
+    data,
+    include: {
+      livro: true,
+      usuario: {
+        select: {
+          id: true,
+          nome: true,
+          email: true
+        }
+      }
+    }
+  });
+}
+
+async function deleteResenha(id) {
+  return prisma.resenha.delete({ where: { id: parseInt(id) } });
+}
+
 module.exports = { 
   createUser, 
   findUserByEmail, 
@@ -67,5 +156,11 @@ module.exports = {
   getAllBooks,
   getBookById,
   updateBook,
-  deleteBook
+  deleteBook,
+  createResenha,
+  getAllResenhas,
+  getResenhasByLivroId,
+  getResenhaById,
+  updateResenha,
+  deleteResenha
 };

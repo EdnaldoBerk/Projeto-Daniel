@@ -1,39 +1,12 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import styles from "../styles/PgResenha.module.css";
+import api from "../services/api";
 
 /**
  * PgResenha.jsx
  * Página de Resenha de Livro (Dark Mode) - sem Header/Footer
- *
- * Coloque este arquivo em src/pages/ e o CSS em src/pages/PgResenha.module.css
- *
- * Uso:
- *  <PgResenha />
  */
-
-const defaultData = {
-  title: "Tudo que acontece aqui dentro – Resenha",
-  author: "Júlio Hermann",
-  publisher: "Faro",
-  year: "2018",
-  pages: "192",
-  isbn: "",
-  date: "05/08/2025",
-  short:
-    "Tudo que acontece aqui dentro é um livro diferente de todos que já li; não se trata de uma história apenas, mas de várias cartas que trazem emoção, lembranças e linguagem poética.",
-  full:
-    "Não é um livro que você precisa ler na sequência; as histórias são independentes e os personagens também. Algumas cartas são intensas e é preciso ser mais sensível para entender essa proposta. É importante entender que não há um enredo formado e você nunca sabe o que virá na próxima carta. São sentimentos e emoções de outras pessoas que em alguns momentos podem fazer sentido para você e em outros não. Em alguns momentos a intensidade também pode te incomodar e você pode deixar o livro de lado por algum tempo.",
-  excerpts: [
-    `"Quando a gente não diz o que sente, o outro vai embora sem saber que talvez tivesse um motivo para ficar". (p.27)`,
-    `"Autossabotagem é a gente morrer engasgado vendo a outra pessoa partir". (p.27)`,
-    `"Dia desses a gente se encontra e eu te conto que todas essas metáforas que eu crio sobre o amor são sobre você". (p.40)`,
-  ],
-  gallery: ["https://placehold.co/1000x380?text=Galeria+do+Livro"],
-  avatar: "https://placehold.co/128x128?text=U",
-  hero: "https://placehold.co/1600x480?text=Banner+do+Livro",
-  tags: ["#CARTAS", "#PENSAMENTOS", "#POESIA", "#ROMANCE"],
-};
 
 function StarRating({ value = 4.2 }) {
   const full = Math.floor(value);
@@ -52,13 +25,58 @@ function StarRating({ value = 4.2 }) {
   );
 }
 
-export default function PgResenha({ data }) {
+export default function PgResenha() {
   const location = useLocation();
-  const stateBook = location?.state?.book;
-  const book = { ...defaultData, ...(data || {}), ...(stateBook || {}) };
+  const navigate = useNavigate();
+  const { livroId, livro } = location?.state || {};
+  
+  const [resenha, setResenha] = useState(null);
+  const [livroCompleto, setLivroCompleto] = useState(livro || null);
+  const [loading, setLoading] = useState(true);
   const [reaction, setReaction] = useState(null);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
+
+  useEffect(() => {
+    if (!livroId) {
+      alert('Nenhum livro selecionado');
+      navigate('/');
+      return;
+    }
+    carregarDados();
+  }, [livroId, navigate]);
+
+  async function carregarDados() {
+    try {
+      setLoading(true);
+      
+      console.log('🔍 Carregando dados para livroId:', livroId);
+      
+      // Buscar dados completos do livro primeiro
+      const livroRes = await api.get(`/admin/livros/${livroId}`);
+      console.log('📚 Livro carregado:', livroRes.data);
+      setLivroCompleto(livroRes.data);
+      
+      // Buscar resenhas do livro
+      const resenhasRes = await api.get(`/resenhas/livro/${livroId}`);
+      const resenhas = resenhasRes.data || [];
+      console.log('⭐ Resenhas encontradas:', resenhas);
+      
+      // Pegar a primeira resenha ativa ou null
+      if (resenhas.length > 0) {
+        console.log('✅ Usando resenha:', resenhas[0]);
+        setResenha(resenhas[0]);
+      } else {
+        console.log('❌ Nenhuma resenha encontrada para este livro');
+        setResenha(null);
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar dados:', error);
+      alert('Erro ao carregar resenha do livro');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function handlePostComment(e) {
     e.preventDefault();
@@ -72,14 +90,68 @@ export default function PgResenha({ data }) {
     setCommentText("");
   }
 
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.loading}>Carregando resenha...</div>
+      </div>
+    );
+  }
+
+  if (!resenha) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles.noResenha}>
+            <h2>Nenhuma resenha disponível para este livro</h2>
+            <p>Em breve teremos uma resenha completa sobre "{livroCompleto?.titulo}"</p>
+            <button onClick={() => navigate('/')} className={styles.backButton}>
+              Voltar para a página inicial
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Preparar dados para exibição
+  console.log('🖼️ Preparando imagens do livro:', {
+    fotoCapa: livroCompleto?.fotoCapa,
+    galeria: livroCompleto?.galeria,
+    galeriaLength: livroCompleto?.galeria?.length
+  });
+
+  // Banner: usar a fotoCapa do livro como fundo principal
+  const bannerImage = livroCompleto?.fotoCapa 
+    ? `http://localhost:3001${livroCompleto.fotoCapa}`
+    : 'https://placehold.co/1600x480?text=Banner+do+Livro';
+
+  // Avatar do autor da resenha
+  const avatarImage = resenha.usuario?.avatar 
+    ? `http://localhost:3001${resenha.usuario.avatar}`
+    : 'https://placehold.co/128x128?text=' + (resenha.usuario?.nome?.[0] || 'U');
+
+  // Galeria: usar todas as imagens da galeria do livro, ou a capa como fallback
+  const galeriaImages = livroCompleto?.galeria && livroCompleto.galeria.length > 0
+    ? livroCompleto.galeria.map(img => `http://localhost:3001${img}`)
+    : livroCompleto?.fotoCapa 
+      ? [`http://localhost:3001${livroCompleto.fotoCapa}`]
+      : ['https://placehold.co/1000x380?text=Galeria+do+Livro'];
+
+  console.log('🎨 Imagens preparadas:', {
+    banner: bannerImage,
+    avatar: avatarImage,
+    galeria: galeriaImages
+  });
+
   return (
     <div className={styles.page}>
       {/* Banner */}
       <div
         className={styles.banner}
         role="img"
-        aria-label={`Banner: ${book.title}`}
-        style={{ backgroundImage: `url(${book.hero})` }}
+        aria-label={`Banner: ${livroCompleto?.titulo}`}
+        style={{ backgroundImage: `url(${bannerImage})` }}
       >
         <div className={styles.bannerFade} />
       </div>
@@ -91,14 +163,14 @@ export default function PgResenha({ data }) {
         <header className={styles.header}>
           <div className={styles.headerLeft}>
             <div className={styles.avatarWrap}>
-              <img src={book.avatar} alt="ícone do resenhista" className={styles.avatar} />
+              <img src={avatarImage} alt="ícone do resenhista" className={styles.avatar} />
             </div>
             <div className={styles.titleBlock}>
-              <h1 className={styles.title}>{book.title}</h1>
+              <h1 className={styles.title}>{resenha.titulo}</h1>
               <div className={styles.metaRow}>
-                <span className={styles.author}>{book.author}</span>
+                <span className={styles.author}>Por {resenha.usuario?.nome || 'Anônimo'}</span>
                 <span className={styles.separator}>•</span>
-                <StarRating value={4.3} />
+                <StarRating value={resenha.avaliacao} />
               </div>
             </div>
           </div>
@@ -106,39 +178,57 @@ export default function PgResenha({ data }) {
 
         {/* Lead / Texto principal */}
         <section className={styles.leadSection}>
-          <p className={styles.lead}>{book.short}</p>
+          <p className={styles.lead}>{resenha.textoResumo}</p>
 
           <div className={styles.articleText}>
-            <p>{book.full}</p>
-            <p>
-              Algumas cartas são intensas, outras mais sutis. A leitura exige disponibilidade emocional e permite que o leitor
-              se reconheça em trechos e imagens, sem a necessidade de um enredo linear.
-            </p>
-            <p>
-              A linguagem poética do autor cria momentos de grande sensibilidade e também desconforto — o que é, muitas vezes,
-              sinal de uma obra que provoca e não apenas entretém.
-            </p>
-          </div>
-        </section>
-
-        {/* Trechos Marcantes */}
-        <section className={styles.excerptsSection}>
-          <h2 className={styles.sectionTitle}>Trechos marcantes de {book.title}</h2>
-          <div className={styles.excerpts}>
-            {book.excerpts.map((q, i) => (
-              <blockquote key={i} className={styles.quote}>
-                <em>{q}</em>
-              </blockquote>
+            {resenha.textoCompleto.split('\n').map((paragrafo, index) => (
+              paragrafo.trim() && <p key={index}>{paragrafo}</p>
             ))}
           </div>
         </section>
 
+        {/* Trechos Marcantes */}
+        {resenha.trechosMarcantes && resenha.trechosMarcantes.length > 0 && (
+          <section className={styles.excerptsSection}>
+            <h2 className={styles.sectionTitle}>Trechos marcantes de {livroCompleto?.titulo}</h2>
+            <div className={styles.excerpts}>
+              {resenha.trechosMarcantes.map((trecho, i) => (
+                <blockquote key={i} className={styles.quote}>
+                  <em>{trecho}</em>
+                </blockquote>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Galeria + link */}
         <section className={styles.gallerySection}>
-          <figure className={styles.galleryFigure}>
-            <img src={book.gallery[0]} alt="Ilustrações do livro" className={styles.galleryImg} />
-            <figcaption className={styles.galleryCaption}>O livro possui lindas ilustrações.</figcaption>
-          </figure>
+          {galeriaImages.length > 1 ? (
+            // Se houver múltiplas imagens na galeria, mostrar todas
+            <div className={styles.galleryGrid}>
+              {galeriaImages.map((img, index) => (
+                <figure key={index} className={styles.galleryFigure}>
+                  <img 
+                    src={img} 
+                    alt={`Imagem ${index + 1} de ${livroCompleto?.titulo}`} 
+                    className={styles.galleryImg} 
+                  />
+                </figure>
+              ))}
+            </div>
+          ) : (
+            // Se houver apenas uma imagem, mostrar single
+            <figure className={styles.galleryFigure}>
+              <img 
+                src={galeriaImages[0]} 
+                alt={`Capa de ${livroCompleto?.titulo}`} 
+                className={styles.galleryImg} 
+              />
+              <figcaption className={styles.galleryCaption}>
+                {livroCompleto?.titulo} - {livroCompleto?.autor}
+              </figcaption>
+            </figure>
+          )}
 
           <p className={styles.amazonLink}>
             Encontre o livro no site Amazon{" "}
@@ -152,39 +242,53 @@ export default function PgResenha({ data }) {
             <tbody>
               <tr>
                 <th>Título</th>
-                <td>{book.title}</td>
+                <td>{livroCompleto?.titulo}</td>
               </tr>
               <tr>
                 <th>Autor</th>
-                <td>{book.author}</td>
+                <td>{livroCompleto?.autor}</td>
               </tr>
               <tr>
                 <th>Ano</th>
-                <td>{book.year}</td>
+                <td>{livroCompleto?.ano}</td>
               </tr>
               <tr>
                 <th>Editora</th>
-                <td>{book.publisher}</td>
+                <td>{livroCompleto?.editora}</td>
               </tr>
               <tr>
                 <th>Páginas</th>
-                <td>{book.pages}</td>
+                <td>{livroCompleto?.paginas}</td>
               </tr>
+              {livroCompleto?.isbn && (
+                <tr>
+                  <th>ISBN</th>
+                  <td>{livroCompleto.isbn}</td>
+                </tr>
+              )}
+              {livroCompleto?.categoria && (
+                <tr>
+                  <th>Categoria</th>
+                  <td>{livroCompleto.categoria}</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </section>
 
-        {/* Post footer: date + tags */}
+        {/* Post footer: date */}
         <section className={styles.postFooter}>
           <div className={styles.postInfo}>
             <span className={styles.calendar} aria-hidden>📅</span>
-            <time dateTime="2025-08-05" className={styles.postDate}>{book.date}</time>
+            <time dateTime={resenha.createdAt} className={styles.postDate}>
+              {new Date(resenha.createdAt).toLocaleDateString('pt-BR')}
+            </time>
           </div>
-          <div className={styles.tags}>
-            {book.tags.map((t) => (
-              <span key={t} className={styles.tag}>{t}</span>
-            ))}
-          </div>
+          {livroCompleto?.categoria && (
+            <div className={styles.tags}>
+              <span className={styles.tag}>#{livroCompleto.categoria.toUpperCase()}</span>
+            </div>
+          )}
         </section>
 
         {/* Comentários / estilo Disqus-like */}

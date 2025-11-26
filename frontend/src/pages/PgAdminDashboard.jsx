@@ -42,11 +42,21 @@ export function PgAdminDashboard() {
         const livrosResponse = await fetch('http://localhost:3001/api/admin/livros');
         const livros = livrosResponse.ok ? await livrosResponse.json() : [];
         
+        // Carregar resenhas
+        const resenhasResponse = await fetch('http://localhost:3001/api/admin/resenhas');
+        const resenhas = resenhasResponse.ok ? await resenhasResponse.json() : [];
+        
+        console.log('📊 Estatísticas carregadas:', {
+          usuarios: usuarios.length,
+          livros: livros.length,
+          resenhas: resenhas.length
+        });
+        
         setStats({
           totalUsers: usuarios.length,
           activeUsers: usuarios.filter(u => !u.isAdmin).length,
           totalBooks: livros.length,
-          totalReviews: 0
+          totalReviews: resenhas.length
         });
       }
     } catch (err) {
@@ -85,7 +95,7 @@ export function PgAdminDashboard() {
             <span className={styles.navIcon}>📚</span>
             Livros
           </button>
-          <button className={styles.navItem}>
+          <button className={styles.navItem} onClick={() => navigate('/admin/resenhas')}>
             <span className={styles.navIcon}>⭐</span>
             Resenhas
           </button>

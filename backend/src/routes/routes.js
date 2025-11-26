@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro } = require('../controllers/controller');
+const { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha } = require('../controllers/controller');
 const upload = require('../config/multer');
 
 const router = Router();
@@ -21,5 +21,18 @@ router.get('/admin/livros', listarLivros);
 router.get('/admin/livros/:id', buscarLivroPorId);
 router.put('/admin/livros/:id', upload.fields([{ name: 'fotoCapa', maxCount: 1 }, { name: 'galeria', maxCount: 10 }]), atualizarLivro);
 router.delete('/admin/livros/:id', deletarLivro);
+
+// Rotas de resenhas
+router.post('/resenhas', criarResenha);
+router.get('/resenhas', listarResenhas);
+router.get('/resenhas/livro/:livroId', listarResenhasPorLivro);
+router.get('/resenhas/:id', buscarResenhaPorId);
+router.put('/resenhas/:id', atualizarResenha);
+router.delete('/resenhas/:id', deletarResenha);
+
+// Rotas admin de resenhas
+router.get('/admin/resenhas', listarResenhas);
+router.put('/admin/resenhas/:id', atualizarResenha);
+router.delete('/admin/resenhas/:id', deletarResenha);
 
 module.exports = router;

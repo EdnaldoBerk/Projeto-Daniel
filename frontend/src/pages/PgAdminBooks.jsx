@@ -198,7 +198,7 @@ export default function PgAdminBooks() {
             Livros
           </button>
 
-          <button className={adminStyles.navItem}>
+          <button className={adminStyles.navItem} onClick={() => navigate('/admin/resenhas')}>
             <span className={adminStyles.navIcon}>⭐</span>
             Resenhas
           </button>

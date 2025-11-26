@@ -1,4 +1,4 @@
-const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook } = require('../services/service');
+const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha } = require('../services/service');
 
 async function registrarUsuario(req, res) {
   // TODO: validação e hashing de senha
@@ -288,6 +288,102 @@ async function deletarLivro(req, res) {
   }
 }
 
+// Controladores de Resenhas
+async function criarResenha(req, res) {
+  try {
+    const { livroId, usuarioId, titulo, textoResumo, textoCompleto, avaliacao, trechosMarcantes } = req.body;
+    
+    if (!livroId || !usuarioId || !titulo || !textoResumo || !textoCompleto || avaliacao === undefined) {
+      return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+
+    const resenha = await createResenha({
+      livroId: parseInt(livroId),
+      usuarioId: parseInt(usuarioId),
+      titulo,
+      textoResumo,
+      textoCompleto,
+      avaliacao: parseFloat(avaliacao),
+      trechosMarcantes: trechosMarcantes || []
+    });
+
+    return res.status(201).json(resenha);
+  } catch (e) {
+    console.error('Erro ao criar resenha:', e);
+    return res.status(500).json({ error: 'Erro ao criar resenha' });
+  }
+}
+
+async function listarResenhas(req, res) {
+  try {
+    const resenhas = await getAllResenhas();
+    return res.json(resenhas);
+  } catch (e) {
+    console.error('Erro ao listar resenhas:', e);
+    return res.status(500).json({ error: 'Erro ao listar resenhas' });
+  }
+}
+
+async function listarResenhasPorLivro(req, res) {
+  const { livroId } = req.params;
+  try {
+    const resenhas = await getResenhasByLivroId(livroId);
+    return res.json(resenhas);
+  } catch (e) {
+    console.error('Erro ao listar resenhas do livro:', e);
+    return res.status(500).json({ error: 'Erro ao listar resenhas' });
+  }
+}
+
+async function buscarResenhaPorId(req, res) {
+  const { id } = req.params;
+  try {
+    const resenha = await getResenhaById(id);
+    if (!resenha) {
+      return res.status(404).json({ error: 'Resenha não encontrada' });
+    }
+    return res.json(resenha);
+  } catch (e) {
+    console.error('Erro ao buscar resenha:', e);
+    return res.status(500).json({ error: 'Erro ao buscar resenha' });
+  }
+}
+
+async function atualizarResenha(req, res) {
+  const { id } = req.params;
+  try {
+    const { titulo, textoResumo, textoCompleto, avaliacao, trechosMarcantes, ativo } = req.body;
+    
+    const dataToUpdate = {};
+    if (titulo !== undefined) dataToUpdate.titulo = titulo;
+    if (textoResumo !== undefined) dataToUpdate.textoResumo = textoResumo;
+    if (textoCompleto !== undefined) dataToUpdate.textoCompleto = textoCompleto;
+    if (avaliacao !== undefined) dataToUpdate.avaliacao = parseFloat(avaliacao);
+    if (trechosMarcantes !== undefined) dataToUpdate.trechosMarcantes = trechosMarcantes;
+    if (ativo !== undefined) dataToUpdate.ativo = ativo;
+
+    const resenha = await updateResenha(id, dataToUpdate);
+    return res.json(resenha);
+  } catch (e) {
+    console.error('Erro ao atualizar resenha:', e);
+    return res.status(500).json({ error: 'Erro ao atualizar resenha' });
+  }
+}
+
+async function deletarResenha(req, res) {
+  const { id } = req.params;
+  try {
+    await deleteResenha(id);
+    return res.json({ message: 'Resenha deletada com sucesso' });
+  } catch (e) {
+    console.error('Erro ao deletar resenha:', e);
+    if (e.code === 'P2025') {
+      return res.status(404).json({ error: 'Resenha não encontrada' });
+    }
+    return res.status(500).json({ error: 'Erro ao deletar resenha' });
+  }
+}
+
 module.exports = { 
   registrarUsuario, 
   logarUsuario, 
@@ -301,5 +397,11 @@ module.exports = {
   listarLivros,
   buscarLivroPorId,
   atualizarLivro,
-  deletarLivro
+  deletarLivro,
+  criarResenha,
+  listarResenhas,
+  listarResenhasPorLivro,
+  buscarResenhaPorId,
+  atualizarResenha,
+  deletarResenha
 };
