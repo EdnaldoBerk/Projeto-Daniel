@@ -153,7 +153,7 @@ export function PgAdminUsers() {
             <span className={styles.navIcon}>👥</span>
             Usuários
           </button>
-          <button className={styles.navItem}>
+          <button className={styles.navItem} onClick={() => navigate('/admin/livros')}>
             <span className={styles.navIcon}>📚</span>
             Livros
           </button>
