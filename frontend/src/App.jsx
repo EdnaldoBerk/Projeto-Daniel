@@ -8,6 +8,8 @@ import { PgLogin } from './pages/PgLogin'
 import { PgCadastro } from './pages/PgCadastro'
 import PgResenha from './pages/PgResenha'
 import PgPerfil from './pages/PgPerfil'
+import { PgAdminLogin } from './pages/PgAdminLogin'
+import { PgAdminDashboard } from './pages/PgAdminDashboard'
 
 const booksData = [
   {
@@ -80,7 +82,9 @@ function Home() {
 
 function AppLayout() {
   const location = useLocation();
-  const hideHeaderFooter = location.pathname === '/login' || location.pathname === '/cadastro';
+  const hideHeaderFooter = location.pathname === '/login' || 
+                          location.pathname === '/cadastro' ||
+                          location.pathname.startsWith('/admin');
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {!hideHeaderFooter && <Header />}
@@ -90,6 +94,8 @@ function AppLayout() {
         <Route path="/cadastro" element={<PgCadastro />} />
         <Route path="/resenha" element={<PgResenha />} />
         <Route path="/perfil" element={<PgPerfil />} />
+        <Route path="/admin/login" element={<PgAdminLogin />} />
+        <Route path="/admin/dashboard" element={<PgAdminDashboard />} />
       </Routes>
       {!hideHeaderFooter && <Footer />}
     </div>

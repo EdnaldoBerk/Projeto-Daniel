@@ -38,6 +38,48 @@ async function logarUsuario(req, res) {
   }
 }
 
+async function logarAdmin(req, res) {
+  const { email, senha, accessKey } = req.body;
+  
+  // Chave de acesso secreta (em produção, use variável de ambiente)
+  const ADMIN_ACCESS_KEY = process.env.ADMIN_ACCESS_KEY || 'projeto-daniel';
+  
+  console.log('Tentativa de login admin:', { email, accessKey });
+  
+  try {
+    // Validar chave de acesso primeiro
+    if (accessKey !== ADMIN_ACCESS_KEY) {
+      return res.status(403).json({ error: 'Chave de acesso inválida' });
+    }
+
+    const usuario = await findUserByEmail(email);
+    
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    // Verificar se é admin
+    if (!usuario.isAdmin) {
+      return res.status(403).json({ error: 'Acesso negado: privilégios insuficientes' });
+    }
+    
+    // Validar senha
+    if (usuario.senha !== senha) {
+      return res.status(401).json({ error: 'Credenciais inválidas' });
+    }
+    
+    return res.json({ 
+      id: usuario.id, 
+      nome: usuario.nome, 
+      email: usuario.email,
+      isAdmin: true
+    });
+  } catch (e) {
+    console.error('Erro no login admin:', e);
+    return res.status(500).json({ error: 'Erro ao realizar login administrativo' });
+  }
+}
+
 module.exports = { registrarUsuario, logarUsuario };
 async function obterUsuarioPorEmail(req, res) {
   const { email } = req.params;
@@ -51,4 +93,4 @@ async function obterUsuarioPorEmail(req, res) {
   }
 }
 
-module.exports = { registrarUsuario, logarUsuario, obterUsuarioPorEmail };
+module.exports = { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail };
