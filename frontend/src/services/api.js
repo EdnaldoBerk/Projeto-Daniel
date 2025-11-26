@@ -41,7 +41,8 @@ export async function fetchUserByEmail(email) {
 const api = {
   get: async (endpoint) => {
     const res = await fetch(`${BASE_URL}${endpoint}`);
-    return handleResponse(res);
+    const data = await handleResponse(res);
+    return { data };
   },
   post: async (endpoint, data, config = {}) => {
     const headers = config.headers || { 'Content-Type': 'application/json' };
@@ -54,7 +55,8 @@ const api = {
       headers: headers['Content-Type'] === 'multipart/form-data' ? {} : headers,
       body
     });
-    return handleResponse(res);
+    const responseData = await handleResponse(res);
+    return { data: responseData };
   },
   put: async (endpoint, data, config = {}) => {
     const headers = config.headers || { 'Content-Type': 'application/json' };
@@ -67,13 +69,15 @@ const api = {
       headers: headers['Content-Type'] === 'multipart/form-data' ? {} : headers,
       body
     });
-    return handleResponse(res);
+    const responseData = await handleResponse(res);
+    return { data: responseData };
   },
   delete: async (endpoint) => {
     const res = await fetch(`${BASE_URL}${endpoint}`, {
       method: 'DELETE'
     });
-    return handleResponse(res);
+    const responseData = await handleResponse(res);
+    return { data: responseData };
   }
 };
 
