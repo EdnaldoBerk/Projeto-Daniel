@@ -21,19 +21,23 @@ export function Header() {
 
   useEffect(() => {
     const user = localStorage.getItem('user')
-    setIsLoggedIn(!!user)
+    const admin = localStorage.getItem('admin')
+    setIsLoggedIn(!!(user || admin))
 
     const handleStorageChange = () => {
       const user = localStorage.getItem('user')
-      setIsLoggedIn(!!user)
+      const admin = localStorage.getItem('admin')
+      setIsLoggedIn(!!(user || admin))
     }
 
     window.addEventListener('storage', handleStorageChange)
     window.addEventListener('userChange', handleStorageChange)
+    window.addEventListener('adminChange', handleStorageChange)
 
     return () => {
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('userChange', handleStorageChange)
+      window.removeEventListener('adminChange', handleStorageChange)
     }
   }, [])
 

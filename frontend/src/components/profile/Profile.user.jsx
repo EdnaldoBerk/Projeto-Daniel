@@ -7,19 +7,27 @@ export function Profile() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
-    if (userData) {
+    const adminData = localStorage.getItem('admin');
+    
+    if (adminData) {
+      const admin = JSON.parse(adminData);
+      setUser(admin);
+      setIsAdmin(true);
+    } else if (userData) {
       setUser(JSON.parse(userData));
+      setIsAdmin(false);
     }
   }, []);
 
   // Buscar nome se ausente
   useEffect(() => {
     async function completarNome() {
-      if (user && (!user.nome || user.nome.trim() === '')) {
+      if (user && !isAdmin && (!user.nome || user.nome.trim() === '')) {
         try {
           const completo = await fetchUserByEmail(user.email);
           if (completo && completo.nome) {
@@ -35,7 +43,7 @@ export function Profile() {
       }
     }
     completarNome();
-  }, [user]);
+  }, [user, isAdmin]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -49,9 +57,15 @@ export function Profile() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    window.dispatchEvent(new Event('userChange'));
-    navigate('/login');
+    if (isAdmin) {
+      localStorage.removeItem('admin');
+      window.dispatchEvent(new Event('adminChange'));
+      navigate('/admin/login');
+    } else {
+      localStorage.removeItem('user');
+      window.dispatchEvent(new Event('userChange'));
+      navigate('/login');
+    }
   };
 
   const getInitials = (email, nome) => {
@@ -97,11 +111,15 @@ export function Profile() {
 
           <div className={styles.dropdownDivider}></div>
 
-          <button className={styles.dropdownItem} onClick={() => { setIsOpen(false); navigate('/perfil'); }}>
+          <button className={styles.dropdownItem} onClick={() => { setIsOpen(false); navigate(isAdmin ? '/admin/dashboard' : '/perfil'); }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              {isAdmin ? (
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+              ) : (
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              )}
             </svg>
-            Ver perfil
+            {isAdmin ? 'Gerenciar site' : 'Ver perfil'}
           </button>
 
           <button className={styles.dropdownItem} onClick={handleLogout}>

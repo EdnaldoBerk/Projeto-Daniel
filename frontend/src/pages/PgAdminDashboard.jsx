@@ -73,6 +73,13 @@ export function PgAdminDashboard() {
           </button>
         </nav>
 
+        <div className={styles.navDivider}></div>
+
+        <button className={styles.backToSiteButton} onClick={() => navigate('/')}>
+          <span className={styles.navIcon}>🏠</span>
+          Voltar ao site
+        </button>
+
         <button className={styles.logoutButton} onClick={handleLogout}>
           <span className={styles.navIcon}>🚪</span>
           Sair
