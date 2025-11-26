@@ -1,4 +1,4 @@
-const { createUser, findUserByEmail } = require('../services/service');
+const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser } = require('../services/service');
 
 async function registrarUsuario(req, res) {
   // TODO: validação e hashing de senha
@@ -93,4 +93,76 @@ async function obterUsuarioPorEmail(req, res) {
   }
 }
 
-module.exports = { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail };
+async function listarUsuarios(req, res) {
+  try {
+    const usuarios = await getAllUsers();
+    const usuariosSemSenha = usuarios.map(u => ({
+      id: u.id,
+      nome: u.nome,
+      email: u.email,
+      telefone: u.telefone,
+      cpf: u.cpf,
+      isAdmin: u.isAdmin,
+      createdAt: u.createdAt
+    }));
+    return res.json(usuariosSemSenha);
+  } catch (e) {
+    console.error('Erro ao listar usuários:', e);
+    return res.status(500).json({ error: 'Erro ao listar usuários' });
+  }
+}
+
+async function buscarUsuarioPorId(req, res) {
+  const { id } = req.params;
+  try {
+    const usuario = await getUserById(id);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    const { senha, ...dadosSemSenha } = usuario;
+    return res.json(dadosSemSenha);
+  } catch (e) {
+    console.error('Erro ao buscar usuário:', e);
+    return res.status(500).json({ error: 'Erro ao buscar usuário' });
+  }
+}
+
+async function atualizarUsuario(req, res) {
+  const { id } = req.params;
+  const { nome, email, telefone, cpf, isAdmin } = req.body;
+  
+  try {
+    const dataToUpdate = {};
+    if (nome !== undefined) dataToUpdate.nome = nome;
+    if (email !== undefined) dataToUpdate.email = email;
+    if (telefone !== undefined) dataToUpdate.telefone = telefone;
+    if (cpf !== undefined) dataToUpdate.cpf = cpf;
+    if (isAdmin !== undefined) dataToUpdate.isAdmin = isAdmin;
+
+    const usuario = await updateUser(id, dataToUpdate);
+    const { senha, ...dadosSemSenha } = usuario;
+    return res.json(dadosSemSenha);
+  } catch (e) {
+    console.error('Erro ao atualizar usuário:', e);
+    if (e.code === 'P2002') {
+      return res.status(409).json({ error: 'Email ou CPF já cadastrado' });
+    }
+    return res.status(500).json({ error: 'Erro ao atualizar usuário' });
+  }
+}
+
+async function deletarUsuario(req, res) {
+  const { id } = req.params;
+  try {
+    await deleteUser(id);
+    return res.json({ message: 'Usuário deletado com sucesso' });
+  } catch (e) {
+    console.error('Erro ao deletar usuário:', e);
+    if (e.code === 'P2025') {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    return res.status(500).json({ error: 'Erro ao deletar usuário' });
+  }
+}
+
+module.exports = { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario };

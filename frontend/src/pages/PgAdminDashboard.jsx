@@ -11,6 +11,7 @@ export function PgAdminDashboard() {
     totalReviews: 0,
     activeUsers: 0
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Verificar se está logado como admin
@@ -27,10 +28,26 @@ export function PgAdminDashboard() {
     }
     
     setAdmin(parsed);
-    
-    // Carregar estatísticas (placeholder - implementar backend)
-    // fetchStats();
+    carregarEstatisticas();
   }, [navigate]);
+
+  const carregarEstatisticas = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/admin/usuarios');
+      if (response.ok) {
+        const usuarios = await response.json();
+        setStats(prev => ({
+          ...prev,
+          totalUsers: usuarios.length,
+          activeUsers: usuarios.filter(u => !u.isAdmin).length
+        }));
+      }
+    } catch (err) {
+      console.error('Erro ao carregar estatísticas:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('admin');
@@ -38,9 +55,7 @@ export function PgAdminDashboard() {
     navigate('/admin/login');
   };
 
-  if (!admin) {
-    return <div>Carregando...</div>;
-  }
+  if (!admin) return <div>Carregando...</div>;
 
   return (
     <div className={styles.container}>
@@ -55,7 +70,7 @@ export function PgAdminDashboard() {
             <span className={styles.navIcon}>📊</span>
             Dashboard
           </button>
-          <button className={styles.navItem}>
+          <button className={styles.navItem} onClick={() => navigate('/admin/usuarios')}>
             <span className={styles.navIcon}>👥</span>
             Usuários
           </button>
@@ -104,7 +119,7 @@ export function PgAdminDashboard() {
               👥
             </div>
             <div className={styles.statContent}>
-              <h3 className={styles.statValue}>{stats.totalUsers}</h3>
+              <h3 className={styles.statValue}>{loading ? '...' : stats.totalUsers}</h3>
               <p className={styles.statLabel}>Total de Usuários</p>
             </div>
           </div>
@@ -114,7 +129,7 @@ export function PgAdminDashboard() {
               📚
             </div>
             <div className={styles.statContent}>
-              <h3 className={styles.statValue}>{stats.totalBooks}</h3>
+              <h3 className={styles.statValue}>{loading ? '...' : stats.totalBooks}</h3>
               <p className={styles.statLabel}>Total de Livros</p>
             </div>
           </div>
@@ -124,7 +139,7 @@ export function PgAdminDashboard() {
               ⭐
             </div>
             <div className={styles.statContent}>
-              <h3 className={styles.statValue}>{stats.totalReviews}</h3>
+              <h3 className={styles.statValue}>{loading ? '...' : stats.totalReviews}</h3>
               <p className={styles.statLabel}>Total de Resenhas</p>
             </div>
           </div>
@@ -134,7 +149,7 @@ export function PgAdminDashboard() {
               🟢
             </div>
             <div className={styles.statContent}>
-              <h3 className={styles.statValue}>{stats.activeUsers}</h3>
+              <h3 className={styles.statValue}>{loading ? '...' : stats.activeUsers}</h3>
               <p className={styles.statLabel}>Usuários Ativos</p>
             </div>
           </div>
