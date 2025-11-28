@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import styles from '../../styles/PgAdminBooks.module.css';
-import adminStyles from '../../styles/PgAdminUsers.module.css';
+import styles from '../../styles/admin/PgAdminBooks.module.css';
+import adminStyles from '../../styles/admin/PgAdminUsers.module.css';
 
 export default function PgAdminBooks() {
   const navigate = useNavigate();

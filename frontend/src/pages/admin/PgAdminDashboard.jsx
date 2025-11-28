@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../../styles/PgAdminDashboard.module.css';
+import styles from '../../styles/admin/PgAdminDashboard.module.css';
 
 export function PgAdminDashboard() {
   const navigate = useNavigate();

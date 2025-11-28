@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from '../styles/PgPerfil.module.css';
 
 const sampleFavorites = [
@@ -17,93 +18,399 @@ const sampleCollection = [
 ];
 
 export default function PgPerfil() {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('perfil');
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  
+  // Dados da conta
+  const [accountData, setAccountData] = useState({
+    nome: '',
+    email: '',
+    telefone: '',
+    cpf: ''
+  });
+
+  // Dados de alteração de senha
+  const [passwordData, setPasswordData] = useState({
+    senhaAtual: '',
+    novaSenha: '',
+    confirmarSenha: ''
+  });
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (!userData) {
+      navigate('/login');
+      return;
+    }
+    const parsed = JSON.parse(userData);
+    setUser(parsed);
+    
+    // Carregar dados completos do usuário
+    loadUserData(parsed.id);
+  }, [navigate]);
+
+  const loadUserData = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:3001/api/admin/usuarios/${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAccountData({
+          nome: data.nome || '',
+          email: data.email || '',
+          telefone: formatTelefone(data.telefone || ''),
+          cpf: formatCPF(data.cpf || '')
+        });
+      }
+    } catch (err) {
+      console.error('Erro ao carregar dados:', err);
+    }
+  };
+
+  // Funções de formatação
+  const formatCPF = (value) => {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length <= 11) {
+      return cleaned
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+        .replace(/(-\d{2})\d+?$/, '$1');
+    }
+    return value;
+  };
+
+  const formatTelefone = (value) => {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length <= 11) {
+      if (cleaned.length <= 10) {
+        return cleaned
+          .replace(/(\d{2})(\d)/, '($1) $2')
+          .replace(/(\d{4})(\d)/, '$1-$2')
+          .replace(/(-\d{4})\d+?$/, '$1');
+      } else {
+        return cleaned
+          .replace(/(\d{2})(\d)/, '($1) $2')
+          .replace(/(\d{5})(\d)/, '$1-$2')
+          .replace(/(-\d{4})\d+?$/, '$1');
+      }
+    }
+    return value;
+  };
+
+  const handleAccountChange = (field, value) => {
+    if (field === 'cpf') {
+      setAccountData({ ...accountData, [field]: formatCPF(value) });
+    } else if (field === 'telefone') {
+      setAccountData({ ...accountData, [field]: formatTelefone(value) });
+    } else {
+      setAccountData({ ...accountData, [field]: value });
+    }
+  };
+
+  const handleSaveAccount = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+    setError('');
+
+    try {
+      const dataToSend = {
+        nome: accountData.nome,
+        email: accountData.email,
+        telefone: accountData.telefone.replace(/\D/g, ''),
+        cpf: accountData.cpf.replace(/\D/g, '')
+      };
+
+      const response = await fetch(`http://localhost:3001/api/admin/usuarios/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSend)
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Erro ao atualizar dados');
+      }
+
+      // Atualizar localStorage
+      const updatedUser = { ...user, nome: accountData.nome, email: accountData.email };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      window.dispatchEvent(new Event('userChange'));
+      setUser(updatedUser);
+      
+      setMessage('Dados atualizados com sucesso!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      setError(err.message);
+      setTimeout(() => setError(''), 3000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+    setError('');
+
+    if (passwordData.novaSenha !== passwordData.confirmarSenha) {
+      setError('As senhas não coincidem');
+      setLoading(false);
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+
+    if (passwordData.novaSenha.length < 6) {
+      setError('A nova senha deve ter no mínimo 6 caracteres');
+      setLoading(false);
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:3001/api/admin/usuarios/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senha: passwordData.novaSenha })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Erro ao alterar senha');
+      }
+
+      setMessage('Senha alterada com sucesso!');
+      setPasswordData({ senhaAtual: '', novaSenha: '', confirmarSenha: '' });
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      setError(err.message);
+      setTimeout(() => setError(''), 3000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!user) return <div className={styles.page}>Carregando...</div>;
+
   return (
   <main className={styles.page}>
     <div className={styles.container}>
       <nav className={styles.tabs}>
-        <button className={`${styles.tab} ${styles.active}`}>Meu Perfil</button>
-        <button className={styles.tab}>Conta</button>
+        <button 
+          className={`${styles.tab} ${activeTab === 'perfil' ? styles.active : ''}`}
+          onClick={() => setActiveTab('perfil')}
+        >
+          Meu Perfil
+        </button>
+        <button 
+          className={`${styles.tab} ${activeTab === 'conta' ? styles.active : ''}`}
+          onClick={() => setActiveTab('conta')}
+        >
+          Conta
+        </button>
       </nav>
 
-      <section className={styles.profileCard}>
-        <div className={styles.avatarWrap}>
-          <div className={styles.avatar} aria-hidden="true">
-            <span className={styles.avatarIcon}>👤</span>
-          </div>
-        </div>
+      {activeTab === 'perfil' && (
+        <>
+          <section className={styles.profileCard}>
+            <div className={styles.avatarWrap}>
+              <div className={styles.avatar} aria-hidden="true">
+                <span className={styles.avatarIcon}>👤</span>
+              </div>
+            </div>
 
-        <div className={styles.profileMain}>
-          <h1 className={styles.name}>Ruan Miguel</h1>
+            <div className={styles.profileMain}>
+              <h1 className={styles.name}>{user.nome || 'Usuário'}</h1>
 
-          <div className={styles.stats}>
-            <div className={styles.statItem}><span className={styles.statNumber}>56</span> Seguidores</div>
-            <div className={styles.statItem}><span className={styles.statNumber}>130</span> Seguindo</div>
-          </div>
+              <div className={styles.stats}>
+                <div className={styles.statItem}><span className={styles.statNumber}>56</span> Seguidores</div>
+                <div className={styles.statItem}><span className={styles.statNumber}>130</span> Seguindo</div>
+              </div>
 
-          <div className={styles.actionLinks}>
-            <button className={styles.btnPrimary}>➕ Adicionar foto do perfil</button>
-            <button className={styles.btnOutline}>✏️ Modificar dados pessoais</button>
-          </div>
-        </div>
-      </section>
+              <div className={styles.actionLinks}>
+                <button className={styles.btnPrimary}>➕ Adicionar foto do perfil</button>
+                <button className={styles.btnOutline}>✏️ Modificar dados pessoais</button>
+              </div>
+            </div>
+          </section>
 
-      <hr className={styles.hr} />
+          <hr className={styles.hr} />
 
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Sobre você</h2>
-        <div className={styles.sectionBody}>
-          <button className={styles.smallAction}>➕ Adicionar minibio</button>
-          <ul className={styles.bullets}>
-            <li>🗣️ Gosto de conversar</li>
-            <li>✈️ Amo viajar</li>
-          </ul>
-        </div>
-      </section>
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Sobre você</h2>
+            <div className={styles.sectionBody}>
+              <button className={styles.smallAction}>➕ Adicionar minibio</button>
+              <ul className={styles.bullets}>
+                <li>🗣️ Gosto de conversar</li>
+                <li>✈️ Amo viajar</li>
+              </ul>
+            </div>
+          </section>
 
-      <hr className={styles.hr} />
+          <hr className={styles.hr} />
 
-      <section className={styles.section}>
-        <h2 className={styles.libraryTitle}>BIBLIOTECA</h2>
+          <section className={styles.section}>
+            <h2 className={styles.libraryTitle}>BIBLIOTECA</h2>
 
-        <div className={styles.subsection}>
-          <h3 className={styles.subTitle}>FAVORITOS ⭐</h3>
-          <div className={styles.grid}>
-            {sampleFavorites.map((book) => (
-              <figure key={book.id} className={styles.bookCard}>
-                <img src={book.cover} alt="" className={styles.bookCover} />
-                <figcaption className={styles.bookTitle}>{book.title}</figcaption>
-              </figure>
-            ))}
+            <div className={styles.subsection}>
+              <h3 className={styles.subTitle}>FAVORITOS ⭐</h3>
+              <div className={styles.grid}>
+                {sampleFavorites.map((book) => (
+                  <figure key={book.id} className={styles.bookCard}>
+                    <img src={book.cover} alt="" className={styles.bookCover} />
+                    <figcaption className={styles.bookTitle}>{book.title}</figcaption>
+                  </figure>
+                ))}
 
-            <button className={`${styles.plusCard}`} aria-label="Adicionar favorito">
-              <div className={styles.plusSign}>+</div>
-            </button>
+                <button className={`${styles.plusCard}`} aria-label="Adicionar favorito">
+                  <div className={styles.plusSign}>+</div>
+                </button>
 
-            <button className={`${styles.plusCard}`} aria-label="Adicionar favorito">
-              <div className={styles.plusSign}>+</div>
-            </button>
-          </div>
-        </div>
+                <button className={`${styles.plusCard}`} aria-label="Adicionar favorito">
+                  <div className={styles.plusSign}>+</div>
+                </button>
+              </div>
+            </div>
 
-        <div className={styles.subsection}>
-          <h3 className={styles.subTitle}>COLEÇÃO 📚</h3>
-          <div className={styles.gridCollection}>
-            {sampleCollection.map((book) => (
-              <figure key={book.id} className={styles.colCard}>
-                <img src={book.cover} alt="" className={styles.bookCoverSmall} />
-                <figcaption className={styles.bookTitleSmall}>{book.title}</figcaption>
-              </figure>
-            ))}
+            <div className={styles.subsection}>
+              <h3 className={styles.subTitle}>COLEÇÃO 📚</h3>
+              <div className={styles.gridCollection}>
+                {sampleCollection.map((book) => (
+                  <figure key={book.id} className={styles.colCard}>
+                    <img src={book.cover} alt="" className={styles.bookCoverSmall} />
+                    <figcaption className={styles.bookTitleSmall}>{book.title}</figcaption>
+                  </figure>
+                ))}
 
-            {/* espaços + para completar a grade */}
-            {[...Array(4)].map((_, i) => (
-              <button key={i} className={styles.plusCardSmall} aria-label="Adicionar à coleção">
-                <div className={styles.plusSignSmall}>+</div>
+                {/* espaços + para completar a grade */}
+                {[...Array(4)].map((_, i) => (
+                  <button key={i} className={styles.plusCardSmall} aria-label="Adicionar à coleção">
+                    <div className={styles.plusSignSmall}>+</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
+        </>
+      )}
+
+      {activeTab === 'conta' && (
+        <div className={styles.accountSection}>
+          {message && <div className={styles.successMessage}>{message}</div>}
+          {error && <div className={styles.errorMessage}>{error}</div>}
+
+          <section className={styles.accountCard}>
+            <h2 className={styles.accountTitle}>Informações da Conta</h2>
+            <form onSubmit={handleSaveAccount} className={styles.accountForm}>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Nome Completo</label>
+                  <input
+                    type="text"
+                    value={accountData.nome}
+                    onChange={(e) => handleAccountChange('nome', e.target.value)}
+                    className={styles.input}
+                    required
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Email</label>
+                  <input
+                    type="email"
+                    value={accountData.email}
+                    onChange={(e) => handleAccountChange('email', e.target.value)}
+                    className={styles.input}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Telefone</label>
+                  <input
+                    type="text"
+                    value={accountData.telefone}
+                    onChange={(e) => handleAccountChange('telefone', e.target.value)}
+                    maxLength="15"
+                    placeholder="(00) 00000-0000"
+                    className={styles.input}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>CPF</label>
+                  <input
+                    type="text"
+                    value={accountData.cpf}
+                    onChange={(e) => handleAccountChange('cpf', e.target.value)}
+                    maxLength="14"
+                    placeholder="000.000.000-00"
+                    className={styles.input}
+                    required
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className={styles.saveButton} disabled={loading}>
+                {loading ? 'Salvando...' : '💾 Salvar Alterações'}
               </button>
-            ))}
-          </div>
+            </form>
+          </section>
+
+          <section className={styles.accountCard}>
+            <h2 className={styles.accountTitle}>Alterar Senha</h2>
+            <form onSubmit={handleChangePassword} className={styles.accountForm}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Senha Atual</label>
+                <input
+                  type="password"
+                  value={passwordData.senhaAtual}
+                  onChange={(e) => setPasswordData({ ...passwordData, senhaAtual: e.target.value })}
+                  className={styles.input}
+                  placeholder="Digite sua senha atual"
+                />
+              </div>
+
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Nova Senha</label>
+                  <input
+                    type="password"
+                    value={passwordData.novaSenha}
+                    onChange={(e) => setPasswordData({ ...passwordData, novaSenha: e.target.value })}
+                    className={styles.input}
+                    placeholder="Mínimo 6 caracteres"
+                    required
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Confirmar Nova Senha</label>
+                  <input
+                    type="password"
+                    value={passwordData.confirmarSenha}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirmarSenha: e.target.value })}
+                    className={styles.input}
+                    placeholder="Digite novamente"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className={styles.saveButton} disabled={loading}>
+                {loading ? 'Alterando...' : '🔒 Alterar Senha'}
+              </button>
+            </form>
+          </section>
         </div>
-      </section>
+      )}
     </div>
   </main>
   );

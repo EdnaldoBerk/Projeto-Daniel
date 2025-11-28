@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../../styles/PgAdminResenhas.module.css';
-import adminStyles from '../../styles/PgAdminUsers.module.css';
+import styles from '../../styles/admin/PgAdminResenhas.module.css';
+import adminStyles from '../../styles/admin/PgAdminUsers.module.css';
 import api from '../../services/api';
 
 export function PgAdminResenhas() {
