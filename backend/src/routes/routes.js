@@ -1,6 +1,6 @@
 const { Router } = require('express');
-const { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha, adicionarFavorito, removerFavorito, listarFavoritosUsuario, verificarFavorito } = require('../controllers/controller');
-const upload = require('../config/multer');
+const { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha, adicionarFavorito, removerFavorito, listarFavoritosUsuario, verificarFavorito, uploadFotoPerfil } = require('../controllers/controller');
+const { uploadBooks, uploadPerfil } = require('../config/multer');
 
 const router = Router();
 
@@ -16,10 +16,10 @@ router.put('/admin/usuarios/:id', atualizarUsuario);
 router.delete('/admin/usuarios/:id', deletarUsuario);
 
 // Rotas de administração de livros
-router.post('/admin/livros', upload.fields([{ name: 'fotoCapa', maxCount: 1 }, { name: 'galeria', maxCount: 10 }]), criarLivro);
+router.post('/admin/livros', uploadBooks.fields([{ name: 'fotoCapa', maxCount: 1 }, { name: 'galeria', maxCount: 10 }]), criarLivro);
 router.get('/admin/livros', listarLivros);
 router.get('/admin/livros/:id', buscarLivroPorId);
-router.put('/admin/livros/:id', upload.fields([{ name: 'fotoCapa', maxCount: 1 }, { name: 'galeria', maxCount: 10 }]), atualizarLivro);
+router.put('/admin/livros/:id', uploadBooks.fields([{ name: 'fotoCapa', maxCount: 1 }, { name: 'galeria', maxCount: 10 }]), atualizarLivro);
 router.delete('/admin/livros/:id', deletarLivro);
 
 // Rotas de resenhas
@@ -40,5 +40,8 @@ router.post('/favoritos', adicionarFavorito);
 router.delete('/favoritos/:usuarioId/:livroId', removerFavorito);
 router.get('/favoritos/:usuarioId', listarFavoritosUsuario);
 router.get('/favoritos/:usuarioId/:livroId', verificarFavorito);
+
+// Rota de upload de foto de perfil
+router.post('/upload/foto-perfil', uploadPerfil.single('fotoPerfil'), uploadFotoPerfil);
 
 module.exports = router;

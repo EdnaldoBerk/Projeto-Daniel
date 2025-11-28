@@ -432,6 +432,26 @@ async function verificarFavorito(req, res) {
   }
 }
 
+// Upload de foto de perfil
+async function uploadFotoPerfil(req, res) {
+  const { usuarioId } = req.body;
+  
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+    }
+
+    const fotoPerfil = `/uploads/perfil/${req.file.filename}`;
+    
+    await updateUser(usuarioId, { fotoPerfil });
+    
+    return res.json({ fotoPerfil, message: 'Foto atualizada com sucesso' });
+  } catch (e) {
+    console.error('Erro ao fazer upload da foto:', e);
+    return res.status(500).json({ error: 'Erro ao fazer upload da foto' });
+  }
+}
+
 module.exports = { 
   registrarUsuario, 
   logarUsuario, 
@@ -455,5 +475,6 @@ module.exports = {
   adicionarFavorito,
   removerFavorito,
   listarFavoritosUsuario,
-  verificarFavorito
+  verificarFavorito,
+  uploadFotoPerfil
 };

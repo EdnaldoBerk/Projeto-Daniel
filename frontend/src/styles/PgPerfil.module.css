@@ -100,6 +100,13 @@
   z-index: 1;
 }
 
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 .profileMain { flex:1; }
 .name {
   margin: 0;
@@ -550,6 +557,210 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modalContent {
+  background: linear-gradient(135deg, rgba(26,27,33,0.95), rgba(20,20,24,0.98));
+  border-radius: 16px;
+  padding: 0;
+  width: 90%;
+  max-width: 500px;
+  border: 1px solid rgba(100,108,255,0.2);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid rgba(100,108,255,0.1);
+}
+
+.modalHeader h2 {
+  margin: 0;
+  color: #646cff;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #b0b0b0;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: rgba(197,34,31,0.2);
+  color: #f87171;
+}
+
+.modalForm {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modalInput {
+  background: rgba(20,20,24,0.6);
+  border: 1px solid rgba(100,108,255,0.2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: #ececec;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  outline: none;
+  width: 100%;
+}
+
+.modalInput:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100,108,255,0.1);
+  background: rgba(20,20,24,0.8);
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  padding: 0 24px 24px;
+  justify-content: flex-end;
+}
+
+.btnCancelModal {
+  background: transparent;
+  border: 1px solid rgba(100,108,255,0.3);
+  color: #b0b0b0;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btnCancelModal:hover {
+  background: rgba(100,108,255,0.1);
+  border-color: #646cff;
+  color: #ececec;
+}
+
+.btnSubmitModal {
+  background: linear-gradient(135deg, #646cff 0%, #9334e6 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(100,108,255,0.3);
+}
+
+.btnSubmitModal:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(100,108,255,0.4);
+}
+
+.btnSubmitModal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Photo upload styles */
+.photoUploadSection {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.photoPreviewWrapper {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #646cff;
+  box-shadow: 0 8px 24px rgba(100,108,255,0.3);
+}
+
+.photoPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoPlaceholder {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(100,108,255,0.05);
+  border: 2px dashed rgba(100,108,255,0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.photoIcon {
+  font-size: 48px;
+}
+
+.photoPlaceholder p {
+  color: #b0b0b0;
+  margin: 0;
+  font-size: 14px;
+}
+
+.fileInput {
+  display: none;
+}
+
+.selectPhotoButton {
+  background: rgba(100,108,255,0.1);
+  border: 1px solid #646cff;
+  color: #646cff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.selectPhotoButton:hover {
+  background: #646cff;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(100,108,255,0.3);
 }
 
 /* responsividade */

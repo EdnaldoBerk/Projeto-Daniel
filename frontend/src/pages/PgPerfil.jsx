@@ -11,6 +11,10 @@ export default function PgPerfil() {
   const [error, setError] = useState('');
   const [favoritos, setFavoritos] = useState([]);
   const [loadingFavoritos, setLoadingFavoritos] = useState(true);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   
   // Dados da conta
   const [accountData, setAccountData] = useState({
@@ -88,6 +92,101 @@ export default function PgPerfil() {
       console.error('Erro ao remover favorito:', err);
       setError('Erro ao remover favorito');
       setTimeout(() => setError(''), 2000);
+    }
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPhotoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUploadPhoto = async () => {
+    if (!photoFile) {
+      setError('Selecione uma foto primeiro');
+      setTimeout(() => setError(''), 2000);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('fotoPerfil', photoFile);
+      formData.append('usuarioId', user.id);
+
+      const response = await fetch('http://localhost:3001/api/upload/foto-perfil', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const updatedUser = { ...user, fotoPerfil: data.fotoPerfil };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        window.dispatchEvent(new Event('userChange'));
+        setUser(updatedUser);
+        setMessage('Foto atualizada com sucesso!');
+        setShowPhotoModal(false);
+        setPhotoFile(null);
+        setPhotoPreview(null);
+        setTimeout(() => setMessage(''), 3000);
+      } else {
+        throw new Error('Erro ao fazer upload da foto');
+      }
+    } catch (err) {
+      setError(err.message);
+      setTimeout(() => setError(''), 3000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenEditModal = () => {
+    setShowEditModal(true);
+  };
+
+  const handleSaveFromModal = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+    setError('');
+
+    try {
+      const dataToSend = {
+        nome: accountData.nome,
+        telefone: accountData.telefone.replace(/\D/g, ''),
+      };
+
+      const response = await fetch(`http://localhost:3001/api/admin/usuarios/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSend)
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Erro ao atualizar dados');
+      }
+
+      const updatedUser = { ...user, nome: accountData.nome };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      window.dispatchEvent(new Event('userChange'));
+      setUser(updatedUser);
+      
+      setMessage('Dados atualizados com sucesso!');
+      setShowEditModal(false);
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      setError(err.message);
+      setTimeout(() => setError(''), 3000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -238,10 +337,21 @@ export default function PgPerfil() {
 
       {activeTab === 'perfil' && (
         <>
+          {message && <div className={styles.successMessage}>{message}</div>}
+          {error && <div className={styles.errorMessage}>{error}</div>}
+          
           <section className={styles.profileCard}>
             <div className={styles.avatarWrap}>
               <div className={styles.avatar} aria-hidden="true">
-                <span className={styles.avatarIcon}>👤</span>
+                {user.fotoPerfil ? (
+                  <img 
+                    src={`http://localhost:3001${user.fotoPerfil}`} 
+                    alt="Foto de perfil" 
+                    className={styles.avatarImage}
+                  />
+                ) : (
+                  <span className={styles.avatarIcon}>👤</span>
+                )}
               </div>
             </div>
 
@@ -254,8 +364,12 @@ export default function PgPerfil() {
               </div>
 
               <div className={styles.actionLinks}>
-                <button className={styles.btnPrimary}>➕ Adicionar foto do perfil</button>
-                <button className={styles.btnOutline}>✏️ Modificar dados pessoais</button>
+                <button className={styles.btnPrimary} onClick={() => setShowPhotoModal(true)}>
+                  ➕ Adicionar foto do perfil
+                </button>
+                <button className={styles.btnOutline} onClick={handleOpenEditModal}>
+                  ✏️ Modificar dados pessoais
+                </button>
               </div>
             </div>
           </section>
@@ -457,6 +571,119 @@ export default function PgPerfil() {
               </button>
             </form>
           </section>
+        </div>
+      )}
+
+      {/* Modal de Upload de Foto */}
+      {showPhotoModal && (
+        <div className={styles.modal} onClick={() => setShowPhotoModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>Adicionar Foto do Perfil</h2>
+              <button className={styles.closeButton} onClick={() => setShowPhotoModal(false)}>✖</button>
+            </div>
+            
+            <div className={styles.photoUploadSection}>
+              {photoPreview ? (
+                <div className={styles.photoPreviewWrapper}>
+                  <img src={photoPreview} alt="Preview" className={styles.photoPreview} />
+                </div>
+              ) : (
+                <div className={styles.photoPlaceholder}>
+                  <span className={styles.photoIcon}>📷</span>
+                  <p>Selecione uma foto</p>
+                </div>
+              )}
+              
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className={styles.fileInput}
+                id="photoInput"
+              />
+              
+              <label htmlFor="photoInput" className={styles.selectPhotoButton}>
+                Escolher Foto
+              </label>
+            </div>
+
+            <div className={styles.modalActions}>
+              <button 
+                type="button" 
+                className={styles.btnCancelModal} 
+                onClick={() => {
+                  setShowPhotoModal(false);
+                  setPhotoFile(null);
+                  setPhotoPreview(null);
+                }}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="button" 
+                className={styles.btnSubmitModal}
+                onClick={handleUploadPhoto}
+                disabled={!photoFile || loading}
+              >
+                {loading ? 'Enviando...' : 'Salvar Foto'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Editar Dados Pessoais */}
+      {showEditModal && (
+        <div className={styles.modal} onClick={() => setShowEditModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>Modificar Dados Pessoais</h2>
+              <button className={styles.closeButton} onClick={() => setShowEditModal(false)}>✖</button>
+            </div>
+            
+            <form onSubmit={handleSaveFromModal} className={styles.modalForm}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Nome Completo</label>
+                <input
+                  type="text"
+                  value={accountData.nome}
+                  onChange={(e) => handleAccountChange('nome', e.target.value)}
+                  className={styles.modalInput}
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Telefone</label>
+                <input
+                  type="text"
+                  value={accountData.telefone}
+                  onChange={(e) => handleAccountChange('telefone', e.target.value)}
+                  maxLength="15"
+                  placeholder="(00) 00000-0000"
+                  className={styles.modalInput}
+                />
+              </div>
+
+              <div className={styles.modalActions}>
+                <button 
+                  type="button" 
+                  className={styles.btnCancelModal} 
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className={styles.btnSubmitModal}
+                  disabled={loading}
+                >
+                  {loading ? 'Salvando...' : 'Salvar Alterações'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

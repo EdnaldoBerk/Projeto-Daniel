@@ -3,19 +3,35 @@ const path = require('path');
 const fs = require('fs');
 
 // Criar pasta uploads se não existir
-const uploadDir = path.join(__dirname, '../../uploads/books');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+const uploadBooksDir = path.join(__dirname, '../../uploads/books');
+if (!fs.existsSync(uploadBooksDir)) {
+  fs.mkdirSync(uploadBooksDir, { recursive: true });
 }
 
-// Configuração de storage
-const storage = multer.diskStorage({
+const uploadPerfilDir = path.join(__dirname, '../../uploads/perfil');
+if (!fs.existsSync(uploadPerfilDir)) {
+  fs.mkdirSync(uploadPerfilDir, { recursive: true });
+}
+
+// Configuração de storage para livros
+const storageBooks = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir);
+    cb(null, uploadBooksDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, `book-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+// Configuração de storage para perfil
+const storagePerfil = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadPerfilDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `perfil-${uniqueSuffix}${path.extname(file.originalname)}`);
   }
 });
 
@@ -32,11 +48,18 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Configuração do multer
-const upload = multer({
-  storage,
+// Configuração do multer para livros
+const uploadBooks = multer({
+  storage: storageBooks,
   fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB
 });
 
-module.exports = upload;
+// Configuração do multer para perfil
+const uploadPerfil = multer({
+  storage: storagePerfil,
+  fileFilter,
+  limits: { fileSize: 2 * 1024 * 1024 } // 2MB
+});
+
+module.exports = { uploadBooks, uploadPerfil };
