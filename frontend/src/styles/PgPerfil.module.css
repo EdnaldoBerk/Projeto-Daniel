@@ -309,7 +309,14 @@
   object-fit: cover;
   display:block;
   background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.16));
+  cursor: pointer;
+  transition: transform 0.3s ease;
 }
+
+.bookCover:hover {
+  transform: scale(1.05);
+}
+
 .bookCoverSmall {
   width: 100%;
   height: 150px;
@@ -331,6 +338,12 @@
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-box-orient: vertical;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.bookTitle:hover {
+  color: #646cff;
 }
 .bookTitleSmall {
   color: #ececec;

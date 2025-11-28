@@ -299,6 +299,17 @@ export default function PgPerfil() {
                           src={`http://localhost:3001${favorito.livro.fotoCapa}`} 
                           alt={favorito.livro.titulo} 
                           className={styles.bookCover}
+                          onClick={() => navigate('/resenha', { 
+                            state: { 
+                              livroId: favorito.livro.id, 
+                              livro: {
+                                id: favorito.livro.id,
+                                titulo: favorito.livro.titulo,
+                                autor: favorito.livro.autor,
+                                fotoCapa: favorito.livro.fotoCapa
+                              }
+                            }
+                          })}
                           onError={(e) => {
                             e.target.src = 'https://via.placeholder.com/100x150?text=Sem+Imagem';
                           }}
@@ -311,7 +322,22 @@ export default function PgPerfil() {
                           ❌
                         </button>
                       </div>
-                      <figcaption className={styles.bookTitle}>{favorito.livro.titulo}</figcaption>
+                      <figcaption 
+                        className={styles.bookTitle}
+                        onClick={() => navigate('/resenha', { 
+                          state: { 
+                            livroId: favorito.livro.id, 
+                            livro: {
+                              id: favorito.livro.id,
+                              titulo: favorito.livro.titulo,
+                              autor: favorito.livro.autor,
+                              fotoCapa: favorito.livro.fotoCapa
+                            }
+                          }
+                        })}
+                      >
+                        {favorito.livro.titulo}
+                      </figcaption>
                     </figure>
                   ))}
                 </div>
