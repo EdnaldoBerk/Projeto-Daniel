@@ -22,6 +22,28 @@ export function Profile() {
       setUser(JSON.parse(userData));
       setIsAdmin(false);
     }
+
+    // Listener para atualizar quando o usuário mudar
+    const handleUserChange = () => {
+      const userData = localStorage.getItem('user');
+      const adminData = localStorage.getItem('admin');
+      
+      if (adminData) {
+        setUser(JSON.parse(adminData));
+        setIsAdmin(true);
+      } else if (userData) {
+        setUser(JSON.parse(userData));
+        setIsAdmin(false);
+      }
+    };
+
+    window.addEventListener('userChange', handleUserChange);
+    window.addEventListener('adminChange', handleUserChange);
+    
+    return () => {
+      window.removeEventListener('userChange', handleUserChange);
+      window.removeEventListener('adminChange', handleUserChange);
+    };
   }, []);
 
   // Buscar nome se ausente
@@ -88,10 +110,18 @@ export function Profile() {
       <button
         className={styles.avatarButton}
         onClick={() => setIsOpen(!isOpen)}
-        style={{ backgroundColor: getAvatarColor(user.email) }}
+        style={user.fotoPerfil ? {} : { backgroundColor: getAvatarColor(user.email) }}
         aria-label="Conta do Google"
       >
-        {getInitials(user.email, user.nome)}
+        {user.fotoPerfil ? (
+          <img 
+            src={`http://localhost:3001${user.fotoPerfil}`} 
+            alt="Foto de perfil" 
+            className={styles.avatarImage}
+          />
+        ) : (
+          getInitials(user.email, user.nome)
+        )}
       </button>
 
       {isOpen && (
@@ -99,9 +129,17 @@ export function Profile() {
           <div className={styles.dropdownHeader}>
             <div
               className={styles.dropdownAvatar}
-              style={{ backgroundColor: getAvatarColor(user.email) }}
+              style={user.fotoPerfil ? {} : { backgroundColor: getAvatarColor(user.email) }}
             >
-              {getInitials(user.email, user.nome)}
+              {user.fotoPerfil ? (
+                <img 
+                  src={`http://localhost:3001${user.fotoPerfil}`} 
+                  alt="Foto de perfil" 
+                  className={styles.dropdownAvatarImage}
+                />
+              ) : (
+                getInitials(user.email, user.nome)
+              )}
             </div>
             <div className={styles.userInfo}>
               <div className={styles.userName}>{user.nome || (user.email ? user.email.split('@')[0] : '')}</div>
