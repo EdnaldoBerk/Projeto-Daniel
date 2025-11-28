@@ -1,4 +1,4 @@
-const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha } = require('../services/service');
+const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, removeFavorito, getFavoritosByUsuarioId, checkFavorito } = require('../services/service');
 
 async function registrarUsuario(req, res) {
   // TODO: validação e hashing de senha
@@ -384,6 +384,54 @@ async function deletarResenha(req, res) {
   }
 }
 
+// Controladores de Favoritos
+async function adicionarFavorito(req, res) {
+  const { usuarioId, livroId } = req.body;
+  try {
+    const favorito = await addFavorito(usuarioId, livroId);
+    return res.status(201).json(favorito);
+  } catch (e) {
+    console.error('Erro ao adicionar favorito:', e);
+    if (e.code === 'P2002') {
+      return res.status(409).json({ error: 'Livro já está nos favoritos' });
+    }
+    return res.status(500).json({ error: 'Erro ao adicionar favorito' });
+  }
+}
+
+async function removerFavorito(req, res) {
+  const { usuarioId, livroId } = req.params;
+  try {
+    await removeFavorito(usuarioId, livroId);
+    return res.json({ message: 'Favorito removido com sucesso' });
+  } catch (e) {
+    console.error('Erro ao remover favorito:', e);
+    return res.status(500).json({ error: 'Erro ao remover favorito' });
+  }
+}
+
+async function listarFavoritosUsuario(req, res) {
+  const { usuarioId } = req.params;
+  try {
+    const favoritos = await getFavoritosByUsuarioId(usuarioId);
+    return res.json(favoritos);
+  } catch (e) {
+    console.error('Erro ao listar favoritos:', e);
+    return res.status(500).json({ error: 'Erro ao listar favoritos' });
+  }
+}
+
+async function verificarFavorito(req, res) {
+  const { usuarioId, livroId } = req.params;
+  try {
+    const isFavorito = await checkFavorito(usuarioId, livroId);
+    return res.json({ isFavorito });
+  } catch (e) {
+    console.error('Erro ao verificar favorito:', e);
+    return res.status(500).json({ error: 'Erro ao verificar favorito' });
+  }
+}
+
 module.exports = { 
   registrarUsuario, 
   logarUsuario, 
@@ -403,5 +451,9 @@ module.exports = {
   listarResenhasPorLivro,
   buscarResenhaPorId,
   atualizarResenha,
-  deletarResenha
+  deletarResenha,
+  adicionarFavorito,
+  removerFavorito,
+  listarFavoritosUsuario,
+  verificarFavorito
 };

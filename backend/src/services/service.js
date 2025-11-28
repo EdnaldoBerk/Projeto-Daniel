@@ -145,6 +145,48 @@ async function deleteResenha(id) {
   return prisma.resenha.delete({ where: { id: parseInt(id) } });
 }
 
+// Funções de Favoritos
+async function addFavorito(usuarioId, livroId) {
+  return prisma.favorito.create({
+    data: {
+      usuarioId: parseInt(usuarioId),
+      livroId: parseInt(livroId)
+    },
+    include: {
+      livro: true
+    }
+  });
+}
+
+async function removeFavorito(usuarioId, livroId) {
+  return prisma.favorito.deleteMany({
+    where: {
+      usuarioId: parseInt(usuarioId),
+      livroId: parseInt(livroId)
+    }
+  });
+}
+
+async function getFavoritosByUsuarioId(usuarioId) {
+  return prisma.favorito.findMany({
+    where: { usuarioId: parseInt(usuarioId) },
+    include: {
+      livro: true
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+}
+
+async function checkFavorito(usuarioId, livroId) {
+  const favorito = await prisma.favorito.findFirst({
+    where: {
+      usuarioId: parseInt(usuarioId),
+      livroId: parseInt(livroId)
+    }
+  });
+  return !!favorito;
+}
+
 module.exports = { 
   createUser, 
   findUserByEmail, 
@@ -162,5 +204,9 @@ module.exports = {
   getResenhasByLivroId,
   getResenhaById,
   updateResenha,
-  deleteResenha
+  deleteResenha,
+  addFavorito,
+  removeFavorito,
+  getFavoritosByUsuarioId,
+  checkFavorito
 };

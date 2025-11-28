@@ -2,21 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/PgPerfil.module.css';
 
-const sampleFavorites = [
-  { id: 1, title: 'O Conde de Monte Cristo', cover: 'https://via.placeholder.com/100x150?text=Monte+Cristo' },
-  { id: 2, title: 'A Máquina que mudou o mundo', cover: 'https://via.placeholder.com/100x150?text=Máquina' },
-  { id: 3, title: 'Sêneca', cover: 'https://via.placeholder.com/100x150?text=Sêneca' },
-];
-
-const sampleCollection = [
-  { id: 1, title: 'O Conde de Monte Cristo', cover: 'https://via.placeholder.com/80x120?text=Monte+Cristo' },
-  { id: 2, title: 'A Máquina que mudou o mundo', cover: 'https://via.placeholder.com/80x120?text=Máquina' },
-  { id: 3, title: 'Descartes', cover: 'https://via.placeholder.com/80x120?text=Descartes' },
-  { id: 4, title: 'O Príncipe', cover: 'https://via.placeholder.com/80x120?text=Príncipe' },
-  { id: 5, title: 'O Mito da Caverna', cover: 'https://via.placeholder.com/80x120?text=Caverna' },
-  { id: 6, title: 'Sêneca', cover: 'https://via.placeholder.com/80x120?text=Sêneca' },
-];
-
 export default function PgPerfil() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('perfil');
@@ -24,6 +9,8 @@ export default function PgPerfil() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [favoritos, setFavoritos] = useState([]);
+  const [loadingFavoritos, setLoadingFavoritos] = useState(true);
   
   // Dados da conta
   const [accountData, setAccountData] = useState({
@@ -51,6 +38,7 @@ export default function PgPerfil() {
     
     // Carregar dados completos do usuário
     loadUserData(parsed.id);
+    loadFavoritos(parsed.id);
   }, [navigate]);
 
   const loadUserData = async (userId) => {
@@ -67,6 +55,39 @@ export default function PgPerfil() {
       }
     } catch (err) {
       console.error('Erro ao carregar dados:', err);
+    }
+  };
+
+  const loadFavoritos = async (userId) => {
+    setLoadingFavoritos(true);
+    try {
+      const response = await fetch(`http://localhost:3001/api/favoritos/${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setFavoritos(data);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar favoritos:', err);
+    } finally {
+      setLoadingFavoritos(false);
+    }
+  };
+
+  const handleRemoveFavorito = async (livroId) => {
+    try {
+      const response = await fetch(`http://localhost:3001/api/favoritos/${user.id}/${livroId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setFavoritos(favoritos.filter(fav => fav.livroId !== livroId));
+        setMessage('Livro removido dos favoritos!');
+        setTimeout(() => setMessage(''), 2000);
+      }
+    } catch (err) {
+      console.error('Erro ao remover favorito:', err);
+      setError('Erro ao remover favorito');
+      setTimeout(() => setError(''), 2000);
     }
   };
 
@@ -259,41 +280,42 @@ export default function PgPerfil() {
 
             <div className={styles.subsection}>
               <h3 className={styles.subTitle}>FAVORITOS ⭐</h3>
-              <div className={styles.grid}>
-                {sampleFavorites.map((book) => (
-                  <figure key={book.id} className={styles.bookCard}>
-                    <img src={book.cover} alt="" className={styles.bookCover} />
-                    <figcaption className={styles.bookTitle}>{book.title}</figcaption>
-                  </figure>
-                ))}
-
-                <button className={`${styles.plusCard}`} aria-label="Adicionar favorito">
-                  <div className={styles.plusSign}>+</div>
-                </button>
-
-                <button className={`${styles.plusCard}`} aria-label="Adicionar favorito">
-                  <div className={styles.plusSign}>+</div>
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.subsection}>
-              <h3 className={styles.subTitle}>COLEÇÃO 📚</h3>
-              <div className={styles.gridCollection}>
-                {sampleCollection.map((book) => (
-                  <figure key={book.id} className={styles.colCard}>
-                    <img src={book.cover} alt="" className={styles.bookCoverSmall} />
-                    <figcaption className={styles.bookTitleSmall}>{book.title}</figcaption>
-                  </figure>
-                ))}
-
-                {/* espaços + para completar a grade */}
-                {[...Array(4)].map((_, i) => (
-                  <button key={i} className={styles.plusCardSmall} aria-label="Adicionar à coleção">
-                    <div className={styles.plusSignSmall}>+</div>
+              
+              {loadingFavoritos ? (
+                <div className={styles.loadingText}>Carregando favoritos...</div>
+              ) : favoritos.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <p>Você ainda não tem livros favoritos.</p>
+                  <button className={styles.btnExplore} onClick={() => navigate('/')}>
+                    📚 Explorar Livros
                   </button>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className={styles.grid}>
+                  {favoritos.map((favorito) => (
+                    <figure key={favorito.id} className={styles.bookCard}>
+                      <div className={styles.bookImageWrapper}>
+                        <img 
+                          src={`http://localhost:3001${favorito.livro.fotoCapa}`} 
+                          alt={favorito.livro.titulo} 
+                          className={styles.bookCover}
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/100x150?text=Sem+Imagem';
+                          }}
+                        />
+                        <button 
+                          className={styles.removeFavorite}
+                          onClick={() => handleRemoveFavorito(favorito.livroId)}
+                          title="Remover dos favoritos"
+                        >
+                          ❌
+                        </button>
+                      </div>
+                      <figcaption className={styles.bookTitle}>{favorito.livro.titulo}</figcaption>
+                    </figure>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
         </>

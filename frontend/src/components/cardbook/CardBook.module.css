@@ -88,6 +88,16 @@
   background-color: #646cff;
 }
 
+.favoriteButton.favorited {
+  background-color: #646cff;
+  border-color: #646cff;
+}
+
+.favoriteButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Ícone de coração para o botão de favoritos */
 .favoriteButton svg {
   width: 16px;

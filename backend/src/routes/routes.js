@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha } = require('../controllers/controller');
+const { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha, adicionarFavorito, removerFavorito, listarFavoritosUsuario, verificarFavorito } = require('../controllers/controller');
 const upload = require('../config/multer');
 
 const router = Router();
@@ -34,5 +34,11 @@ router.delete('/resenhas/:id', deletarResenha);
 router.get('/admin/resenhas', listarResenhas);
 router.put('/admin/resenhas/:id', atualizarResenha);
 router.delete('/admin/resenhas/:id', deletarResenha);
+
+// Rotas de favoritos
+router.post('/favoritos', adicionarFavorito);
+router.delete('/favoritos/:usuarioId/:livroId', removerFavorito);
+router.get('/favoritos/:usuarioId', listarFavoritosUsuario);
+router.get('/favoritos/:usuarioId/:livroId', verificarFavorito);
 
 module.exports = router;
