@@ -43,6 +43,10 @@ export default function PgResenha() {
       navigate('/');
       return;
     }
+    
+    // Scroll para o topo da página
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     carregarDados();
   }, [livroId, navigate]);
 
@@ -100,15 +104,13 @@ export default function PgResenha() {
 
   if (!resenha) {
     return (
-      <div className={styles.page}>
-        <div className={styles.container}>
-          <div className={styles.noResenha}>
-            <h2>Nenhuma resenha disponível para este livro</h2>
-            <p>Em breve teremos uma resenha completa sobre "{livroCompleto?.titulo}"</p>
-            <button onClick={() => navigate('/')} className={styles.backButton}>
-              Voltar para a página inicial
-            </button>
-          </div>
+      <div className={styles.pageNoResenha}>
+        <div className={styles.noResenha}>
+          <h2>Nenhuma resenha disponível para este livro</h2>
+          <p>Em breve teremos uma resenha completa sobre "{livroCompleto?.titulo}"</p>
+          <button onClick={() => navigate('/')} className={styles.backButton}>
+            Voltar para a página inicial
+          </button>
         </div>
       </div>
     );
