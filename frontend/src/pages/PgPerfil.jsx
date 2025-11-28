@@ -471,17 +471,6 @@ export default function PgPerfil() {
             <form onSubmit={handleSaveAccount} className={styles.accountForm}>
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label className={styles.label}>Nome Completo</label>
-                  <input
-                    type="text"
-                    value={accountData.nome}
-                    onChange={(e) => handleAccountChange('nome', e.target.value)}
-                    className={styles.input}
-                    required
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
                   <label className={styles.label}>Email</label>
                   <input
                     type="email"
@@ -489,20 +478,6 @@ export default function PgPerfil() {
                     onChange={(e) => handleAccountChange('email', e.target.value)}
                     className={styles.input}
                     required
-                  />
-                </div>
-              </div>
-
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Telefone</label>
-                  <input
-                    type="text"
-                    value={accountData.telefone}
-                    onChange={(e) => handleAccountChange('telefone', e.target.value)}
-                    maxLength="15"
-                    placeholder="(00) 00000-0000"
-                    className={styles.input}
                   />
                 </div>
 
