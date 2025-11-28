@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../styles/PgAdminUsers.module.css';
+import styles from '../../styles/PgAdminUsers.module.css';
 
 export function PgAdminUsers() {
   const navigate = useNavigate();

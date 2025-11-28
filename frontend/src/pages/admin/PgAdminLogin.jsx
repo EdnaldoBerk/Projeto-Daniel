@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../styles/PgAdminLogin.module.css';
+import styles from '../../styles/PgAdminLogin.module.css';
 
 export function PgAdminLogin() {
   const [email, setEmail] = useState('');
