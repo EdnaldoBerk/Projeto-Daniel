@@ -52,23 +52,62 @@ export function PgAdminUsers() {
     }
   };
 
+  // Função para formatar CPF
+  const formatCPF = (value) => {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length <= 11) {
+      return cleaned
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+        .replace(/(-\d{2})\d+?$/, '$1');
+    }
+    return value;
+  };
+
+  // Função para formatar Telefone
+  const formatTelefone = (value) => {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length <= 11) {
+      if (cleaned.length <= 10) {
+        return cleaned
+          .replace(/(\d{2})(\d)/, '($1) $2')
+          .replace(/(\d{4})(\d)/, '$1-$2')
+          .replace(/(-\d{4})\d+?$/, '$1');
+      } else {
+        return cleaned
+          .replace(/(\d{2})(\d)/, '($1) $2')
+          .replace(/(\d{5})(\d)/, '$1-$2')
+          .replace(/(-\d{4})\d+?$/, '$1');
+      }
+    }
+    return value;
+  };
+
   const handleEdit = (usuario) => {
     setEditingUser(usuario.id);
     setFormData({
       nome: usuario.nome,
       email: usuario.email,
-      telefone: usuario.telefone || '',
-      cpf: usuario.cpf,
+      telefone: formatTelefone(usuario.telefone || ''),
+      cpf: formatCPF(usuario.cpf),
       isAdmin: usuario.isAdmin
     });
   };
 
   const handleSave = async (id) => {
     try {
+      // Remove formatação antes de enviar
+      const dataToSend = {
+        ...formData,
+        telefone: formData.telefone.replace(/\D/g, ''),
+        cpf: formData.cpf.replace(/\D/g, '')
+      };
+      
       const response = await fetch(`http://localhost:3001/api/admin/usuarios/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(dataToSend)
       });
 
       if (!response.ok) throw new Error('Erro ao atualizar usuário');
@@ -102,10 +141,17 @@ export function PgAdminUsers() {
     e.preventDefault();
     
     try {
+      // Remove formatação antes de enviar
+      const userToCreate = {
+        ...newUser,
+        telefone: newUser.telefone.replace(/\D/g, ''),
+        cpf: newUser.cpf.replace(/\D/g, '')
+      };
+      
       const response = await fetch('http://localhost:3001/api/registro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newUser)
+        body: JSON.stringify(userToCreate)
       });
 
       if (!response.ok) {
@@ -243,7 +289,9 @@ export function PgAdminUsers() {
                         <input
                           type="text"
                           value={formData.telefone}
-                          onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, telefone: formatTelefone(e.target.value) })}
+                          maxLength="15"
+                          placeholder="(00) 00000-0000"
                           className={styles.input}
                         />
                       ) : (
@@ -255,7 +303,9 @@ export function PgAdminUsers() {
                         <input
                           type="text"
                           value={formData.cpf}
-                          onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, cpf: formatCPF(e.target.value) })}
+                          maxLength="14"
+                          placeholder="000.000.000-00"
                           className={styles.input}
                         />
                       ) : (
@@ -355,7 +405,9 @@ export function PgAdminUsers() {
                   <input
                     type="text"
                     value={newUser.telefone}
-                    onChange={(e) => setNewUser({ ...newUser, telefone: e.target.value })}
+                    onChange={(e) => setNewUser({ ...newUser, telefone: formatTelefone(e.target.value) })}
+                    maxLength="15"
+                    placeholder="(00) 00000-0000"
                     className={styles.modalInput}
                   />
                 </div>
@@ -365,7 +417,9 @@ export function PgAdminUsers() {
                   <input
                     type="text"
                     value={newUser.cpf}
-                    onChange={(e) => setNewUser({ ...newUser, cpf: e.target.value })}
+                    onChange={(e) => setNewUser({ ...newUser, cpf: formatCPF(e.target.value) })}
+                    maxLength="14"
+                    placeholder="000.000.000-00"
                     required
                     className={styles.modalInput}
                   />

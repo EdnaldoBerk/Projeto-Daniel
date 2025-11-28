@@ -15,12 +15,74 @@ export function PgCadastro() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Função para formatar CPF
+  const formatCPF = (value) => {
+    // Remove tudo que não é dígito
+    const cleaned = value.replace(/\D/g, '');
+    
+    // Aplica a máscara: 000.000.000-00
+    if (cleaned.length <= 11) {
+      return cleaned
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+        .replace(/(-\d{2})\d+?$/, '$1');
+    }
+    return cpf;
+  };
+
+  // Função para formatar Telefone
+  const formatTelefone = (value) => {
+    // Remove tudo que não é dígito
+    const cleaned = value.replace(/\D/g, '');
+    
+    // Aplica a máscara: (00) 00000-0000 ou (00) 0000-0000
+    if (cleaned.length <= 11) {
+      if (cleaned.length <= 10) {
+        // Formato: (00) 0000-0000
+        return cleaned
+          .replace(/(\d{2})(\d)/, '($1) $2')
+          .replace(/(\d{4})(\d)/, '$1-$2')
+          .replace(/(-\d{4})\d+?$/, '$1');
+      } else {
+        // Formato: (00) 00000-0000
+        return cleaned
+          .replace(/(\d{2})(\d)/, '($1) $2')
+          .replace(/(\d{5})(\d)/, '$1-$2')
+          .replace(/(-\d{4})\d+?$/, '$1');
+      }
+    }
+    return telefone;
+  };
+
+  // Handler para CPF
+  const handleCPFChange = (e) => {
+    const formatted = formatCPF(e.target.value);
+    setCpf(formatted);
+  };
+
+  // Handler para Telefone
+  const handleTelefoneChange = (e) => {
+    const formatted = formatTelefone(e.target.value);
+    setTelefone(formatted);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      await registerUser({ nome, email, telefone, cpf, senha });
+      // Remove formatação antes de enviar
+      const cpfLimpo = cpf.replace(/\D/g, '');
+      const telefoneLimpo = telefone.replace(/\D/g, '');
+      
+      await registerUser({ 
+        nome, 
+        email, 
+        telefone: telefoneLimpo, 
+        cpf: cpfLimpo, 
+        senha 
+      });
       navigate('/login');
     } catch (err) {
       setError(err.message || 'Erro ao cadastrar.');
@@ -71,7 +133,8 @@ export function PgCadastro() {
                 className={styles.input}
                 placeholder="(00) 00000-0000"
                 value={telefone}
-                onChange={(e) => setTelefone(e.target.value)}
+                onChange={handleTelefoneChange}
+                maxLength="15"
                 required
               />
             </div>
@@ -84,7 +147,8 @@ export function PgCadastro() {
                 className={styles.input}
                 placeholder="000.000.000-00"
                 value={cpf}
-                onChange={(e) => setCpf(e.target.value)}
+                onChange={handleCPFChange}
+                maxLength="14"
                 required
               />
             </div>
