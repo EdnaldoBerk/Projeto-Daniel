@@ -138,6 +138,9 @@ Projeto-Daniel/
     │   │   ├── cardbook/
     │   │   │   ├── CardBook.jsx
     │   │   │   └── CardBook.module.css
+    │   │   ├── cardreview/
+    │   │   │   ├── Cardreview.jsx
+    │   │   │   └── Cardreview.module.css
     │   │   ├── slider/
     │   │   │   ├── Slider.jsx
     │   │   │   └── Slider.module.css
@@ -209,8 +212,9 @@ O projeto utiliza um tema escuro (Dark Mode) com a seguinte paleta:
 - ✅ Sistema de dropdown para navegação
 - ✅ Layout responsivo (mobile, tablet, desktop)
 - ✅ Tema dark mode moderno
-- ✅ Componentes reutilizáveis (CardBook, Slider, Profile)
+- ✅ Componentes reutilizáveis (CardBook, CardReview, Slider, Profile)
 - ✅ Modais para upload e edição
+- ✅ Cards de resenhas na página inicial
 
 ### Recursos Técnicos
 - ✅ Upload de arquivos com Multer (livros e fotos de perfil)
@@ -256,6 +260,7 @@ npm run preview      # Preview do build de produção
 - Conteúdo (título, resumo, texto completo)
 - Avaliação (0.0 a 5.0)
 - Trechos marcantes (array)
+- Curtidas (contador de likes)
 - Relacionamentos: livro, usuario
 
 **Favorito**

@@ -20,6 +20,7 @@ model Usuario {
   createdAt  DateTime   @default(now())
   resenhas   Resenha[]
   favoritos  Favorito[]
+  curtidas   CurtidaResenha[]
 }
 
 model Livro {
@@ -52,12 +53,14 @@ model Resenha {
   textoCompleto   String   @db.Text
   avaliacao       Float    // 0.0 a 5.0
   trechosMarcantes String[] // Array de citações
+  curtidas        Int      @default(0)
   ativo           Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
   livro           Livro    @relation(fields: [livroId], references: [id], onDelete: Cascade)
   usuario         Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  curtidasResenha CurtidaResenha[]
   
   @@index([livroId])
   @@index([usuarioId])
@@ -75,4 +78,18 @@ model Favorito {
   @@unique([usuarioId, livroId])
   @@index([usuarioId])
   @@index([livroId])
+}
+
+model CurtidaResenha {
+  id         Int      @id @default(autoincrement())
+  usuarioId  Int
+  resenhaId  Int
+  createdAt  DateTime @default(now())
+  
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  resenha    Resenha  @relation(fields: [resenhaId], references: [id], onDelete: Cascade)
+  
+  @@unique([usuarioId, resenhaId])
+  @@index([usuarioId])
+  @@index([resenhaId])
 }

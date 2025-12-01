@@ -1,4 +1,4 @@
-const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, removeFavorito, getFavoritosByUsuarioId, checkFavorito } = require('../services/service');
+const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha } = require('../services/service');
 
 async function registrarUsuario(req, res) {
   // TODO: validação e hashing de senha
@@ -459,6 +459,65 @@ async function uploadFotoPerfil(req, res) {
   }
 }
 
+// Controladores de Curtidas em Resenhas
+async function curtirResenha(req, res) {
+  const { resenhaId } = req.params;
+  const { usuarioId } = req.body;
+  
+  try {
+    if (!usuarioId) {
+      return res.status(400).json({ error: 'usuarioId é obrigatório' });
+    }
+    
+    // Verificar se já curtiu
+    const jaCurtiu = await checkCurtidaResenha(usuarioId, resenhaId);
+    if (jaCurtiu) {
+      return res.status(409).json({ error: 'Você já curtiu esta resenha' });
+    }
+    
+    await addCurtidaResenha(usuarioId, resenhaId);
+    
+    // Retornar resenha atualizada
+    const resenha = await getResenhaById(resenhaId);
+    return res.json({ curtidas: resenha.curtidas, curtiu: true });
+  } catch (e) {
+    console.error('Erro ao curtir resenha:', e);
+    return res.status(500).json({ error: 'Erro ao curtir resenha' });
+  }
+}
+
+async function descurtirResenha(req, res) {
+  const { resenhaId } = req.params;
+  const { usuarioId } = req.body;
+  
+  try {
+    if (!usuarioId) {
+      return res.status(400).json({ error: 'usuarioId é obrigatório' });
+    }
+    
+    await removeCurtidaResenha(usuarioId, resenhaId);
+    
+    // Retornar resenha atualizada
+    const resenha = await getResenhaById(resenhaId);
+    return res.json({ curtidas: resenha.curtidas, curtiu: false });
+  } catch (e) {
+    console.error('Erro ao descurtir resenha:', e);
+    return res.status(500).json({ error: 'Erro ao descurtir resenha' });
+  }
+}
+
+async function verificarCurtidaResenha(req, res) {
+  const { resenhaId, usuarioId } = req.params;
+  
+  try {
+    const curtiu = await checkCurtidaResenha(usuarioId, resenhaId);
+    return res.json({ curtiu });
+  } catch (e) {
+    console.error('Erro ao verificar curtida:', e);
+    return res.status(500).json({ error: 'Erro ao verificar curtida' });
+  }
+}
+
 module.exports = { 
   registrarUsuario, 
   logarUsuario, 
@@ -483,5 +542,8 @@ module.exports = {
   removerFavorito,
   listarFavoritosUsuario,
   verificarFavorito,
-  uploadFotoPerfil
+  uploadFotoPerfil,
+  curtirResenha,
+  descurtirResenha,
+  verificarCurtidaResenha
 };

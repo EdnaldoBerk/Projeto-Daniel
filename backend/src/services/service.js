@@ -187,6 +187,51 @@ async function checkFavorito(usuarioId, livroId) {
   return !!favorito;
 }
 
+// Funções de Curtidas em Resenhas
+async function addCurtidaResenha(usuarioId, resenhaId) {
+  // Adicionar curtida
+  const curtida = await prisma.curtidaResenha.create({
+    data: {
+      usuarioId: parseInt(usuarioId),
+      resenhaId: parseInt(resenhaId)
+    }
+  });
+  
+  // Incrementar contador de curtidas na resenha
+  await prisma.resenha.update({
+    where: { id: parseInt(resenhaId) },
+    data: { curtidas: { increment: 1 } }
+  });
+  
+  return curtida;
+}
+
+async function removeCurtidaResenha(usuarioId, resenhaId) {
+  // Remover curtida
+  await prisma.curtidaResenha.deleteMany({
+    where: {
+      usuarioId: parseInt(usuarioId),
+      resenhaId: parseInt(resenhaId)
+    }
+  });
+  
+  // Decrementar contador de curtidas na resenha
+  await prisma.resenha.update({
+    where: { id: parseInt(resenhaId) },
+    data: { curtidas: { decrement: 1 } }
+  });
+}
+
+async function checkCurtidaResenha(usuarioId, resenhaId) {
+  const curtida = await prisma.curtidaResenha.findFirst({
+    where: {
+      usuarioId: parseInt(usuarioId),
+      resenhaId: parseInt(resenhaId)
+    }
+  });
+  return !!curtida;
+}
+
 module.exports = { 
   createUser, 
   findUserByEmail, 
@@ -208,5 +253,8 @@ module.exports = {
   addFavorito,
   removeFavorito,
   getFavoritosByUsuarioId,
-  checkFavorito
+  checkFavorito,
+  addCurtidaResenha,
+  removeCurtidaResenha,
+  checkCurtidaResenha
 };

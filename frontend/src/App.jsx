@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { Header } from './components/header/Header'
 import { Footer } from './components/footer/Footer'
 import { CardBook } from './components/cardbook/CardBook'
 import Slider from './components/slider/Slider'
+import Cardreview from './components/cardreview/Cardreview'
 import { PgLogin } from './pages/PgLogin'
 import { PgCadastro } from './pages/PgCadastro'
 import PgResenha from './pages/PgResenha'
@@ -16,11 +17,14 @@ import { PgAdminResenhas } from './pages/admin/PgAdminResenhas'
 import api from './services/api'
 
 function Home() {
+  const navigate = useNavigate();
   const [livros, setLivros] = useState([]);
+  const [resenhas, setResenhas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     carregarLivros();
+    carregarResenhas();
   }, []);
 
   async function carregarLivros() {
@@ -33,6 +37,20 @@ function Home() {
       console.error('Erro ao carregar livros:', error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function carregarResenhas() {
+    try {
+      const response = await api.get('/resenhas');
+      // Filtrar apenas resenhas ativas e pegar as mais recentes
+      const resenhasAtivas = (response.data || [])
+        .filter(resenha => resenha.ativo !== false)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 3); // Pegar apenas as 3 mais recentes
+      setResenhas(resenhasAtivas);
+    } catch (error) {
+      console.error('Erro ao carregar resenhas:', error);
     }
   }
 
@@ -72,6 +90,51 @@ function Home() {
         infinite={true}
         title="Livros em Destaque"
       />
+
+      {resenhas.length > 0 && (
+        <div style={{ 
+          marginTop: '4rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '2rem'
+        }}>
+          <h2 style={{ 
+            color: '#fff', 
+            fontSize: '2rem', 
+            fontWeight: '600',
+            textAlign: 'center' 
+          }}>
+            Resenhas Recentes
+          </h2>
+          
+          <div style={{
+            display: 'flex',
+            gap: '2rem',
+            flexWrap: 'wrap',
+            justifyContent: 'center'
+          }}>
+            {resenhas.map((resenha) => (
+              <Cardreview
+                key={resenha.id}
+                bookCover={resenha.livro?.fotoCapa 
+                  ? `http://localhost:3001${resenha.livro.fotoCapa}` 
+                  : '/placeholder.png'}
+                userPhoto={resenha.usuario?.fotoPerfil 
+                  ? `http://localhost:3001${resenha.usuario.fotoPerfil}` 
+                  : null}
+                userName={resenha.usuario?.nome || 'Usuário'}
+                bookTitle={resenha.livro?.titulo || 'Livro'}
+                reviewText={resenha.textoResumo || ''}
+                reviewDate={new Date(resenha.createdAt).toLocaleDateString('pt-BR')}
+                rating={resenha.avaliacao || 0}
+                likes={resenha.curtidas || 0}
+                onClick={() => navigate(`/resenha?livroId=${resenha.livroId}`)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

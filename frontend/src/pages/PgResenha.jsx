@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import styles from "../styles/PgResenha.module.css";
 import api from "../services/api";
 
@@ -28,7 +28,12 @@ function StarRating({ value = 4.2 }) {
 export default function PgResenha() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { livroId, livro } = location?.state || {};
+  const [searchParams] = useSearchParams();
+  
+  // Pegar livroId da query string ou do state
+  const livroIdFromQuery = searchParams.get('livroId');
+  const { livroId: livroIdFromState, livro } = location?.state || {};
+  const livroId = livroIdFromQuery || livroIdFromState;
   
   const [resenha, setResenha] = useState(null);
   const [livroCompleto, setLivroCompleto] = useState(livro || null);
@@ -36,6 +41,8 @@ export default function PgResenha() {
   const [reaction, setReaction] = useState(null);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
+  const [curtidas, setCurtidas] = useState(0);
+  const [curtiu, setCurtiu] = useState(false);
 
   useEffect(() => {
     if (!livroId) {
@@ -70,6 +77,18 @@ export default function PgResenha() {
       if (resenhas.length > 0) {
         console.log('✅ Usando resenha:', resenhas[0]);
         setResenha(resenhas[0]);
+        setCurtidas(resenhas[0].curtidas || 0);
+        
+        // Verificar se o usuário já curtiu
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.id) {
+          try {
+            const curtidaResponse = await api.get(`/resenhas/${resenhas[0].id}/curtir/${user.id}`);
+            setCurtiu(curtidaResponse.data.curtiu);
+          } catch (err) {
+            console.error('Erro ao verificar curtida:', err);
+          }
+        }
       } else {
         console.log('❌ Nenhuma resenha encontrada para este livro');
         setResenha(null);
@@ -79,6 +98,41 @@ export default function PgResenha() {
       alert('Erro ao carregar resenha do livro');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleCurtir() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (!user.id) {
+      alert('Você precisa estar logado para curtir');
+      navigate('/login');
+      return;
+    }
+
+    if (!resenha?.id) return;
+
+    try {
+      if (!curtiu) {
+        const response = await api.post(`/resenhas/${resenha.id}/curtir`, { 
+          usuarioId: user.id 
+        });
+        setCurtidas(response.data.curtidas);
+        setCurtiu(true);
+      } else {
+        const response = await api.delete(`/resenhas/${resenha.id}/curtir`, {
+          data: { usuarioId: user.id }
+        });
+        setCurtidas(response.data.curtidas);
+        setCurtiu(false);
+      }
+    } catch (error) {
+      console.error('Erro ao curtir/descurtir:', error);
+      if (error.response?.status === 409) {
+        alert('Você já curtiu esta resenha');
+      } else {
+        alert('Erro ao processar curtida');
+      }
     }
   }
 
@@ -156,6 +210,17 @@ export default function PgResenha() {
         style={{ backgroundImage: `url(${bannerImage})` }}
       >
         <div className={styles.bannerFade} />
+        <button 
+          className={`${styles.likeButton} ${curtiu ? styles.liked : ''}`}
+          onClick={handleCurtir}
+          aria-label={curtiu ? 'Remover curtida' : 'Curtir resenha'}
+        >
+          <span className={styles.likeIcon}>❤️</span>
+          <span className={styles.likeText}>
+            {curtiu ? 'Curtiu' : 'Curtir'}
+          </span>
+          <span className={styles.likeCount}>{curtidas}</span>
+        </button>
       </div>
 
       {/* Card container overlapping banner */}

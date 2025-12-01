@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha, adicionarFavorito, removerFavorito, listarFavoritosUsuario, verificarFavorito, uploadFotoPerfil } = require('../controllers/controller');
+const { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha, adicionarFavorito, removerFavorito, listarFavoritosUsuario, verificarFavorito, uploadFotoPerfil, curtirResenha, descurtirResenha, verificarCurtidaResenha } = require('../controllers/controller');
 const { uploadBooks, uploadPerfil } = require('../config/multer');
 
 const router = Router();
@@ -43,5 +43,10 @@ router.get('/favoritos/:usuarioId/:livroId', verificarFavorito);
 
 // Rota de upload de foto de perfil
 router.post('/upload/foto-perfil', uploadPerfil.single('fotoPerfil'), uploadFotoPerfil);
+
+// Rotas de curtidas em resenhas
+router.post('/resenhas/:resenhaId/curtir', curtirResenha);
+router.delete('/resenhas/:resenhaId/curtir', descurtirResenha);
+router.get('/resenhas/:resenhaId/curtir/:usuarioId', verificarCurtidaResenha);
 
 module.exports = router;
