@@ -377,19 +377,6 @@ export default function PgPerfil() {
           <hr className={styles.hr} />
 
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Sobre você</h2>
-            <div className={styles.sectionBody}>
-              <button className={styles.smallAction}>➕ Adicionar minibio</button>
-              <ul className={styles.bullets}>
-                <li>🗣️ Gosto de conversar</li>
-                <li>✈️ Amo viajar</li>
-              </ul>
-            </div>
-          </section>
-
-          <hr className={styles.hr} />
-
-          <section className={styles.section}>
             <h2 className={styles.libraryTitle}>BIBLIOTECA</h2>
 
             <div className={styles.subsection}>
@@ -456,6 +443,19 @@ export default function PgPerfil() {
                   ))}
                 </div>
               )}
+            </div>
+          </section>
+
+          <hr className={styles.hr} />
+
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Sobre você</h2>
+            <div className={styles.sectionBody}>
+              <button className={styles.smallAction}>➕ Adicionar minibio</button>
+              <ul className={styles.bullets}>
+                <li>🗣️ Gosto de conversar</li>
+                <li>✈️ Amo viajar</li>
+              </ul>
             </div>
           </section>
         </>
