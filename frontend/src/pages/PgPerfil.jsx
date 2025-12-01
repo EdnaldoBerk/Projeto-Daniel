@@ -359,8 +359,7 @@ export default function PgPerfil() {
               <h1 className={styles.name}>{user.nome || 'Usuário'}</h1>
 
               <div className={styles.stats}>
-                <div className={styles.statItem}><span className={styles.statNumber}>56</span> Seguidores</div>
-                <div className={styles.statItem}><span className={styles.statNumber}>130</span> Seguindo</div>
+                <div className={styles.statItem}><span className={styles.statNumber}>{favoritos.length}</span> Livros Favoritados</div>
               </div>
 
               <div className={styles.actionLinks}>
