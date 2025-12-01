@@ -129,7 +129,7 @@ async function buscarUsuarioPorId(req, res) {
 
 async function atualizarUsuario(req, res) {
   const { id } = req.params;
-  const { nome, email, telefone, cpf, isAdmin } = req.body;
+  const { nome, email, telefone, cpf, isAdmin, senha, bio } = req.body;
   
   try {
     const dataToUpdate = {};
@@ -138,9 +138,11 @@ async function atualizarUsuario(req, res) {
     if (telefone !== undefined) dataToUpdate.telefone = telefone;
     if (cpf !== undefined) dataToUpdate.cpf = cpf;
     if (isAdmin !== undefined) dataToUpdate.isAdmin = isAdmin;
+    if (senha !== undefined) dataToUpdate.senha = senha;
+    if (bio !== undefined) dataToUpdate.bio = bio;
 
     const usuario = await updateUser(id, dataToUpdate);
-    const { senha, ...dadosSemSenha } = usuario;
+    const { senha: senhaOmitida, ...dadosSemSenha } = usuario;
     return res.json(dadosSemSenha);
   } catch (e) {
     console.error('Erro ao atualizar usuário:', e);

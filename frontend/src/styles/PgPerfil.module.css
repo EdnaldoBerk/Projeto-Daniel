@@ -647,6 +647,50 @@
   background: rgba(20,20,24,0.8);
 }
 
+.modalTextarea {
+  background: rgba(20,20,24,0.6);
+  border: 1px solid rgba(100,108,255,0.2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: #ececec;
+  font-size: 15px;
+  line-height: 1.6;
+  transition: all 0.3s ease;
+  outline: none;
+  width: 100%;
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+.modalTextarea:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100,108,255,0.1);
+  background: rgba(20,20,24,0.8);
+}
+
+.modalTextarea::placeholder {
+  color: rgba(176,176,176,0.5);
+}
+
+.bioText {
+  color: #ececec;
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0;
+  padding: 4px 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.emptyBio {
+  color: #888;
+  font-size: 14px;
+  font-style: italic;
+  margin: 0;
+  padding: 8px 0;
+}
+
 .modalActions {
   display: flex;
   gap: 12px;

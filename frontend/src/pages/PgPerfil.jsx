@@ -182,6 +182,9 @@ export default function PgPerfil() {
       window.dispatchEvent(new Event('userChange'));
       setUser(updatedUser);
       
+      // Recarregar dados completos do usuário para garantir que a bio seja exibida
+      await loadUserData(user.id);
+      
       setMessage('Dados atualizados com sucesso!');
       setShowEditModal(false);
       setTimeout(() => setMessage(''), 3000);
