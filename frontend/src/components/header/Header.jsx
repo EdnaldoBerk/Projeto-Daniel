@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import styles from './Header.module.css'
 import logo from '../../assets/Logo.png'
 import { Profile } from '../profile/Profile.user'
 
 export function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [query, setQuery] = useState('')
+  const navigate = useNavigate()
 
   // Filter dropdown state
   const filters = [
@@ -81,6 +83,15 @@ export function Header() {
     setExploreDropdownOpen((v) => !v)
   }
 
+  function doSearch() {
+    const q = query.trim()
+    if (!q) return
+    const tipo = selectedFilter.value
+    navigate(`/busca?q=${encodeURIComponent(q)}&tipo=${encodeURIComponent(tipo)}`)
+    setDropdownOpen(false)
+    setExploreDropdownOpen(false)
+  }
+
   return (
     <header className={styles.header}>
       <Link to="/" className={styles.logoContainer}>
@@ -96,6 +107,9 @@ export function Header() {
               placeholder="Busque por título, autor, editora, ISBN..."
               className={styles.searchInput}
               aria-label="Buscar livros"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') doSearch() }}
             />
 
             <button
@@ -112,7 +126,7 @@ export function Header() {
             </button>
           </div>
 
-          <button className={styles.searchButton} aria-label="Pesquisar">
+          <button className={styles.searchButton} aria-label="Pesquisar" onClick={doSearch}>
             Pesquisar
           </button>
 

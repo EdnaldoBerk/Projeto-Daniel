@@ -8,6 +8,7 @@ import Cardreview from './components/cardreview/Cardreview'
 import { PgLogin } from './pages/PgLogin'
 import { PgCadastro } from './pages/PgCadastro'
 import PgResenha from './pages/PgResenha'
+import PgBusca from './pages/PgBusca'
 import PgPerfil from './pages/PgPerfil'
 import { PgAdminLogin } from './pages/admin/PgAdminLogin'
 import { PgAdminDashboard } from './pages/admin/PgAdminDashboard'
@@ -158,6 +159,7 @@ function AppLayout() {
         <Route path="/login" element={<PgLogin />} />
         <Route path="/cadastro" element={<PgCadastro />} />
         <Route path="/resenha" element={<PgResenha />} />
+        <Route path="/busca" element={<PgBusca />} />
         <Route path="/perfil" element={<PgPerfil />} />
         <Route path="/admin/login" element={<PgAdminLogin />} />
         <Route path="/admin/dashboard" element={<PgAdminDashboard />} />

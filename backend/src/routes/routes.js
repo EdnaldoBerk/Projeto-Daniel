@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha, adicionarFavorito, removerFavorito, listarFavoritosUsuario, verificarFavorito, uploadFotoPerfil, curtirResenha, descurtirResenha, verificarCurtidaResenha } = require('../controllers/controller');
+const { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha, adicionarFavorito, removerFavorito, listarFavoritosUsuario, verificarFavorito, uploadFotoPerfil, curtirResenha, descurtirResenha, verificarCurtidaResenha, buscar } = require('../controllers/controller');
 const { uploadBooks, uploadPerfil } = require('../config/multer');
 
 const router = Router();
@@ -48,5 +48,8 @@ router.post('/upload/foto-perfil', uploadPerfil.single('fotoPerfil'), uploadFoto
 router.post('/resenhas/:resenhaId/curtir', curtirResenha);
 router.delete('/resenhas/:resenhaId/curtir', descurtirResenha);
 router.get('/resenhas/:resenhaId/curtir/:usuarioId', verificarCurtidaResenha);
+
+// Busca
+router.get('/search', buscar);
 
 module.exports = router;
