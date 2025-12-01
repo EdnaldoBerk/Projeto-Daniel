@@ -100,12 +100,12 @@ export function Header() {
             Pesquisar
           </button>
 
-          <button className={styles.exploreButton} type="button" aria-label="Explorar">
+          {/* <button className={styles.exploreButton} type="button" aria-label="Explorar">
             <span>Explorar</span>
             <svg className={styles.chev} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
               <path d="M6 8L10 12L14 8" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </button>
+          </button> */}
 
           {dropdownOpen && (
             <div className={styles.filterDropdown} ref={dropdownRef} role="menu" aria-label="Selecionar filtro">
