@@ -31,7 +31,12 @@ async function logarUsuario(req, res) {
     // Comparar senha futuramente
     console.log('Comparando senhas:', { recebida: senha, armazenada: usuario.senha, iguais: usuario.senha === senha });
     if (usuario.senha !== senha) return res.status(401).json({ error: 'Credenciais inválidas' });
-    return res.json({ id: usuario.id, nome: usuario.nome, email: usuario.email });
+    return res.json({ 
+      id: usuario.id, 
+      nome: usuario.nome, 
+      email: usuario.email,
+      fotoPerfil: usuario.fotoPerfil 
+    });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: 'Erro ao realizar login' });
