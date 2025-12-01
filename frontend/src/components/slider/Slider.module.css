@@ -62,9 +62,11 @@
   color: #fff;
   font-size: 20px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* Centralização robusta do conteúdo da seta */
+  display: grid;
+  place-items: center;
+  padding: 0;
+  line-height: 1;
   box-shadow: 0 8px 18px rgba(100, 108, 255, 0.22);
   transition: transform 0.12s, opacity 0.12s;
 }
@@ -76,6 +78,13 @@
 
 .prev { left: 12px; }
 .next { right: 12px; }
+
+/* Dimensões dos ícones (SVG) das setas */
+.arrow svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
 
 /* Pontos (dots) */
 .dots {
@@ -104,10 +113,12 @@
 /* Ajustes responsivos para diferentes layouts */
 @media (max-width: 1024px) {
   .slider { padding: 18px; border-radius: 10px; }
-  .arrow { width: 36px; height: 36px; font-size: 18px; }
+  .arrow { width: 36px; height: 36px; }
+  .arrow svg { width: 18px; height: 18px; }
 }
 @media (max-width: 480px) {
   .slider { padding: 12px; }
-  .arrow { width: 32px; height: 32px; font-size: 16px; }
+  .arrow { width: 32px; height: 32px; }
+  .arrow svg { width: 16px; height: 16px; }
   .dot { width: 10px; height: 10px; }
 }
