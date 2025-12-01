@@ -71,7 +71,12 @@ function Home() {
   }
 
   return (
-    <main style={{ padding: '2rem' }}>
+    <main style={{ 
+      padding: '2rem 1rem',
+      maxWidth: '1400px',
+      margin: '0 auto',
+      width: '100%'
+    }}>
       <Slider 
         items={livros}
         renderItem={(livro) => (
@@ -84,10 +89,11 @@ function Home() {
           />
         )}
         slidesToShow={5}
-        gap={12}
+        gap={20}
         autoplay={true}
         autoplayInterval={5000}
         infinite={true}
+        maxItemWidth={280}
         title="Livros em Destaque"
       />
 
