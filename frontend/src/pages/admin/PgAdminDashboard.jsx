@@ -191,9 +191,9 @@ export function PgAdminDashboard() {
                 <span>👤</span>
                 Criar Usuário
               </button>
-              <button className={styles.actionButton}>
+              <button className={styles.actionButton} onClick={() => navigate('/admin/resenhas')}>
                 <span>📝</span>
-                Ver Relatórios
+                Ver Resenhas
               </button>
               <button className={styles.actionButton}>
                 <span>🔧</span>
