@@ -16,6 +16,7 @@ model Usuario {
   senha      String
   isAdmin    Boolean    @default(false)
   fotoPerfil String?
+  bio        String?    @db.Text
   createdAt  DateTime   @default(now())
   resenhas   Resenha[]
   favoritos  Favorito[]

@@ -21,7 +21,8 @@ export default function PgPerfil() {
     nome: '',
     email: '',
     telefone: '',
-    cpf: ''
+    cpf: '',
+    bio: ''
   });
 
   // Dados de alteração de senha
@@ -54,7 +55,8 @@ export default function PgPerfil() {
           nome: data.nome || '',
           email: data.email || '',
           telefone: formatTelefone(data.telefone || ''),
-          cpf: formatCPF(data.cpf || '')
+          cpf: formatCPF(data.cpf || ''),
+          bio: data.bio || ''
         });
       }
     } catch (err) {
@@ -161,6 +163,7 @@ export default function PgPerfil() {
       const dataToSend = {
         nome: accountData.nome,
         telefone: accountData.telefone.replace(/\D/g, ''),
+        bio: accountData.bio
       };
 
       const response = await fetch(`http://localhost:3001/api/admin/usuarios/${user.id}`, {
@@ -450,11 +453,11 @@ export default function PgPerfil() {
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Sobre você</h2>
             <div className={styles.sectionBody}>
-              <button className={styles.smallAction}>➕ Adicionar minibio</button>
-              <ul className={styles.bullets}>
-                <li>🗣️ Gosto de conversar</li>
-                <li>✈️ Amo viajar</li>
-              </ul>
+              {accountData.bio ? (
+                <p className={styles.bioText}>{accountData.bio}</p>
+              ) : (
+                <p className={styles.emptyBio}>Adicione uma bio em "Modificar dados pessoais" para contar um pouco sobre você.</p>
+              )}
             </div>
           </section>
         </>
@@ -637,6 +640,18 @@ export default function PgPerfil() {
                   maxLength="15"
                   placeholder="(00) 00000-0000"
                   className={styles.modalInput}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Sobre mim</label>
+                <textarea
+                  value={accountData.bio}
+                  onChange={(e) => handleAccountChange('bio', e.target.value)}
+                  className={styles.modalTextarea}
+                  placeholder="Conte um pouco sobre você..."
+                  rows="4"
+                  maxLength="500"
                 />
               </div>
 
