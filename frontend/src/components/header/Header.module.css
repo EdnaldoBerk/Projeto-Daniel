@@ -132,6 +132,57 @@
 }
 .exploreButton:hover { background-color: rgba(100,108,255,0.06); }
 
+/* wrapper do explore para posicionar o dropdown */
+.exploreWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* dropdown do explore */
+.exploreDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  min-width: 240px;
+  background-color: #2a2a2a;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  padding: 8px 0;
+}
+
+/* items do explore dropdown */
+.exploreItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 0.95rem;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.exploreItem:hover { 
+  background: rgba(100,108,255,0.1); 
+}
+.exploreItem svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* divider no explore dropdown */
+.exploreDivider {
+  height: 1px;
+  background: rgba(100,108,255,0.2);
+  margin: 8px 12px;
+}
+
 /* dropdown do filtro: posicione relativo à searchBar */
 .searchBar { position: relative; display: flex; flex: 1 1 auto; min-width: 0; }
 
