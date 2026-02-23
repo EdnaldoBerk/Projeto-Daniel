@@ -101,6 +101,7 @@
   width: 100%;
   max-width: var(--container-max); /* limita a largura para não ultrapassar a linha azul */
   margin: 0 auto;                  /* centraliza dentro da viewport */
+  margin-top: 1rem;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
