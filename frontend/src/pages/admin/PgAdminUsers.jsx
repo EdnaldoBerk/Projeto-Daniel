@@ -207,9 +207,9 @@ export function PgAdminUsers() {
             <span className={styles.navIcon}>⭐</span>
             Resenhas
           </button>
-          <button className={styles.navItem}>
-            <span className={styles.navIcon}>⚙️</span>
-            Configurações
+          <button className={styles.navItem} onClick={() => navigate('/admin/comentarios')}>
+            <span className={styles.navIcon}>💬</span>
+            Comentários
           </button>
         </nav>
 

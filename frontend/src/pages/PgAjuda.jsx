@@ -24,18 +24,6 @@ export default function PgAjuda() {
       resposta: 'Sim! Acesse seu perfil clicando no ícone de usuário no menu superior. Na aba "Editar Perfil", você pode alterar informações como nome, bio e foto de perfil. Para alterações de e-mail, entre em contato com nosso suporte.'
     },
     {
-      id: 4,
-      categoria: 'Resenhas',
-      pergunta: 'Como fazer uma resenha de um livro?',
-      resposta: 'Acesse a página do livro desejado e procure pelo botão "Escrever Resenha". Preencha o formulário com seu título, avaliação (de 1 a 5 estrelas), texto resumido e texto completo. Você também pode adicionar trechos marcantes do livro.'
-    },
-    {
-      id: 5,
-      categoria: 'Resenhas',
-      pergunta: 'Posso editar ou deletar minha resenha?',
-      resposta: 'Sim! Acesse seu perfil e vá até a seção "Minhas Resenhas". Clique em uma resenha para visualizar as opções de editar ou deletar. Apenas você pode editar suas próprias resenhas.'
-    },
-    {
       id: 6,
       categoria: 'Resenhas',
       pergunta: 'Como comentar em uma resenha?',

@@ -1,0 +1,799 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+.container h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+/* Mensagens de erro e sucesso */
+.error {
+  background-color: #fee;
+  border: 1px solid #f99;
+  color: #c00;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+.success {
+  background-color: #efe;
+  border: 1px solid #9f9;
+  color: #060;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 1rem;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 2rem;
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #666;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  color: #333;
+}
+
+.tab.active {
+  color: #e74c3c;
+  border-bottom-color: #e74c3c;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #999;
+  font-size: 1.1rem;
+}
+
+/* Section */
+.section {
+  margin-top: 1rem;
+}
+
+/* Grid de Comentários */
+.comentariosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.comentarioCard {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.comentarioCard:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.userInfo strong {
+  color: #333;
+  font-size: 1rem;
+}
+
+.userInfo small {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.denunciaBadge {
+  background: #ffe0e0;
+  color: #c00;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.texto {
+  color: #555;
+  line-height: 1.5;
+  margin: 0.5rem 0;
+  word-wrap: break-word;
+}
+
+.data {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+/* Edit Mode */
+.editMode {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.editTextarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 0.3rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: none;
+}
+
+.editTextarea:focus {
+  outline: none;
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1);
+}
+
+.editButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.save, .cancel {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.save {
+  background: #27ae60;
+  color: #fff;
+}
+
+.save:hover {
+  background: #229954;
+}
+
+.cancel {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.cancel:hover {
+  background: #c0392b;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.buttonEdit, .buttonDelete, .buttonDetails, .buttonApprove, .buttonReject, .buttonRevert {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 0.3rem;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.buttonEdit:hover {
+  background: #e3f2fd;
+  border-color: #2196f3;
+  color: #1976d2;
+}
+
+.buttonDelete:hover {
+  background: #ffebee;
+  border-color: #f44336;
+  color: #c62828;
+}
+
+.buttonDetails:hover {
+  background: #fff3e0;
+  border-color: #ff9800;
+  color: #e65100;
+}
+
+.buttonEdit:disabled, .buttonDelete:disabled, .buttonDetails:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.buttonApprove:hover {
+  background: #e8f5e9;
+  border-color: #4caf50;
+  color: #2e7d32;
+}
+
+.buttonReject:hover {
+  background: #ffebee;
+  border-color: #f44336;
+  color: #c62828;
+}
+
+.buttonRevert:hover {
+  background: #f3e5f5;
+  border-color: #9c27b0;
+  color: #6a1b9a;
+}
+
+/* Filter Buttons */
+.filterButtons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 0.5rem;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.filterBtn:hover {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.filterBtn.active {
+  background: #e74c3c;
+  color: #fff;
+  border-color: #e74c3c;
+}
+
+/* Grid de Denúncias */
+.denunciasGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.denunciaCard {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.denunciaCard:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.denunciaHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.statusBadge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statusBadge.status-pendente {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.statusBadge.status-analisado {
+  background: #d4edda;
+  color: #155724;
+}
+
+.statusBadge.status-rejeitado {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.motivo {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.denunciaContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.descricao {
+  color: #555;
+  line-height: 1.5;
+  word-wrap: break-word;
+  margin: 0;
+}
+
+.comentarioOriginal {
+  background: #f9f9f9;
+  border-left: 3px solid #e74c3c;
+  padding: 0.75rem;
+  border-radius: 0.3rem;
+}
+
+.comentarioOriginal strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.comentarioOriginal p {
+  margin: 0 0 0.5rem 0;
+  color: #666;
+  font-style: italic;
+}
+
+.comentarioOriginal small {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.denunciaActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.denunciaActions button {
+  flex: 1;
+  min-width: 100px;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.buttonApprove {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.buttonApprove:hover {
+  background: #c3e6cb;
+}
+
+.buttonReject {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.buttonReject:hover {
+  background: #f5c6cb;
+}
+
+.buttonRevert {
+  background: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #d6d8db;
+}
+
+.buttonRevert:hover {
+  background: #d6d8db;
+}
+
+/* Modal */
+.modal {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modalContent {
+  background: #fff;
+  border-radius: 0.8rem;
+  padding: 2rem;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.3s ease;
+}
+
+.closeBtn:hover {
+  color: #333;
+}
+
+.modalContent h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.comentarioInfo {
+  background: #f9f9f9;
+  border-left: 3px solid #e74c3c;
+  padding: 1rem;
+  border-radius: 0.3rem;
+  margin-bottom: 1.5rem;
+}
+
+.comentarioInfo .texto {
+  margin: 0 0 0.5rem 0;
+  font-style: italic;
+  color: #555;
+}
+
+.comentarioInfo small {
+  color: #999;
+}
+
+.denunciasDetalhes {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.denunciaDetalhes {
+  border: 1px solid #e0e0e0;
+  padding: 1rem;
+  border-radius: 0.3rem;
+  background: #fafafa;
+}
+
+.denunciaDetalhes p {
+  margin: 0.5rem 0;
+  color: #555;
+}
+
+.denunciaDetalhes strong {
+  color: #333;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .comentariosGrid, .denunciasGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    flex-direction: column;
+  }
+
+  .tab {
+    width: 100%;
+    text-align: left;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+
+  .actions, .denunciaActions {
+    flex-direction: column;
+  }
+
+  .actions button, .denunciaActions button {
+    width: 100%;
+  }
+
+  .modalContent {
+    margin: 1rem;
+    max-height: 90vh;
+  }
+
+  .filterButtons {
+    flex-direction: column;
+  }
+
+  .filterBtn {
+    width: 100%;
+  }
+}
+
+/* Layout alinhado ao padrão de Resenhas/Admin */
+.error,
+.success {
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.tab {
+  background: rgba(26, 27, 33, 0.8);
+  border: 1px solid rgba(100, 108, 255, 0.2);
+  color: #bfc4ff;
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+}
+
+.tab.active {
+  background: linear-gradient(135deg, rgba(100, 108, 255, 0.25), rgba(147, 52, 230, 0.2));
+  color: #ffffff;
+  border-color: rgba(100, 108, 255, 0.45);
+}
+
+.tab:hover {
+  color: #ffffff;
+}
+
+.loading {
+  color: #b0b0b0;
+}
+
+.filterButtons {
+  margin-bottom: 1rem;
+}
+
+.filterBtn {
+  background: rgba(26, 27, 33, 0.8);
+  border: 1px solid rgba(100, 108, 255, 0.2);
+  color: #cfd3ff;
+}
+
+.filterBtn.active {
+  background: linear-gradient(135deg, #646cff, #9334e6);
+  color: #fff;
+  border-color: transparent;
+}
+
+.emptyRow {
+  text-align: center;
+  color: #a4a4a4;
+}
+
+.commentCell {
+  max-width: 340px;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.editTextarea {
+  width: 100%;
+  min-height: 74px;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(100, 108, 255, 0.35);
+  background: rgba(10, 10, 15, 0.65);
+  color: #fff;
+  resize: none;
+}
+
+.editTextarea:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.flagBadge,
+.cleanBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.flagBadge {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff8a8a;
+  border: 1px solid rgba(255, 107, 107, 0.35);
+}
+
+.cleanBadge {
+  background: rgba(16, 185, 129, 0.18);
+  color: #7ee3b9;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.btnDetails {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.btnDetails:hover {
+  background: rgba(245, 158, 11, 0.35);
+}
+
+.statusBadge {
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 12px;
+  text-transform: capitalize;
+  border: 1px solid transparent;
+}
+
+.status-pendente {
+  color: #ffd86b;
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.status-analisado {
+  color: #80e0b8;
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.status-rejeitado {
+  color: #ff8f8f;
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.denunciaActionsInline {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.buttonApprove,
+.buttonReject,
+.buttonRevert,
+.buttonRemove {
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.buttonApprove {
+  background: rgba(16, 185, 129, 0.2);
+  color: #7ee3b9;
+}
+
+.buttonReject {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ff9a9a;
+}
+
+.buttonRevert {
+  background: rgba(245, 158, 11, 0.2);
+  color: #ffd28a;
+}
+
+.buttonRemove {
+  background: rgba(239, 68, 68, 0.25);
+  color: #ffd1d1;
+}
+
+.buttonRemove:hover {
+  background: rgba(239, 68, 68, 0.4);
+}
+
+.modalContent {
+  background: #12131a;
+  border: 1px solid rgba(100, 108, 255, 0.25);
+}
+
+.modalContent h2,
+.denunciaDetalhes strong,
+.texto {
+  color: #fff;
+}
+
+.comentarioInfo {
+  background: rgba(100, 108, 255, 0.08);
+  border-left-color: #646cff;
+}
+
+.comentarioInfo small,
+.denunciaDetalhes p {
+  color: #d1d5db;
+}
+
+.denunciaDetalhes {
+  border-color: rgba(100, 108, 255, 0.15);
+  background: rgba(20, 20, 26, 0.7);
+}

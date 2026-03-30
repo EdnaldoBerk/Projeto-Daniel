@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import styles from "../styles/PgResenha.module.css";
 import api from "../services/api";
+import ReportComentarioModal from "../components/ReportComentarioModal";
 
 /**
  * PgResenha.jsx
@@ -44,6 +45,7 @@ export default function PgResenha() {
   const [curtidas, setCurtidas] = useState(0);
   const [curtiu, setCurtiu] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [comentarioParaDenunciar, setComentarioParaDenunciar] = useState(null);
 
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -183,6 +185,20 @@ export default function PgResenha() {
       console.error('Dados do erro:', error.response?.data);
       alert(`Erro ao enviar comentário: ${error.response?.data?.error || error.message}`);
     });
+  }
+
+  function abrirModalDenuncia(comentario) {
+    const user = JSON.parse(localStorage.getItem('user') || localStorage.getItem('usuario') || '{}');
+    if (!user.id) {
+      alert('Você precisa estar logado para denunciar');
+      navigate('/login');
+      return;
+    }
+    setComentarioParaDenunciar(comentario);
+  }
+
+  function fecharModalDenuncia() {
+    setComentarioParaDenunciar(null);
   }
 
   if (loading) {
@@ -485,6 +501,22 @@ export default function PgResenha() {
                         </div>
                       </div>
                       <p className={styles.commentText}>{c.texto}</p>
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <button
+                          type="button"
+                          onClick={() => abrirModalDenuncia(c)}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#c67d2f',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            padding: 0
+                          }}
+                        >
+                          🚩 Denunciar comentário
+                        </button>
+                      </div>
                     </article>
                   );
                 })}
@@ -493,6 +525,16 @@ export default function PgResenha() {
           )}
         </section>
       </main>
+
+      {comentarioParaDenunciar && (
+        <ReportComentarioModal
+          comentarioId={comentarioParaDenunciar.id}
+          onClose={fecharModalDenuncia}
+          onSuccess={() => {
+            // Mantém o fluxo simples por enquanto: apenas feedback visual do modal
+          }}
+        />
+      )}
     </div>
   );
 }

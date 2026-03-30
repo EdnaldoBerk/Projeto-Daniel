@@ -22,6 +22,7 @@ model Usuario {
   favoritos  Favorito[]
   curtidas   CurtidaResenha[]
   comentarios Comentario[]
+  denuncias  DenunciaComentario[]
 }
 
 model Livro {
@@ -78,8 +79,26 @@ model Comentario {
   
   resenha    Resenha  @relation(fields: [resenhaId], references: [id], onDelete: Cascade)
   usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  denuncias  DenunciaComentario[]
   
   @@index([resenhaId])
+  @@index([usuarioId])
+}
+
+model DenunciaComentario {
+  id          Int      @id @default(autoincrement())
+  comentarioId Int
+  usuarioId   Int
+  motivo      String   // 'spam', 'ofensivo', 'inapropriado', 'conteudo_falso', 'outro'
+  descricao   String?  @db.Text
+  status      String   @default("pendente") // 'pendente', 'analisado', 'rejeitado'
+  createdAt   DateTime @default(now())
+  
+  comentario  Comentario @relation(fields: [comentarioId], references: [id], onDelete: Cascade)
+  usuario     Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  
+  @@unique([comentarioId, usuarioId])
+  @@index([comentarioId])
   @@index([usuarioId])
 }
 

@@ -99,9 +99,9 @@ export function PgAdminDashboard() {
             <span className={styles.navIcon}>⭐</span>
             Resenhas
           </button>
-          <button className={styles.navItem}>
-            <span className={styles.navIcon}>⚙️</span>
-            Configurações
+          <button className={styles.navItem} onClick={() => navigate('/admin/comentarios')}>
+            <span className={styles.navIcon}>💬</span>
+            Comentários
           </button>
         </nav>
 
@@ -197,7 +197,7 @@ export function PgAdminDashboard() {
               </button>
               <button className={styles.actionButton}>
                 <span>🔧</span>
-                Manutenção
+                Comentarios
               </button>
             </div>
           </div>

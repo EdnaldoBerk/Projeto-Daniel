@@ -1,4 +1,4 @@
-const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha, searchLivros, searchUsuarios, createComentario, getComentariosByResenhaId, deleteComentario, getComentarioById } = require('../services/service');
+const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha, searchLivros, searchUsuarios, createComentario, getComentariosByResenhaId, deleteComentario, getComentarioById, getAllComentariosAdmin, updateComentarioAdmin, deleteComentarioAdmin, criarDenunciaComentario, getDenunciasComentarios, atualizarStatusDenuncia, deleteDenunciaComentario } = require('../services/service');
 
 async function registrarUsuario(req, res) {
   // TODO: validação e hashing de senha
@@ -85,7 +85,6 @@ async function logarAdmin(req, res) {
   }
 }
 
-module.exports = { registrarUsuario, logarUsuario };
 async function obterUsuarioPorEmail(req, res) {
   const { email } = req.params;
   try {
@@ -625,5 +624,137 @@ module.exports = {
   criarComentario,
   listarComentariosResenha,
   deletarComentario,
-  buscar
+  buscar,
+  listarTodosComentarios,
+  atualizarComentarioAdmin,
+  deletarComentarioAdmin,
+  criarDenuncia,
+  listarDenuncias,
+  atualizarStatusDenunciaCtrl,
+  deletarDenunciaCtrl
 };
+
+// Controladores de Admin para Comentários
+async function listarTodosComentarios(req, res) {
+  try {
+    const comentarios = await getAllComentariosAdmin();
+    return res.json(comentarios);
+  } catch (e) {
+    console.error('❌ Erro ao listar comentários:', e);
+    return res.status(500).json({ error: 'Erro ao listar comentários' });
+  }
+}
+
+async function atualizarComentarioAdmin(req, res) {
+  const { comentarioId } = req.params;
+  const { texto } = req.body;
+  
+  try {
+    if (!texto || !texto.trim()) {
+      return res.status(400).json({ error: 'Texto do comentário é obrigatório' });
+    }
+    
+    const comentario = await updateComentarioAdmin(comentarioId, texto.trim());
+    return res.json(comentario);
+  } catch (e) {
+    console.error('❌ Erro ao atualizar comentário:', e);
+    if (e.code === 'P2025') {
+      return res.status(404).json({ error: 'Comentário não encontrado' });
+    }
+    return res.status(500).json({ error: 'Erro ao atualizar comentário' });
+  }
+}
+
+async function deletarComentarioAdmin(req, res) {
+  const { comentarioId } = req.params;
+  
+  try {
+    await deleteComentarioAdmin(comentarioId);
+    return res.json({ message: 'Comentário deletado com sucesso' });
+  } catch (e) {
+    console.error('❌ Erro ao deletar comentário:', e);
+    if (e.code === 'P2025') {
+      return res.status(404).json({ error: 'Comentário não encontrado' });
+    }
+    return res.status(500).json({ error: 'Erro ao deletar comentário' });
+  }
+}
+
+// Controladores de Denúncias
+async function criarDenuncia(req, res) {
+  const { usuarioId, comentarioId, motivo, descricao } = req.body;
+  
+  console.log('📨 Recebendo denúncia:', { usuarioId, comentarioId, motivo });
+  
+  try {
+    if (!usuarioId || !comentarioId || !motivo) {
+      return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+    
+    const motivosValidos = ['spam', 'ofensivo', 'inapropriado', 'conteudo_falso', 'outro'];
+    if (!motivosValidos.includes(motivo)) {
+      return res.status(400).json({ error: 'Motivo inválido' });
+    }
+    
+    const denuncia = await criarDenunciaComentario(usuarioId, comentarioId, motivo, descricao);
+    return res.status(201).json(denuncia);
+  } catch (e) {
+    console.error('❌ Erro ao criar denúncia:', e);
+    if (e.code === 'P2002') {
+      return res.status(409).json({ error: 'Você já denunciou este comentário' });
+    }
+    return res.status(500).json({ error: 'Erro ao criar denúncia' });
+  }
+}
+
+async function listarDenuncias(req, res) {
+  const { status } = req.query;
+  
+  try {
+    const denuncias = await getDenunciasComentarios(status || null);
+   return res.json(denuncias);
+  } catch (e) {
+    console.error('❌ Erro ao listar denúncias:', e);
+    return res.status(500).json({ error: 'Erro ao listar denúncias' });
+  }
+}
+
+async function atualizarStatusDenunciaCtrl(req, res) {
+  const { denunciaId } = req.params;
+  const { status } = req.body;
+  
+  try {
+    if (!status) {
+      return res.status(400).json({ error: 'Status é obrigatório' });
+    }
+    
+    const statusValidos = ['pendente', 'analisado', 'rejeitado'];
+    if (!statusValidos.includes(status)) {
+      return res.status(400).json({ error: 'Status inválido' });
+    }
+    
+    const denuncia = await atualizarStatusDenuncia(denunciaId, status);
+    return res.json(denuncia);
+  } catch (e) {
+    console.error('❌ Erro ao atualizar denúncia:', e);
+    if (e.code === 'P2025') {
+      return res.status(404).json({ error: 'Denúncia não encontrada' });
+    }
+    return res.status(500).json({ error: 'Erro ao atualizar denúncia' });
+  }
+}
+
+async function deletarDenunciaCtrl(req, res) {
+  const { denunciaId } = req.params;
+
+  try {
+    await deleteDenunciaComentario(denunciaId);
+    return res.json({ message: 'Denúncia removida com sucesso' });
+  } catch (e) {
+    console.error('❌ Erro ao remover denúncia:', e);
+    if (e.code === 'P2025') {
+      return res.status(404).json({ error: 'Denúncia não encontrada' });
+    }
+    return res.status(500).json({ error: 'Erro ao remover denúncia' });
+  }
+}

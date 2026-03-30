@@ -193,9 +193,9 @@ export function PgAdminResenhas() {
             <span className={adminStyles.navIcon}>⭐</span>
             Resenhas
           </button>
-          <button className={adminStyles.navItem}>
-            <span className={adminStyles.navIcon}>⚙️</span>
-            Configurações
+          <button className={adminStyles.navItem} onClick={() => navigate('/admin/comentarios')}>
+            <span className={adminStyles.navIcon}>💬</span>
+            Comentários
           </button>
         </nav>
 

@@ -372,6 +372,246 @@ async function getComentarioById(comentarioId) {
   });
 }
 
+// Funções de Admin para Comentários
+async function getAllComentariosAdmin() {
+  console.log('📋 Buscando todos os comentários (admin)');
+  
+  try {
+    const comentarios = await prisma.comentario.findMany({
+      include: {
+        usuario: {
+          select: {
+            id: true,
+            nome: true,
+            email: true,
+            fotoPerfil: true
+          }
+        },
+        resenha: {
+          select: {
+            id: true,
+            titulo: true,
+            livro: {
+              select: {
+                titulo: true
+              }
+            }
+          }
+        },
+        denuncias: {
+          select: {
+            id: true,
+            motivo: true,
+            descricao: true,
+            status: true,
+            createdAt: true,
+            usuario: {
+              select: {
+                id: true,
+                nome: true,
+                email: true
+              }
+            }
+          },
+          orderBy: { createdAt: 'desc' }
+        },
+        _count: {
+          select: {
+            denuncias: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    console.log('✅ Encontrados', comentarios.length, 'comentários');
+    return comentarios;
+  } catch (error) {
+    console.error('❌ Erro ao buscar comentários:', error);
+    throw error;
+  }
+}
+
+async function updateComentarioAdmin(comentarioId, texto) {
+  console.log('✏️  Atualizando comentário ID:', comentarioId);
+  
+  try {
+    const comentario = await prisma.comentario.update({
+      where: { id: parseInt(comentarioId) },
+      data: { texto },
+      include: {
+        usuario: {
+          select: {
+            id: true,
+            nome: true,
+            fotoPerfil: true
+          }
+        }
+      }
+    });
+    
+    console.log('✅ Comentário atualizado com sucesso');
+    return comentario;
+  } catch (error) {
+    console.error('❌ Erro ao atualizar comentário:', error);
+    throw error;
+  }
+}
+
+async function deleteComentarioAdmin(comentarioId) {
+  console.log('🗑️  Deletando comentário ID:', comentarioId, '(admin)');
+  
+  try {
+    // Deletar denúncias associadas
+    await prisma.denunciaComentario.deleteMany({
+      where: { comentarioId: parseInt(comentarioId) }
+    });
+
+    const resultado = await prisma.comentario.delete({
+      where: { id: parseInt(comentarioId) }
+    });
+    
+    console.log('✅ Comentário deletado com sucesso por admin');
+    return resultado;
+  } catch (error) {
+    console.error('❌ Erro ao deletar comentário:', error);
+    throw error;
+  }
+}
+
+// Funções de Denúncias de Comentários
+async function criarDenunciaComentario(usuarioId, comentarioId, motivo, descricao) {
+  console.log('🚩 Recebi denúncia:', { usuarioId, comentarioId, motivo });
+  
+  try {
+    const denuncia = await prisma.denunciaComentario.create({
+      data: {
+        usuarioId: parseInt(usuarioId),
+        comentarioId: parseInt(comentarioId),
+        motivo,
+        descricao: descricao || null
+      },
+      include: {
+        usuario: {
+          select: {
+            id: true,
+            nome: true,
+            email: true
+          }
+        },
+        comentario: {
+          select: {
+            id: true,
+            texto: true,
+            usuario: {
+              select: {
+                nome: true
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    console.log('✅ Denúncia criada com ID:', denuncia.id);
+    return denuncia;
+  } catch (error) {
+    console.error('❌ Erro ao criar denúncia:', error);
+    throw error;
+  }
+}
+
+async function getDenunciasComentarios(status = null) {
+  console.log('📋 Buscando denúncias:', { status });
+  
+  try {
+    const where = status ? { status } : {};
+    
+    const denuncias = await prisma.denunciaComentario.findMany({
+      where,
+      include: {
+        usuario: {
+          select: {
+            id: true,
+            nome: true,
+            email: true
+          }
+        },
+        comentario: {
+          select: {
+            id: true,
+            texto: true,
+            usuario: {
+              select: {
+                nome: true
+              }
+            },
+            resenha: {
+              select: {
+                titulo: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    console.log('✅ Encontradas', denuncias.length, 'denúncias');
+    return denuncias;
+  } catch (error) {
+    console.error('❌ Erro ao buscar denúncias:', error);
+    throw error;
+  }
+}
+
+async function atualizarStatusDenuncia(denunciaId, status) {
+  console.log('🔄 Atualizando denúncia ID:', denunciaId, 'status:', status);
+  
+  try {
+    const denuncia = await prisma.denunciaComentario.update({
+      where: { id: parseInt(denunciaId) },
+      data: { status },
+      include: {
+        usuario: {
+          select: {
+            id: true,
+            nome: true
+          }
+        },
+        comentario: {
+          select: {
+            id: true,
+            texto: true
+          }
+        }
+      }
+    });
+    
+    console.log('✅ Denúncia atualizada com status:', status);
+    return denuncia;
+  } catch (error) {
+    console.error('❌ Erro ao atualizar denúncia:', error);
+    throw error;
+  }
+}
+
+async function deleteDenunciaComentario(denunciaId) {
+  console.log('🗑️  Removendo denúncia ID:', denunciaId);
+
+  try {
+    const denuncia = await prisma.denunciaComentario.delete({
+      where: { id: parseInt(denunciaId) }
+    });
+
+    console.log('✅ Denúncia removida com sucesso');
+    return denuncia;
+  } catch (error) {
+    console.error('❌ Erro ao remover denúncia:', error);
+    throw error;
+  }
+}
+
 module.exports = { 
   createUser, 
   findUserByEmail, 
@@ -402,5 +642,12 @@ module.exports = {
   createComentario,
   getComentariosByResenhaId,
   deleteComentario,
-  getComentarioById
+  getComentarioById,
+  getAllComentariosAdmin,
+  updateComentarioAdmin,
+  deleteComentarioAdmin,
+  criarDenunciaComentario,
+  getDenunciasComentarios,
+  atualizarStatusDenuncia,
+  deleteDenunciaComentario
 };

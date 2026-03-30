@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha, adicionarFavorito, removerFavorito, listarFavoritosUsuario, verificarFavorito, uploadFotoPerfil, curtirResenha, descurtirResenha, verificarCurtidaResenha, criarComentario, listarComentariosResenha, deletarComentario, buscar } = require('../controllers/controller');
+const { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha, adicionarFavorito, removerFavorito, listarFavoritosUsuario, verificarFavorito, uploadFotoPerfil, curtirResenha, descurtirResenha, verificarCurtidaResenha, criarComentario, listarComentariosResenha, deletarComentario, buscar, listarTodosComentarios, atualizarComentarioAdmin, deletarComentarioAdmin, criarDenuncia, listarDenuncias, atualizarStatusDenunciaCtrl, deletarDenunciaCtrl } = require('../controllers/controller');
 const { uploadBooks, uploadPerfil } = require('../config/multer');
 
 const router = Router();
@@ -53,6 +53,17 @@ router.get('/resenhas/:resenhaId/curtir/:usuarioId', verificarCurtidaResenha);
 router.post('/comentarios', criarComentario);
 router.get('/resenhas/:resenhaId/comentarios', listarComentariosResenha);
 router.delete('/comentarios/:comentarioId', deletarComentario);
+
+// Rotas admin de comentários
+router.get('/admin/comentarios', listarTodosComentarios);
+router.put('/admin/comentarios/:comentarioId', atualizarComentarioAdmin);
+router.delete('/admin/comentarios/:comentarioId', deletarComentarioAdmin);
+
+// Rotas de denúncias de comentários
+router.post('/denuncias', criarDenuncia);
+router.get('/admin/denuncias', listarDenuncias);
+router.put('/admin/denuncias/:denunciaId', atualizarStatusDenunciaCtrl);
+router.delete('/admin/denuncias/:denunciaId', deletarDenunciaCtrl);
 
 // Busca
 router.get('/search', buscar);

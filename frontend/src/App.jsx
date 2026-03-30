@@ -19,6 +19,7 @@ import { PgAdminDashboard } from './pages/admin/PgAdminDashboard'
 import { PgAdminUsers } from './pages/admin/PgAdminUsers'
 import PgAdminBooks from './pages/admin/PgAdminBooks'
 import { PgAdminResenhas } from './pages/admin/PgAdminResenhas'
+import PgAdminComentarios from './pages/admin/PgAdminComentarios'
 import api from './services/api'
 
 function Home() {
@@ -178,6 +179,7 @@ function AppLayout() {
         <Route path="/admin/usuarios" element={<PgAdminUsers />} />
         <Route path="/admin/livros" element={<PgAdminBooks />} />
         <Route path="/admin/resenhas" element={<PgAdminResenhas />} />
+        <Route path="/admin/comentarios" element={<PgAdminComentarios />} />
       </Routes>
       {!hideHeaderFooter && <Footer />}
     </div>
