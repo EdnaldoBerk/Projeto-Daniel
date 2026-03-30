@@ -1,0 +1,233 @@
+:root {
+  --accent: #646cff;
+  --accent-hover: #7c83ff;
+  --bg: #242424;
+  --panel: #1a1b21;
+  --text: #ffffff;
+  --text-muted: #b0b0b0;
+  --borders: #2f2f3a;
+  --success: #10b981;
+  --radius: 12px;
+}
+
+.page {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 40px 20px 60px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 50px;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, rgba(100, 108, 255, 0.1), rgba(200, 140, 255, 0.05));
+  border-radius: var(--radius);
+  border: 1px solid var(--borders);
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #646cff, #c8f7ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-bottom: 30px;
+}
+
+.searchBox {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.searchInput {
+  width: 100%;
+  max-width: 500px;
+  padding: 12px 20px;
+  border: 1px solid var(--borders);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 1rem;
+  transition: all 200ms ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+}
+
+/* FAQ Section */
+.faqSection {
+  margin-bottom: 50px;
+}
+
+.faqContent {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.categoryBlock {
+  background: var(--panel);
+  border: 1px solid var(--borders);
+  border-radius: var(--radius);
+  padding: 30px;
+  overflow: hidden;
+}
+
+.categoryTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--accent);
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--borders);
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.faqItem {
+  border: 1px solid var(--borders);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 180ms ease;
+}
+
+.faqItem:hover {
+  background: rgba(100, 108, 255, 0.05);
+  border-color: var(--accent);
+}
+
+.faqItem.expanded {
+  border-color: var(--accent);
+  background: rgba(100, 108, 255, 0.05);
+}
+
+.faqQuestion {
+  width: 100%;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 180ms ease;
+}
+
+.faqQuestion:hover {
+  color: var(--accent);
+}
+
+.faqQuestion span:last-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: var(--borders);
+  border-radius: 4px;
+  font-size: 1.2rem;
+  transition: transform 180ms ease;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+
+.faqItem.expanded .faqQuestion span:last-child {
+  transform: rotate(45deg);
+}
+
+.faqAnswer {
+  padding: 0 20px 16px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  animation: slideDown 200ms ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Contact Section */
+.contactSection {
+  text-align: center;
+  padding: 40px;
+  background: var(--panel);
+  border: 1px solid var(--borders);
+  border-radius: var(--radius);
+  margin-bottom: 50px;
+}
+
+.sectionTitle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.contactText {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  margin-bottom: 25px;
+}
+
+.contactButton {
+  display: inline-block;
+  padding: 12px 30px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 180ms ease;
+  border: none;
+  cursor: pointer;
+}
+
+.contactButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(100, 108, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .categoryBlock {
+    padding: 20px;
+  }
+
+  .faqQuestion {
+    font-size: 0.95rem;
+  }
+}

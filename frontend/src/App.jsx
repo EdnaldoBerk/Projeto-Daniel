@@ -10,6 +10,10 @@ import { PgCadastro } from './pages/PgCadastro'
 import PgResenha from './pages/PgResenha'
 import PgBusca from './pages/PgBusca'
 import PgPerfil from './pages/PgPerfil'
+import PgAjuda from './pages/PgAjuda'
+import PgContato from './pages/PgContato'
+import PgTermos from './pages/PgTermos'
+import PgPrivacidade from './pages/PgPrivacidade'
 import { PgAdminLogin } from './pages/admin/PgAdminLogin'
 import { PgAdminDashboard } from './pages/admin/PgAdminDashboard'
 import { PgAdminUsers } from './pages/admin/PgAdminUsers'
@@ -161,6 +165,14 @@ function AppLayout() {
         <Route path="/resenha" element={<PgResenha />} />
         <Route path="/busca" element={<PgBusca />} />
         <Route path="/perfil" element={<PgPerfil />} />
+        
+        {/* Support Pages */}
+        <Route path="/ajuda" element={<PgAjuda />} />
+        <Route path="/contato" element={<PgContato />} />
+        <Route path="/termos" element={<PgTermos />} />
+        <Route path="/privacidade" element={<PgPrivacidade />} />
+        
+        {/* Admin Routes */}
         <Route path="/admin/login" element={<PgAdminLogin />} />
         <Route path="/admin/dashboard" element={<PgAdminDashboard />} />
         <Route path="/admin/usuarios" element={<PgAdminUsers />} />

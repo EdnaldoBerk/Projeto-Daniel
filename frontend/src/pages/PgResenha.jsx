@@ -43,6 +43,12 @@ export default function PgResenha() {
   const [comments, setComments] = useState([]);
   const [curtidas, setCurtidas] = useState(0);
   const [curtiu, setCurtiu] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    setIsLoggedIn(!!user);
+  }, []);
 
   useEffect(() => {
     if (!livroId) {
@@ -78,6 +84,16 @@ export default function PgResenha() {
         console.log('✅ Usando resenha:', resenhas[0]);
         setResenha(resenhas[0]);
         setCurtidas(resenhas[0].curtidas || 0);
+        
+        // Buscar comentários da resenha
+        try {
+          const comentariosRes = await api.get(`/resenhas/${resenhas[0].id}/comentarios`);
+          console.log('💬 Comentários carregados:', comentariosRes.data);
+          setComments(comentariosRes.data || []);
+        } catch (err) {
+          console.error('Erro ao buscar comentários:', err);
+          setComments([]);
+        }
         
         // Verificar se o usuário já curtiu
         const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -139,13 +155,34 @@ export default function PgResenha() {
   function handlePostComment(e) {
     e.preventDefault();
     if (!commentText.trim()) return;
-    const c = {
-      id: Date.now(),
-      text: commentText.trim(),
-      date: new Date().toISOString(),
-    };
-    setComments((s) => [c, ...s]);
-    setCommentText("");
+    
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (!user.id || !resenha?.id) {
+      alert('Erro: usuário ou resenha não identificados');
+      return;
+    }
+
+    console.log('📤 Enviando comentário:', { resenhaId: resenha.id, usuarioId: user.id, texto: commentText.trim() });
+
+    // Enviar para o backend
+    api.post('/comentarios', {
+      resenhaId: resenha.id,
+      usuarioId: user.id,
+      texto: commentText.trim()
+    })
+    .then(response => {
+      console.log('✅ Comentário criado com sucesso:', response.data);
+      // Adiciona o novo comentário ao início da lista
+      setComments((s) => [response.data, ...s]);
+      setCommentText("");
+    })
+    .catch(error => {
+      console.error('❌ Erro ao enviar comentário:', error);
+      console.error('Status:', error.response?.status);
+      console.error('Dados do erro:', error.response?.data);
+      alert(`Erro ao enviar comentário: ${error.response?.data?.error || error.message}`);
+    });
   }
 
   if (loading) {
@@ -362,87 +399,98 @@ export default function PgResenha() {
         <section className={styles.commentsWrap}>
           <h2 className={styles.sectionTitle}>Comentários</h2>
 
-          {/* Policy card */}
-          <div className={styles.policyCard}>
-            <div className={styles.policyText}>
-              <strong>Política de comentários</strong>
-              <p>Por favor, leia nossa política de comentários antes de postar.</p>
+          {!isLoggedIn ? (
+            <div className={styles.loginPrompt}>
+              <p>Você precisa estar logado para comentar.</p>
+              <button 
+                onClick={() => navigate('/login')} 
+                className={styles.loginButton}
+              >
+                Fazer Login
+              </button>
             </div>
-            <button className={styles.policyButton}>Compreendi</button>
-          </div>
-
-          {/* Reactions */}
-          <div className={styles.reactionsRow}>
-            <div className={styles.reactionsTitle}>O que você achou?</div>
-            <div className={styles.reactionButtons}>
-              {[
-                { id: "like", emoji: "👍", label: "Gostei" },
-                { id: "fun", emoji: "😆", label: "Engraçado" },
-                { id: "love", emoji: "😍", label: "Amei" },
-                { id: "wow", emoji: "😮", label: "Uau" },
-                { id: "sad", emoji: "😢", label: "Triste" },
-              ].map((r) => (
-                <button
-                  key={r.id}
-                  className={`${styles.reactionBtn} ${reaction === r.id ? styles.reactionActive : ""}`}
-                  onClick={() => setReaction(r.id)}
-                  aria-pressed={reaction === r.id}
-                  title={r.label}
-                >
-                  <span className={styles.emoji}>{r.emoji}</span>
-                  <small className={styles.reactionLabel}>{r.label}</small>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Comment input with social icons (simulated) */}
-          <div className={styles.commentCard}>
-            <div className={styles.commentInputRow}>
-              <div className={styles.socialIcons}>
-                <button className={styles.socialIcon} title="Login com Google">G</button>
-                <button className={styles.socialIcon} title="Login com Facebook">f</button>
-                <button className={styles.socialIcon} title="Login com Apple"></button>
+          ) : (
+            <>
+              {/* Policy card */}
+              <div className={styles.policyCard}>
+                <div className={styles.policyText}>
+                  <strong>Política de comentários</strong>
+                  <p>Por favor, leia nossa política de comentários antes de postar.</p>
+                </div>
+                <button className={styles.policyButton}>Compreendi</button>
               </div>
 
-              <form onSubmit={handlePostComment} className={styles.commentForm}>
-                <input
-                  type="text"
-                  placeholder="Iniciar debate..."
-                  className={styles.commentInput}
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                />
-                <div className={styles.commentActions}>
-                  <button type="submit" className={styles.postButton}>Publicar</button>
+              {/* Reactions */}
+              <div className={styles.reactionsRow}>
+                <div className={styles.reactionsTitle}>O que você achou?</div>
+                <div className={styles.reactionButtons}>
+                  {[
+                    { id: "like", emoji: "👍", label: "Gostei" },
+                    { id: "fun", emoji: "😆", label: "Engraçado" },
+                    { id: "love", emoji: "😍", label: "Amei" },
+                    { id: "wow", emoji: "😮", label: "Uau" },
+                    { id: "sad", emoji: "😢", label: "Triste" },
+                  ].map((r) => (
+                    <button
+                      key={r.id}
+                      className={`${styles.reactionBtn} ${reaction === r.id ? styles.reactionActive : ""}`}
+                      onClick={() => setReaction(r.id)}
+                      aria-pressed={reaction === r.id}
+                      title={r.label}
+                    >
+                      <span className={styles.emoji}>{r.emoji}</span>
+                      <small className={styles.reactionLabel}>{r.label}</small>
+                    </button>
+                  ))}
                 </div>
-              </form>
-            </div>
+              </div>
 
-            {/* Small footer links under comment area */}
-            <div className={styles.commentFooter}>
-              <a href="#" className={styles.footerLink}>Subscrever</a>
-              <a href="#" className={styles.footerLink}>Privacidade</a>
-              <a href="#" className={styles.footerLink}>Não vender os meus dados</a>
-            </div>
-          </div>
+              {/* Comment input with social icons (simulated) */}
+              <div className={styles.commentCard}>
+                <div className={styles.commentInputRow}>
 
-          {/* Comment list */}
-          <div className={styles.commentList}>
-            {comments.length === 0 && <div className={styles.emptyComments}>Seja o primeiro a comentar!</div>}
-            {comments.map((c) => (
-              <article key={c.id} className={styles.commentItem}>
-                <div className={styles.commentHeader}>
-                  <div className={styles.commentAvatar}>U</div>
-                  <div className={styles.commentMeta}>
-                    <strong>Anônimo</strong>
-                    <time dateTime={c.date} className={styles.commentTime}>{new Date(c.date).toLocaleString()}</time>
-                  </div>
+                  <form onSubmit={handlePostComment} className={styles.commentForm}>
+                    <input
+                      type="text"
+                      placeholder="Iniciar debate..."
+                      className={styles.commentInput}
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                    />
+                    <div className={styles.commentActions}>
+                      <button type="submit" className={styles.postButton}>Publicar</button>
+                    </div>
+                  </form>
                 </div>
-                <p className={styles.commentText}>{c.text}</p>
-              </article>
-            ))}
-          </div>
+              </div>
+
+              {/* Comment list */}
+              <div className={styles.commentList}>
+                {comments.length === 0 && <div className={styles.emptyComments}>Seja o primeiro a comentar!</div>}
+                {comments.map((c) => {
+                  // A estrutura vem do backend com 'texto' e 'usuario' incluído
+                  const nomeUsuario = c.usuario?.nome || 'Anônimo';
+                  const fotoUsuario = c.usuario?.fotoPerfil 
+                    ? `http://localhost:3001${c.usuario.fotoPerfil}`
+                    : 'https://placehold.co/32x32?text=' + nomeUsuario[0];
+                  const dataComentario = new Date(c.createdAt).toLocaleString('pt-BR');
+                  
+                  return (
+                    <article key={c.id} className={styles.commentItem}>
+                      <div className={styles.commentHeader}>
+                        <img src={fotoUsuario} alt={nomeUsuario} className={styles.commentAvatar} />
+                        <div className={styles.commentMeta}>
+                          <strong>{nomeUsuario}</strong>
+                          <time dateTime={c.createdAt} className={styles.commentTime}>{dataComentario}</time>
+                        </div>
+                      </div>
+                      <p className={styles.commentText}>{c.texto}</p>
+                    </article>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </section>
       </main>
     </div>

@@ -285,6 +285,93 @@ async function checkCurtidaResenha(usuarioId, resenhaId) {
   return !!curtida;
 }
 
+// Funções de Comentários
+async function createComentario(usuarioId, resenhaId, texto) {
+  console.log('💾 Salvando comentário no banco:', { usuarioId, resenhaId, texto: texto?.substring(0, 50) });
+  
+  try {
+    const comentario = await prisma.comentario.create({
+      data: {
+        usuarioId: parseInt(usuarioId),
+        resenhaId: parseInt(resenhaId),
+        texto
+      },
+      include: {
+        usuario: {
+          select: {
+            id: true,
+            nome: true,
+            fotoPerfil: true
+          }
+        }
+      }
+    });
+    
+    console.log('✅ Comentário salvo com ID:', comentario.id);
+    return comentario;
+  } catch (error) {
+    console.error('❌ Erro ao criar comentário no Prisma:', error);
+    throw error;
+  }
+}
+
+async function getComentariosByResenhaId(resenhaId) {
+  console.log('🔍 Buscando comentários para resenhaId:', resenhaId);
+  
+  try {
+    const comentarios = await prisma.comentario.findMany({
+      where: { resenhaId: parseInt(resenhaId) },
+      include: {
+        usuario: {
+          select: {
+            id: true,
+            nome: true,
+            fotoPerfil: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    console.log('✅ Encontrados', comentarios.length, 'comentários');
+    return comentarios;
+  } catch (error) {
+    console.error('❌ Erro ao buscar comentários:', error);
+    throw error;
+  }
+}
+
+async function deleteComentario(comentarioId) {
+  console.log('🗑️  Deletando comentário ID:', comentarioId);
+  
+  try {
+    const resultado = await prisma.comentario.delete({
+      where: { id: parseInt(comentarioId) }
+    });
+    
+    console.log('✅ Comentário deletado');
+    return resultado;
+  } catch (error) {
+    console.error('❌ Erro ao deletar comentário:', error);
+    throw error;
+  }
+}
+
+async function getComentarioById(comentarioId) {
+  return prisma.comentario.findUnique({
+    where: { id: parseInt(comentarioId) },
+    include: {
+      usuario: {
+        select: {
+          id: true,
+          nome: true,
+          fotoPerfil: true
+        }
+      }
+    }
+  });
+}
+
 module.exports = { 
   createUser, 
   findUserByEmail, 
@@ -311,5 +398,9 @@ module.exports = {
   removeCurtidaResenha,
   checkCurtidaResenha,
   searchLivros,
-  searchUsuarios
+  searchUsuarios,
+  createComentario,
+  getComentariosByResenhaId,
+  deleteComentario,
+  getComentarioById
 };

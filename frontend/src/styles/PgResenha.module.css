@@ -537,16 +537,50 @@
   width:44px;
   height:44px;
   border-radius:50%;
-  background: rgba(255,255,255,0.03);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--text-muted);
-  font-weight:600;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 .commentMeta strong{ display:block; color:var(--text); }
 .commentTime{ color:var(--text-muted); font-size:12px; }
 .commentText{ color:var(--text); line-height:1.6; margin:0; }
+
+/* Login prompt for comments */
+.loginPrompt {
+  background: linear-gradient(135deg, rgba(100,108,255,0.08), rgba(200,140,255,0.04));
+  border: 1px solid rgba(100,108,255,0.2);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  margin: 16px 0;
+}
+
+.loginPrompt p {
+  color: var(--text);
+  margin: 0 0 16px 0;
+  font-size: 1.05rem;
+}
+
+.loginButton {
+  background: linear-gradient(135deg, var(--accent), #7c83ff);
+  border: none;
+  color: white;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
+}
+
+.loginButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(100, 108, 255, 0.4);
+}
+
+.loginButton:active {
+  transform: translateY(0);
+}
 
 /* Responsive adjustments */
 @media (max-width: 920px){

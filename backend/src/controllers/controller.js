@@ -1,4 +1,4 @@
-const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha, searchLivros, searchUsuarios } = require('../services/service');
+const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha, searchLivros, searchUsuarios, createComentario, getComentariosByResenhaId, deleteComentario, getComentarioById } = require('../services/service');
 
 async function registrarUsuario(req, res) {
   // TODO: validação e hashing de senha
@@ -540,6 +540,60 @@ async function verificarCurtidaResenha(req, res) {
   }
 }
 
+// Controladores de Comentários
+async function criarComentario(req, res) {
+  const { resenhaId, usuarioId, texto } = req.body;
+  
+  console.log('📝 Recebido pedido de criar comentário:', { resenhaId, usuarioId, texto: texto?.substring(0, 50) });
+  
+  try {
+    if (!resenhaId || !usuarioId || !texto) {
+      console.error('❌ Campos faltando:', { resenhaId, usuarioId, textoExists: !!texto });
+      return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+    
+    const comentario = await createComentario(usuarioId, resenhaId, texto);
+    console.log('✅ Comentário criado com sucesso:', comentario);
+    return res.status(201).json(comentario);
+  } catch (e) {
+    console.error('❌ Erro ao criar comentário:', e);
+    return res.status(500).json({ error: 'Erro ao criar comentário', details: e.message });
+  }
+}
+
+async function listarComentariosResenha(req, res) {
+  const { resenhaId } = req.params;
+  
+  console.log('📋 Listando comentários para resenhaId:', resenhaId);
+  
+  try {
+    const comentarios = await getComentariosByResenhaId(resenhaId);
+    console.log('✅ Comentários encontrados:', comentarios.length);
+    return res.json(comentarios);
+  } catch (e) {
+    console.error('❌ Erro ao listar comentários:', e);
+    return res.status(500).json({ error: 'Erro ao listar comentários' });
+  }
+}
+
+async function deletarComentario(req, res) {
+  const { comentarioId } = req.params;
+  
+  console.log('🗑️  Deletando comentário:', comentarioId);
+  
+  try {
+    await deleteComentario(comentarioId);
+    console.log('✅ Comentário deletado com sucesso');
+    return res.json({ message: 'Comentário deletado com sucesso' });
+  } catch (e) {
+    console.error('❌ Erro ao deletar comentário:', e);
+    if (e.code === 'P2025') {
+      return res.status(404).json({ error: 'Comentário não encontrado' });
+    }
+    return res.status(500).json({ error: 'Erro ao deletar comentário' });
+  }
+}
+
 module.exports = { 
   registrarUsuario, 
   logarUsuario, 
@@ -567,6 +621,9 @@ module.exports = {
   uploadFotoPerfil,
   curtirResenha,
   descurtirResenha,
-  verificarCurtidaResenha
-  ,buscar
+  verificarCurtidaResenha,
+  criarComentario,
+  listarComentariosResenha,
+  deletarComentario,
+  buscar
 };

@@ -1,0 +1,283 @@
+:root {
+  --accent: #646cff;
+  --accent-hover: #7c83ff;
+  --bg: #242424;
+  --panel: #1a1b21;
+  --text: #ffffff;
+  --text-muted: #b0b0b0;
+  --borders: #2f2f3a;
+  --success: #10b981;
+  --error: #ef4444;
+  --radius: 12px;
+}
+
+.page {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 40px 20px 60px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 50px;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, rgba(100, 108, 255, 0.1), rgba(200, 140, 255, 0.05));
+  border-radius: var(--radius);
+  border: 1px solid var(--borders);
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #646cff, #c8f7ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 50px;
+}
+
+/* Form Section */
+.formSection {
+  background: var(--panel);
+  border: 1px solid var(--borders);
+  border-radius: var(--radius);
+  padding: 30px;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--accent);
+}
+
+.successMessage {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--success);
+  color: var(--success);
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  animation: slideDown 300ms ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.input,
+.select,
+.textarea {
+  padding: 12px 16px;
+  border: 1px solid var(--borders);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 180ms ease;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(100, 108, 255, 0.05);
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.submitButton {
+  padding: 14px 20px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 180ms ease;
+  margin-top: 10px;
+}
+
+.submitButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(100, 108, 255, 0.3);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+/* Info Section */
+.infoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contactInfo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.infoCard {
+  background: var(--panel);
+  border: 1px solid var(--borders);
+  border-radius: var(--radius);
+  padding: 25px;
+  text-align: center;
+  transition: all 180ms ease;
+}
+
+.infoCard:hover {
+  border-color: var(--accent);
+  background: rgba(100, 108, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.infoIcon {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+.infoCard h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+.infoCard p {
+  margin-bottom: 8px;
+}
+
+.infoCard a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 180ms ease;
+}
+
+.infoCard a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.infoCard small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+/* Schedule Section */
+.scheduleSection {
+  background: linear-gradient(135deg, rgba(100, 108, 255, 0.1), rgba(200, 140, 255, 0.05));
+  border: 1px solid var(--borders);
+  border-radius: var(--radius);
+  padding: 40px;
+  text-align: center;
+}
+
+.scheduleBox {
+  background: var(--panel);
+  border: 1px solid var(--borders);
+  border-radius: 8px;
+  padding: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.scheduleItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scheduleItem span {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.scheduleItem strong {
+  font-size: 1.2rem;
+  color: var(--accent);
+}
+
+.timezone {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .scheduleBox {
+    grid-template-columns: 1fr;
+  }
+
+  .formSection,
+  .infoSection {
+    padding: 20px;
+  }
+}

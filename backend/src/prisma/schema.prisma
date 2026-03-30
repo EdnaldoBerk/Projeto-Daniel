@@ -21,6 +21,7 @@ model Usuario {
   resenhas   Resenha[]
   favoritos  Favorito[]
   curtidas   CurtidaResenha[]
+  comentarios Comentario[]
 }
 
 model Livro {
@@ -61,8 +62,24 @@ model Resenha {
   livro           Livro    @relation(fields: [livroId], references: [id], onDelete: Cascade)
   usuario         Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   curtidasResenha CurtidaResenha[]
+  comentarios     Comentario[]
   
   @@index([livroId])
+  @@index([usuarioId])
+}
+
+model Comentario {
+  id         Int      @id @default(autoincrement())
+  resenhaId  Int
+  usuarioId  Int
+  texto      String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  resenha    Resenha  @relation(fields: [resenhaId], references: [id], onDelete: Cascade)
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  
+  @@index([resenhaId])
   @@index([usuarioId])
 }
 
