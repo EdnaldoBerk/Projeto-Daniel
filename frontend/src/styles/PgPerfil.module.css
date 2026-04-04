@@ -239,6 +239,12 @@
   letter-spacing: 1px;
 }
 
+.sectionHint {
+  color: #9aa0b4;
+  margin: 0 0 14px 2px;
+  font-size: 14px;
+}
+
 /* GRID FAVORITOS */
 .grid {
   display: grid;
@@ -274,6 +280,45 @@
   transform: translateY(-8px); 
   box-shadow: 0 16px 40px rgba(100,108,255,0.25), 0 8px 16px rgba(0,0,0,0.6); 
   border-color: rgba(100,108,255,0.3);
+}
+
+.addBookCard {
+  background: rgba(100,108,255,0.03);
+  border-radius: 12px;
+  border: 2px dashed rgba(100,108,255,0.28);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+  cursor: pointer;
+  transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+  color: #646cff;
+  padding: 0;
+}
+
+.addBookCard:hover {
+  transform: translateY(-8px);
+  border-color: #646cff;
+  background: rgba(100,108,255,0.08);
+}
+
+.addBookCard:focus {
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
+}
+
+.addBookPlus {
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 300;
+}
+
+.addBookLabel {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #b7bbff;
 }
 
 .bookImageWrapper {
@@ -586,6 +631,10 @@
   overflow-y: auto;
 }
 
+.modalContentWide {
+  max-width: 980px;
+}
+
 .modalHeader {
   display: flex;
   justify-content: space-between;
@@ -627,6 +676,73 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.modalBody {
+  padding: 24px;
+}
+
+.modalDescription {
+  margin: 0 0 18px 0;
+  color: #b0b0b0;
+  font-size: 14px;
+}
+
+.catalogGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.catalogCard {
+  background: linear-gradient(145deg, rgba(30,30,35,0.9), rgba(20,20,24,0.95));
+  border: 1px solid rgba(100,108,255,0.12);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: #ececec;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.catalogCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(100,108,255,0.3);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+}
+
+.catalogCard:focus {
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
+}
+
+.catalogCover {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+}
+
+.catalogTitle {
+  width: 100%;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  line-height: 1.3;
+  min-height: 34px;
+}
+
+.catalogButtonLabel {
+  width: 100%;
+  text-align: center;
+  color: #646cff;
+  font-size: 13px;
+  font-weight: 700;
+  padding-top: 2px;
 }
 
 .modalInput {
@@ -835,6 +951,9 @@
   .accountCard {
     padding: 24px;
   }
+  .modalContentWide {
+    max-width: 720px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -858,13 +977,19 @@
   .saveButton {
     width: 100%;
   }
+  .catalogGrid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
 }
 
 @media (max-width: 520px) {
   .bookCard { height: 180px; }
   .bookCover { height: 140px; }
+  .addBookCard { height: 180px; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
   .gridCollection { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 10px; }
   .name { font-size: 22px; }
   .libraryTitle, .sectionTitle { font-size: 16px; }
+  .catalogGrid { grid-template-columns: 1fr 1fr; }
+  .catalogCover { height: 150px; }
 }

@@ -638,6 +638,68 @@
 }
 .commentText{ color:var(--text); line-height:1.6; margin:0; }
 
+.commentActionsRow {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.replyButton,
+.reportButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+}
+
+.replyButton {
+  color: #8aa2ff;
+}
+
+.reportButton {
+  color: #c67d2f;
+}
+
+.replyForm {
+  margin-top: 0.8rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(100,108,255,0.2);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.02);
+}
+
+.replyFormActions {
+  margin-top: 0.6rem;
+  display: flex;
+  gap: 8px;
+}
+
+.cancelReplyButton {
+  border: 1px solid rgba(255,255,255,0.14);
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+
+.replyList {
+  margin-top: 0.8rem;
+  margin-left: 1.4rem;
+  padding-left: 0.9rem;
+  border-left: 2px solid rgba(100,108,255,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.replyItem {
+  background: rgba(42,42,42,0.6);
+}
+
 /* Login prompt for comments */
 .loginPrompt {
   background: linear-gradient(135deg, rgba(100,108,255,0.08), rgba(200,140,255,0.04));

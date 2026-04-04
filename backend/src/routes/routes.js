@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { registrarUsuario, logarUsuario, logarAdmin, solicitarRecuperacaoSenha, redefinirSenha, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha, adicionarFavorito, removerFavorito, listarFavoritosUsuario, verificarFavorito, uploadFotoPerfil, curtirResenha, descurtirResenha, verificarCurtidaResenha, avaliarResenha, obterAvaliacaoResenha, criarComentario, listarComentariosResenha, deletarComentario, buscar, listarTodosComentarios, atualizarComentarioAdmin, deletarComentarioAdmin, criarDenuncia, listarDenuncias, atualizarStatusDenunciaCtrl, deletarDenunciaCtrl } = require('../controllers/controller');
+const { registrarUsuario, logarUsuario, logarAdmin, solicitarRecuperacaoSenha, redefinirSenha, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha, adicionarFavorito, removerFavorito, listarFavoritosUsuario, verificarFavorito, salvarLeitura, listarLeiturasUsuario, removerLeituraUsuario, uploadFotoPerfil, curtirResenha, descurtirResenha, verificarCurtidaResenha, avaliarResenha, obterAvaliacaoResenha, criarComentario, listarComentariosResenha, deletarComentario, buscar, listarTodosComentarios, atualizarComentarioAdmin, deletarComentarioAdmin, criarDenuncia, listarDenuncias, atualizarStatusDenunciaCtrl, deletarDenunciaCtrl } = require('../controllers/controller');
 const { uploadBooks, uploadPerfil } = require('../config/multer');
 
 const router = Router();
@@ -42,6 +42,11 @@ router.post('/favoritos', adicionarFavorito);
 router.delete('/favoritos/:usuarioId/:livroId', removerFavorito);
 router.get('/favoritos/:usuarioId', listarFavoritosUsuario);
 router.get('/favoritos/:usuarioId/:livroId', verificarFavorito);
+
+// Rotas de leituras
+router.post('/leituras', salvarLeitura);
+router.get('/leituras/:usuarioId', listarLeiturasUsuario);
+router.delete('/leituras/:usuarioId/:livroId', removerLeituraUsuario);
 
 // Rota de upload de foto de perfil
 router.post('/upload/foto-perfil', uploadPerfil.single('fotoPerfil'), uploadFotoPerfil);

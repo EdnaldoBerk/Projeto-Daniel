@@ -90,10 +90,18 @@ const api = {
     const responseData = await handleResponse(res);
     return { data: responseData };
   },
-  delete: async (endpoint) => {
-    const res = await fetch(`${BASE_URL}${endpoint}`, {
-      method: 'DELETE'
-    });
+  delete: async (endpoint, dataOrConfig = null) => {
+    const hasAxiosStyleData = dataOrConfig && typeof dataOrConfig === 'object' && Object.prototype.hasOwnProperty.call(dataOrConfig, 'data');
+    const payload = hasAxiosStyleData ? dataOrConfig.data : dataOrConfig;
+    const hasBody = payload !== null && payload !== undefined;
+
+    const options = {
+      method: 'DELETE',
+      headers: hasBody ? { 'Content-Type': 'application/json' } : undefined,
+      body: hasBody ? JSON.stringify(payload) : undefined
+    };
+
+    const res = await fetch(`${BASE_URL}${endpoint}`, options);
     const responseData = await handleResponse(res);
     return { data: responseData };
   }

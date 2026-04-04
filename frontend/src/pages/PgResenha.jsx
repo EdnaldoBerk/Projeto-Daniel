@@ -46,6 +46,7 @@ export default function PgResenha() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [selectedRating, setSelectedRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
   const [ratingStats, setRatingStats] = useState({
     media: 0,
     totalAvaliacoes: 0,
@@ -57,6 +58,8 @@ export default function PgResenha() {
       5: { count: 0, percentage: 0 }
     }
   });
+  const [replyingToId, setReplyingToId] = useState(null);
+  const [replyText, setReplyText] = useState('');
   const [comentarioParaDenunciar, setComentarioParaDenunciar] = useState(null);
 
   useEffect(() => {
@@ -249,10 +252,114 @@ export default function PgResenha() {
         totalAvaliacoes: avaliacaoRes.data?.totalAvaliacoes || 0,
         distribution: avaliacaoRes.data?.distribution || ratingStats.distribution
       });
+      setSelectedRating(0);
+      setHoverRating(0);
     } catch (error) {
       console.error('❌ Erro ao enviar comentário/avaliação:', error);
       alert(`Erro ao enviar comentário: ${error.response?.data?.error || error.message}`);
     }
+  }
+
+  async function handleReplySubmit(parentCommentId) {
+    const textoResposta = replyText.trim();
+    if (!textoResposta) {
+      alert('Escreva uma resposta antes de publicar.');
+      return;
+    }
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.id || !resenha?.id) {
+      alert('Você precisa estar logado para responder.');
+      return;
+    }
+
+    try {
+      await api.post('/comentarios', {
+        resenhaId: resenha.id,
+        usuarioId: user.id,
+        texto: textoResposta,
+        parentId: parentCommentId
+      });
+
+      const comentariosRes = await api.get(`/resenhas/${resenha.id}/comentarios`);
+      setComments(comentariosRes.data || []);
+      setReplyText('');
+      setReplyingToId(null);
+    } catch (error) {
+      console.error('❌ Erro ao enviar resposta:', error);
+      alert(`Erro ao enviar resposta: ${error.response?.data?.error || error.message}`);
+    }
+  }
+
+  function renderComment(c, isReply = false) {
+    const nomeUsuario = c.usuario?.nome || 'Anônimo';
+    const fotoUsuario = c.usuario?.fotoPerfil
+      ? `http://localhost:3001${c.usuario.fotoPerfil}`
+      : 'https://placehold.co/32x32?text=' + nomeUsuario[0];
+    const dataComentario = new Date(c.createdAt).toLocaleString('pt-BR');
+
+    return (
+      <article key={c.id} className={`${styles.commentItem} ${isReply ? styles.replyItem : ''}`}>
+        <div className={styles.commentHeader}>
+          <img src={fotoUsuario} alt={nomeUsuario} className={styles.commentAvatar} />
+          <div className={styles.commentMeta}>
+            <strong>{nomeUsuario}</strong>
+            <time dateTime={c.createdAt} className={styles.commentTime}>{dataComentario}</time>
+            {c.nota && (
+              <div className={styles.commentStars} aria-label={`Comentário avaliado com ${c.nota} estrelas`}>
+                {'★'.repeat(c.nota)}{'☆'.repeat(5 - c.nota)}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <p className={styles.commentText}>{c.texto}</p>
+
+        <div className={styles.commentActionsRow}>
+          <button
+            type="button"
+            onClick={() => setReplyingToId(replyingToId === c.id ? null : c.id)}
+            className={styles.replyButton}
+          >
+            Responder
+          </button>
+
+          <button
+            type="button"
+            onClick={() => abrirModalDenuncia(c)}
+            className={styles.reportButton}
+          >
+            🚩 Denunciar comentário
+          </button>
+        </div>
+
+        {replyingToId === c.id && (
+          <div className={styles.replyForm}>
+            <input
+              type="text"
+              placeholder="Escreva sua resposta"
+              className={styles.commentInput}
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+            />
+            <div className={styles.replyFormActions}>
+              <button type="button" className={styles.postButton} onClick={() => handleReplySubmit(c.id)}>
+                Publicar resposta
+              </button>
+              <button type="button" className={styles.cancelReplyButton} onClick={() => { setReplyingToId(null); setReplyText(''); }}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
+
+        {Array.isArray(c.replies) && c.replies.length > 0 && (
+          <div className={styles.replyList}>
+            {c.replies.map((reply) => renderComment(reply, true))}
+          </div>
+        )}
+      </article>
+    );
   }
 
   function abrirModalDenuncia(comentario) {
@@ -548,8 +655,10 @@ export default function PgResenha() {
                             <button
                               key={nota}
                               type="button"
-                              className={`${styles.starButton} ${nota <= selectedRating ? styles.starActive : ''}`}
+                              className={`${styles.starButton} ${nota <= (hoverRating || selectedRating) ? styles.starActive : ''}`}
                               onClick={() => setSelectedRating(nota)}
+                              onMouseEnter={() => setHoverRating(nota)}
+                              onMouseLeave={() => setHoverRating(0)}
                               aria-label={`Selecionar ${nota} estrela${nota > 1 ? 's' : ''}`}
                               title={`${nota} estrela${nota > 1 ? 's' : ''}`}
                             >
@@ -566,48 +675,7 @@ export default function PgResenha() {
               {/* Comment list */}
               <div className={styles.commentList}>
                 {comments.length === 0 && <div className={styles.emptyComments}>Seja o primeiro a comentar!</div>}
-                {comments.map((c) => {
-                  // A estrutura vem do backend com 'texto' e 'usuario' incluído
-                  const nomeUsuario = c.usuario?.nome || 'Anônimo';
-                  const fotoUsuario = c.usuario?.fotoPerfil 
-                    ? `http://localhost:3001${c.usuario.fotoPerfil}`
-                    : 'https://placehold.co/32x32?text=' + nomeUsuario[0];
-                  const dataComentario = new Date(c.createdAt).toLocaleString('pt-BR');
-                  
-                  return (
-                    <article key={c.id} className={styles.commentItem}>
-                      <div className={styles.commentHeader}>
-                        <img src={fotoUsuario} alt={nomeUsuario} className={styles.commentAvatar} />
-                        <div className={styles.commentMeta}>
-                          <strong>{nomeUsuario}</strong>
-                          <time dateTime={c.createdAt} className={styles.commentTime}>{dataComentario}</time>
-                          {c.nota && (
-                            <div className={styles.commentStars} aria-label={`Comentário avaliado com ${c.nota} estrelas`}>
-                              {'★'.repeat(c.nota)}{'☆'.repeat(5 - c.nota)}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <p className={styles.commentText}>{c.texto}</p>
-                      <div style={{ marginTop: '0.5rem' }}>
-                        <button
-                          type="button"
-                          onClick={() => abrirModalDenuncia(c)}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#c67d2f',
-                            cursor: 'pointer',
-                            fontSize: '0.9rem',
-                            padding: 0
-                          }}
-                        >
-                          🚩 Denunciar comentário
-                        </button>
-                      </div>
-                    </article>
-                  );
-                })}
+                {comments.map((c) => renderComment(c))}
               </div>
             </>
           )}

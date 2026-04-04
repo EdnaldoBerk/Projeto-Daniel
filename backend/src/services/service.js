@@ -180,6 +180,48 @@ async function addFavorito(usuarioId, livroId) {
   });
 }
 
+// Funções de Leituras
+async function addOrUpdateLeitura(usuarioId, livroId, status) {
+  return prisma.leituraUsuario.upsert({
+    where: {
+      usuarioId_livroId: {
+        usuarioId: parseInt(usuarioId),
+        livroId: parseInt(livroId)
+      }
+    },
+    create: {
+      usuarioId: parseInt(usuarioId),
+      livroId: parseInt(livroId),
+      status
+    },
+    update: {
+      status
+    },
+    include: {
+      livro: true
+    }
+  });
+}
+
+async function getLeiturasByUsuarioId(usuarioId) {
+  return prisma.leituraUsuario.findMany({
+    where: { usuarioId: parseInt(usuarioId) },
+    include: {
+      livro: true
+    },
+    orderBy: { updatedAt: 'desc' }
+  });
+}
+
+async function removeLeitura(usuarioId, livroId) {
+  return prisma.leituraUsuario.deleteMany({
+    where: {
+      usuarioId: parseInt(usuarioId),
+      livroId: parseInt(livroId)
+    }
+  });
+}
+
 async function removeFavorito(usuarioId, livroId) {
   return prisma.favorito.deleteMany({
     where: {
@@ -325,14 +367,30 @@ async function getAvaliacaoStatsByResenhaId(resenhaId, usuarioId = null) {
 }
 
 // Funções de Comentários
-async function createComentario(usuarioId, resenhaId, texto, nota = null) {
-  console.log('💾 Salvando comentário no banco:', { usuarioId, resenhaId, nota, texto: texto?.substring(0, 50) });
+async function createComentario(usuarioId, resenhaId, texto, nota = null, parentId = null) {
+  console.log('💾 Salvando comentário no banco:', { usuarioId, resenhaId, parentId, nota, texto: texto?.substring(0, 50) });
+
+  if (parentId !== null && parentId !== undefined) {
+    const parent = await prisma.comentario.findUnique({
+      where: { id: parseInt(parentId) },
+      select: { id: true, resenhaId: true }
+    });
+
+    if (!parent) {
+      throw new Error('Comentário pai não encontrado');
+    }
+
+    if (parent.resenhaId !== parseInt(resenhaId)) {
+      throw new Error('Comentário pai não pertence à mesma resenha');
+    }
+  }
   
   try {
     const comentario = await prisma.comentario.create({
       data: {
         usuarioId: parseInt(usuarioId),
         resenhaId: parseInt(resenhaId),
+        parentId: parentId !== null && parentId !== undefined ? parseInt(parentId) : null,
         texto,
         nota: nota !== null ? parseInt(nota) : null
       },
@@ -359,7 +417,7 @@ async function getComentariosByResenhaId(resenhaId) {
   console.log('🔍 Buscando comentários para resenhaId:', resenhaId);
   
   try {
-    const comentarios = await prisma.comentario.findMany({
+    const comentariosFlat = await prisma.comentario.findMany({
       where: { resenhaId: parseInt(resenhaId) },
       include: {
         usuario: {
@@ -370,11 +428,28 @@ async function getComentariosByResenhaId(resenhaId) {
           }
         }
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'asc' }
     });
+
+    const byId = new Map();
+    comentariosFlat.forEach((c) => {
+      byId.set(c.id, { ...c, replies: [] });
+    });
+
+    const roots = [];
+    byId.forEach((c) => {
+      if (c.parentId && byId.has(c.parentId)) {
+        byId.get(c.parentId).replies.push(c);
+      } else {
+        roots.push(c);
+      }
+    });
+
+    // Comentários principais mais novos primeiro, replies em ordem de criação.
+    roots.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     
-    console.log('✅ Encontrados', comentarios.length, 'comentários');
-    return comentarios;
+    console.log('✅ Encontrados', comentariosFlat.length, 'comentários');
+    return roots;
   } catch (error) {
     console.error('❌ Erro ao buscar comentários:', error);
     throw error;
@@ -714,7 +789,10 @@ module.exports = {
   updateResenha,
   deleteResenha,
   addFavorito,
+  addOrUpdateLeitura,
   removeFavorito,
+  getLeiturasByUsuarioId,
+  removeLeitura,
   getFavoritosByUsuarioId,
   checkFavorito,
   addCurtidaResenha,

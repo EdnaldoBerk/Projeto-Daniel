@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha, addOrUpdateAvaliacaoResenha, getAvaliacaoStatsByResenhaId, searchLivros, createComentario, getComentariosByResenhaId, deleteComentario, getComentarioById, getAllComentariosAdmin, updateComentarioAdmin, deleteComentarioAdmin, criarDenunciaComentario, getDenunciasComentarios, atualizarStatusDenuncia, deleteDenunciaComentario } = require('../services/service');
+const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, addOrUpdateLeitura, removeLeitura, getLeiturasByUsuarioId, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha, addOrUpdateAvaliacaoResenha, getAvaliacaoStatsByResenhaId, searchLivros, createComentario, getComentariosByResenhaId, deleteComentario, getComentarioById, getAllComentariosAdmin, updateComentarioAdmin, deleteComentarioAdmin, criarDenunciaComentario, getDenunciasComentarios, atualizarStatusDenuncia, deleteDenunciaComentario } = require('../services/service');
 
 const RESET_TOKEN_TTL_MS = 15 * 60 * 1000;
 const passwordResetTokens = new Map();
@@ -551,6 +551,50 @@ async function verificarFavorito(req, res) {
   }
 }
 
+async function salvarLeitura(req, res) {
+  const { usuarioId, livroId, status } = req.body;
+
+  if (!usuarioId || !livroId) {
+    return res.status(400).json({ error: 'Usuario e livro são obrigatórios' });
+  }
+
+  if (!['lendo', 'finalizada'].includes(status)) {
+    return res.status(400).json({ error: 'Status inválido' });
+  }
+
+  try {
+    const leitura = await addOrUpdateLeitura(usuarioId, livroId, status);
+    return res.status(201).json(leitura);
+  } catch (e) {
+    console.error('Erro ao salvar leitura:', e);
+    return res.status(500).json({ error: 'Erro ao salvar leitura' });
+  }
+}
+
+async function listarLeiturasUsuario(req, res) {
+  const { usuarioId } = req.params;
+
+  try {
+    const leituras = await getLeiturasByUsuarioId(usuarioId);
+    return res.json(leituras);
+  } catch (e) {
+    console.error('Erro ao listar leituras:', e);
+    return res.status(500).json({ error: 'Erro ao listar leituras' });
+  }
+}
+
+async function removerLeituraUsuario(req, res) {
+  const { usuarioId, livroId } = req.params;
+
+  try {
+    await removeLeitura(usuarioId, livroId);
+    return res.json({ message: 'Leitura removida com sucesso' });
+  } catch (e) {
+    console.error('Erro ao remover leitura:', e);
+    return res.status(500).json({ error: 'Erro ao remover leitura' });
+  }
+}
+
 // Upload de foto de perfil
 async function uploadFotoPerfil(req, res) {
   const { usuarioId } = req.body;
@@ -668,9 +712,9 @@ async function obterAvaliacaoResenha(req, res) {
 
 // Controladores de Comentários
 async function criarComentario(req, res) {
-  const { resenhaId, usuarioId, texto, nota } = req.body;
+  const { resenhaId, usuarioId, texto, nota, parentId } = req.body;
   
-  console.log('📝 Recebido pedido de criar comentário:', { resenhaId, usuarioId, nota, texto: texto?.substring(0, 50) });
+  console.log('📝 Recebido pedido de criar comentário:', { resenhaId, usuarioId, parentId, nota, texto: texto?.substring(0, 50) });
   
   try {
     if (!resenhaId || !usuarioId || !texto) {
@@ -678,16 +722,25 @@ async function criarComentario(req, res) {
       return res.status(400).json({ error: 'Campos obrigatórios faltando' });
     }
 
-    const notaNumero = Number(nota);
-    if (!Number.isInteger(notaNumero) || notaNumero < 1 || notaNumero > 5) {
-      return res.status(400).json({ error: 'A nota do comentário deve ser um inteiro entre 1 e 5' });
+    let notaNumero = null;
+    const isReply = parentId !== null && parentId !== undefined;
+
+    // Comentário principal exige nota; resposta não exige.
+    if (!isReply) {
+      notaNumero = Number(nota);
+      if (!Number.isInteger(notaNumero) || notaNumero < 1 || notaNumero > 5) {
+        return res.status(400).json({ error: 'A nota do comentário deve ser um inteiro entre 1 e 5' });
+      }
     }
     
-    const comentario = await createComentario(usuarioId, resenhaId, texto, notaNumero);
+    const comentario = await createComentario(usuarioId, resenhaId, texto, notaNumero, isReply ? parentId : null);
     console.log('✅ Comentário criado com sucesso:', comentario);
     return res.status(201).json(comentario);
   } catch (e) {
     console.error('❌ Erro ao criar comentário:', e);
+    if (e.message === 'Comentário pai não encontrado' || e.message === 'Comentário pai não pertence à mesma resenha') {
+      return res.status(400).json({ error: e.message });
+    }
     return res.status(500).json({ error: 'Erro ao criar comentário', details: e.message });
   }
 }
@@ -751,6 +804,9 @@ module.exports = {
   removerFavorito,
   listarFavoritosUsuario,
   verificarFavorito,
+  salvarLeitura,
+  listarLeiturasUsuario,
+  removerLeituraUsuario,
   uploadFotoPerfil,
   curtirResenha,
   descurtirResenha,

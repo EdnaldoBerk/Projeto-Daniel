@@ -11,6 +11,12 @@ export default function PgPerfil() {
   const [error, setError] = useState('');
   const [favoritos, setFavoritos] = useState([]);
   const [loadingFavoritos, setLoadingFavoritos] = useState(true);
+  const [leituras, setLeituras] = useState([]);
+  const [loadingLeituras, setLoadingLeituras] = useState(true);
+  const [catalogoLivros, setCatalogoLivros] = useState([]);
+  const [loadingCatalogo, setLoadingCatalogo] = useState(false);
+  const [showLeituraModal, setShowLeituraModal] = useState(false);
+  const [leituraModalStatus, setLeituraModalStatus] = useState('lendo');
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
@@ -44,6 +50,8 @@ export default function PgPerfil() {
     // Carregar dados completos do usuário
     loadUserData(parsed.id);
     loadFavoritos(parsed.id);
+    loadLeituras(parsed.id);
+    loadCatalogoLivros();
   }, [navigate]);
 
   const loadUserData = async (userId) => {
@@ -79,6 +87,86 @@ export default function PgPerfil() {
     }
   };
 
+  const loadLeituras = async (userId) => {
+    setLoadingLeituras(true);
+    try {
+      const response = await fetch(`http://localhost:3001/api/leituras/${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setLeituras(data);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar leituras:', err);
+    } finally {
+      setLoadingLeituras(false);
+    }
+  };
+
+  const loadCatalogoLivros = async () => {
+    setLoadingCatalogo(true);
+    try {
+      const response = await fetch('http://localhost:3001/api/admin/livros');
+      if (response.ok) {
+        const data = await response.json();
+        setCatalogoLivros((data || []).filter((livro) => livro.ativo !== false));
+      }
+    } catch (err) {
+      console.error('Erro ao carregar catálogo de livros:', err);
+    } finally {
+      setLoadingCatalogo(false);
+    }
+  };
+
+  const openLeituraModal = (status) => {
+    setLeituraModalStatus(status);
+    setShowLeituraModal(true);
+  };
+
+  const salvarLeitura = async (livroId) => {
+    try {
+      const response = await fetch('http://localhost:3001/api/leituras', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          usuarioId: user.id,
+          livroId,
+          status: leituraModalStatus
+        })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Erro ao salvar leitura');
+      }
+
+      await loadLeituras(user.id);
+      setShowLeituraModal(false);
+      setMessage(leituraModalStatus === 'finalizada' ? 'Livro adicionado em Leitura Finalizada!' : 'Livro adicionado em Estou Lendo!');
+      setTimeout(() => setMessage(''), 2500);
+    } catch (err) {
+      setError(err.message);
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
+  const removerLeitura = async (livroId) => {
+    try {
+      const response = await fetch(`http://localhost:3001/api/leituras/${user.id}/${livroId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        await loadLeituras(user.id);
+        setMessage('Livro removido da lista de leituras!');
+        setTimeout(() => setMessage(''), 2000);
+      }
+    } catch (err) {
+      console.error('Erro ao remover leitura:', err);
+      setError('Erro ao remover leitura');
+      setTimeout(() => setError(''), 2000);
+    }
+  };
+
   const handleRemoveFavorito = async (livroId) => {
     try {
       const response = await fetch(`http://localhost:3001/api/favoritos/${user.id}/${livroId}`, {
@@ -96,6 +184,9 @@ export default function PgPerfil() {
       setTimeout(() => setError(''), 2000);
     }
   };
+
+  const leiturasFinalizadas = leituras.filter((leitura) => leitura.status === 'finalizada');
+  const leiturasEmAndamento = leituras.filter((leitura) => leitura.status === 'lendo');
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
@@ -385,6 +476,146 @@ export default function PgPerfil() {
             <h2 className={styles.libraryTitle}>BIBLIOTECA</h2>
 
             <div className={styles.subsection}>
+              <h3 className={styles.subTitle}>LEITURA FINALIZADA 📘</h3>
+
+              {loadingLeituras ? (
+                <div className={styles.loadingText}>Carregando leituras...</div>
+              ) : (
+                <>
+                  {leiturasFinalizadas.length === 0 && (
+                    <p className={styles.sectionHint}>Adicione os livros que você já terminou de ler.</p>
+                  )}
+
+                  <div className={styles.grid}>
+                    {leiturasFinalizadas.map((leitura) => (
+                      <figure key={leitura.id} className={styles.bookCard}>
+                        <div className={styles.bookImageWrapper}>
+                          <img
+                            src={`http://localhost:3001${leitura.livro.fotoCapa}`}
+                            alt={leitura.livro.titulo}
+                            className={styles.bookCover}
+                            onClick={() => navigate('/resenha', {
+                              state: {
+                                livroId: leitura.livro.id,
+                                livro: {
+                                  id: leitura.livro.id,
+                                  titulo: leitura.livro.titulo,
+                                  autor: leitura.livro.autor,
+                                  fotoCapa: leitura.livro.fotoCapa
+                                }
+                              }
+                            })}
+                            onError={(e) => {
+                              e.target.src = 'https://via.placeholder.com/100x150?text=Sem+Imagem';
+                            }}
+                          />
+                          <button
+                            className={styles.removeFavorite}
+                            onClick={() => removerLeitura(leitura.livroId)}
+                            title="Remover da leitura finalizada"
+                          >
+                            ❌
+                          </button>
+                        </div>
+                        <figcaption
+                          className={styles.bookTitle}
+                          onClick={() => navigate('/resenha', {
+                            state: {
+                              livroId: leitura.livro.id,
+                              livro: {
+                                id: leitura.livro.id,
+                                titulo: leitura.livro.titulo,
+                                autor: leitura.livro.autor,
+                                fotoCapa: leitura.livro.fotoCapa
+                              }
+                            }
+                          })}
+                        >
+                          {leitura.livro.titulo}
+                        </figcaption>
+                      </figure>
+                    ))}
+
+                    <button className={styles.addBookCard} type="button" onClick={() => openLeituraModal('finalizada')}>
+                      <span className={styles.addBookPlus}>+</span>
+                      <span className={styles.addBookLabel}>Adicionar livro</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className={styles.subsection}>
+              <h3 className={styles.subTitle}>ESTOU LENDO 📖</h3>
+
+              {loadingLeituras ? (
+                <div className={styles.loadingText}>Carregando leituras...</div>
+              ) : (
+                <>
+                  {leiturasEmAndamento.length === 0 && (
+                    <p className={styles.sectionHint}>Adicione os livros que você está lendo agora.</p>
+                  )}
+
+                  <div className={styles.grid}>
+                    {leiturasEmAndamento.map((leitura) => (
+                      <figure key={leitura.id} className={styles.bookCard}>
+                        <div className={styles.bookImageWrapper}>
+                          <img
+                            src={`http://localhost:3001${leitura.livro.fotoCapa}`}
+                            alt={leitura.livro.titulo}
+                            className={styles.bookCover}
+                            onClick={() => navigate('/resenha', {
+                              state: {
+                                livroId: leitura.livro.id,
+                                livro: {
+                                  id: leitura.livro.id,
+                                  titulo: leitura.livro.titulo,
+                                  autor: leitura.livro.autor,
+                                  fotoCapa: leitura.livro.fotoCapa
+                                }
+                              }
+                            })}
+                            onError={(e) => {
+                              e.target.src = 'https://via.placeholder.com/100x150?text=Sem+Imagem';
+                            }}
+                          />
+                          <button
+                            className={styles.removeFavorite}
+                            onClick={() => removerLeitura(leitura.livroId)}
+                            title="Remover de estou lendo"
+                          >
+                            ❌
+                          </button>
+                        </div>
+                        <figcaption
+                          className={styles.bookTitle}
+                          onClick={() => navigate('/resenha', {
+                            state: {
+                              livroId: leitura.livro.id,
+                              livro: {
+                                id: leitura.livro.id,
+                                titulo: leitura.livro.titulo,
+                                autor: leitura.livro.autor,
+                                fotoCapa: leitura.livro.fotoCapa
+                              }
+                            }
+                          })}
+                        >
+                          {leitura.livro.titulo}
+                        </figcaption>
+                      </figure>
+                    ))}
+
+                    <button className={styles.addBookCard} type="button" onClick={() => openLeituraModal('lendo')}>
+                      <span className={styles.addBookPlus}>+</span>
+                      <span className={styles.addBookLabel}>Adicionar livro</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className={styles.subsection}>
               <h3 className={styles.subTitle}>FAVORITOS ⭐</h3>
               
               {loadingFavoritos ? (
@@ -450,6 +681,53 @@ export default function PgPerfil() {
               )}
             </div>
           </section>
+
+          {showLeituraModal && (
+            <div className={styles.modal} onClick={() => setShowLeituraModal(false)}>
+              <div className={`${styles.modalContent} ${styles.modalContentWide}`} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.modalHeader}>
+                  <h2>{leituraModalStatus === 'finalizada' ? 'Adicionar leitura finalizada' : 'Adicionar livro que estou lendo'}</h2>
+                  <button className={styles.closeButton} onClick={() => setShowLeituraModal(false)}>✖</button>
+                </div>
+
+                <div className={styles.modalBody}>
+                  <p className={styles.modalDescription}>
+                    Selecione uma capa do catálogo para salvar no seu perfil.
+                  </p>
+
+                  {loadingCatalogo ? (
+                    <div className={styles.loadingText}>Carregando catálogo...</div>
+                  ) : catalogoLivros.length === 0 ? (
+                    <div className={styles.emptyState}>
+                      <p>Nenhum livro disponível no catálogo.</p>
+                    </div>
+                  ) : (
+                    <div className={styles.catalogGrid}>
+                      {catalogoLivros.map((livro) => (
+                        <button
+                          key={livro.id}
+                          type="button"
+                          className={styles.catalogCard}
+                          onClick={() => salvarLeitura(livro.id)}
+                        >
+                          <img
+                            src={`http://localhost:3001${livro.fotoCapa}`}
+                            alt={livro.titulo}
+                            className={styles.catalogCover}
+                            onError={(e) => {
+                              e.target.src = 'https://via.placeholder.com/100x150?text=Sem+Imagem';
+                            }}
+                          />
+                          <span className={styles.catalogTitle}>{livro.titulo}</span>
+                          <span className={styles.catalogButtonLabel}>Adicionar</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           <hr className={styles.hr} />
 
