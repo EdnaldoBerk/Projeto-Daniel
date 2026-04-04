@@ -381,13 +381,44 @@ async function getComentariosByResenhaId(resenhaId) {
   }
 }
 
+async function cleanupAvaliacaoByComentario(usuarioId, resenhaId) {
+  const remainingComentarios = await prisma.comentario.count({
+    where: {
+      usuarioId: parseInt(usuarioId),
+      resenhaId: parseInt(resenhaId)
+    }
+  });
+
+  // Se o usuário não tiver mais comentários nessa resenha, removemos a avaliação dele.
+  if (remainingComentarios === 0) {
+    await prisma.avaliacaoResenha.deleteMany({
+      where: {
+        usuarioId: parseInt(usuarioId),
+        resenhaId: parseInt(resenhaId)
+      }
+    });
+  }
+}
+
 async function deleteComentario(comentarioId) {
   console.log('🗑️  Deletando comentário ID:', comentarioId);
   
   try {
-    const resultado = await prisma.comentario.delete({
-      where: { id: parseInt(comentarioId) }
+    const parsedComentarioId = parseInt(comentarioId);
+    const comentario = await prisma.comentario.findUnique({
+      where: { id: parsedComentarioId },
+      select: { id: true, usuarioId: true, resenhaId: true }
     });
+
+    if (!comentario) {
+      throw new Error('Comentário não encontrado');
+    }
+
+    const resultado = await prisma.comentario.delete({
+      where: { id: parsedComentarioId }
+    });
+
+    await cleanupAvaliacaoByComentario(comentario.usuarioId, comentario.resenhaId);
     
     console.log('✅ Comentário deletado');
     return resultado;
@@ -502,14 +533,26 @@ async function deleteComentarioAdmin(comentarioId) {
   console.log('🗑️  Deletando comentário ID:', comentarioId, '(admin)');
   
   try {
+    const parsedComentarioId = parseInt(comentarioId);
+    const comentario = await prisma.comentario.findUnique({
+      where: { id: parsedComentarioId },
+      select: { id: true, usuarioId: true, resenhaId: true }
+    });
+
+    if (!comentario) {
+      throw new Error('Comentário não encontrado');
+    }
+
     // Deletar denúncias associadas
     await prisma.denunciaComentario.deleteMany({
-      where: { comentarioId: parseInt(comentarioId) }
+      where: { comentarioId: parsedComentarioId }
     });
 
     const resultado = await prisma.comentario.delete({
-      where: { id: parseInt(comentarioId) }
+      where: { id: parsedComentarioId }
     });
+
+    await cleanupAvaliacaoByComentario(comentario.usuarioId, comentario.resenhaId);
     
     console.log('✅ Comentário deletado com sucesso por admin');
     return resultado;

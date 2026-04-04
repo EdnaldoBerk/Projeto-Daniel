@@ -718,7 +718,7 @@ async function deletarComentario(req, res) {
     return res.json({ message: 'Comentário deletado com sucesso' });
   } catch (e) {
     console.error('❌ Erro ao deletar comentário:', e);
-    if (e.code === 'P2025') {
+    if (e.code === 'P2025' || e.message === 'Comentário não encontrado') {
       return res.status(404).json({ error: 'Comentário não encontrado' });
     }
     return res.status(500).json({ error: 'Erro ao deletar comentário' });
@@ -809,7 +809,7 @@ async function deletarComentarioAdmin(req, res) {
     return res.json({ message: 'Comentário deletado com sucesso' });
   } catch (e) {
     console.error('❌ Erro ao deletar comentário:', e);
-    if (e.code === 'P2025') {
+    if (e.code === 'P2025' || e.message === 'Comentário não encontrado') {
       return res.status(404).json({ error: 'Comentário não encontrado' });
     }
     return res.status(500).json({ error: 'Erro ao deletar comentário' });

@@ -206,7 +206,12 @@ export default function PgResenha() {
 
   async function handlePostComment(e) {
     e.preventDefault();
-    if (!commentText.trim()) return;
+    const comentarioLimpo = commentText.trim();
+
+    if (!comentarioLimpo) {
+      alert('Escreva um comentário antes de publicar.');
+      return;
+    }
     
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
@@ -220,13 +225,13 @@ export default function PgResenha() {
       return;
     }
 
-    console.log('📤 Enviando comentário:', { resenhaId: resenha.id, usuarioId: user.id, texto: commentText.trim() });
+    console.log('📤 Enviando comentário:', { resenhaId: resenha.id, usuarioId: user.id, texto: comentarioLimpo });
 
     try {
       const comentarioRes = await api.post('/comentarios', {
         resenhaId: resenha.id,
         usuarioId: user.id,
-        texto: commentText.trim(),
+        texto: comentarioLimpo,
         nota: selectedRating
       });
 
@@ -476,7 +481,7 @@ export default function PgResenha() {
 
         {/* Comentários / estilo Disqus-like */}
         <section className={styles.commentsWrap}>
-          <h2 className={styles.sectionTitle}>Avaliações</h2>
+          <h2 className={`${styles.sectionTitle} ${styles.blockTitle}`}>Avaliações</h2>
 
           <div className={styles.ratingPanel}>
             <div className={styles.ratingTopRow}>
@@ -505,7 +510,7 @@ export default function PgResenha() {
             </p>
           </div>
 
-          <h2 className={styles.sectionTitle}>Comentários</h2>
+          <h2 className={`${styles.sectionTitle} ${styles.commentsTitle}`}>Comentários</h2>
 
           {!isLoggedIn ? (
             <div className={styles.loginPrompt}>
@@ -524,32 +529,35 @@ export default function PgResenha() {
                 <div className={styles.commentInputRow}>
 
                   <form onSubmit={handlePostComment} className={styles.commentForm}>
-                    <div className={styles.commentRatingRow}>
-                      <span className={styles.commentRatingLabel}>Sua nota para publicar:</span>
-                      <div className={styles.ratingButtons}>
-                        {[1, 2, 3, 4, 5].map((nota) => (
-                          <button
-                            key={nota}
-                            type="button"
-                            className={`${styles.starButton} ${nota <= selectedRating ? styles.starActive : ''}`}
-                            onClick={() => setSelectedRating(nota)}
-                            aria-label={`Selecionar ${nota} estrela${nota > 1 ? 's' : ''}`}
-                            title={`${nota} estrela${nota > 1 ? 's' : ''}`}
-                          >
-                            ★
-                          </button>
-                        ))}
-                      </div>
-                    </div>
                     <input
                       type="text"
-                      placeholder="Iniciar debate..."
+                      placeholder="Escreva seu comentário"
                       className={styles.commentInput}
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
+                      required
                     />
-                    <div className={styles.commentActions}>
-                      <button type="submit" className={styles.postButton}>Publicar</button>
+                    <div className={styles.commentBottomRow}>
+                      <div className={styles.commentActions}>
+                        <button type="submit" className={styles.postButton}>Publicar</button>
+                      </div>
+                      <div className={styles.commentRatingRow}>
+                        <span className={styles.commentRatingLabel}>Sua nota para publicar:</span>
+                        <div className={styles.ratingButtons}>
+                          {[1, 2, 3, 4, 5].map((nota) => (
+                            <button
+                              key={nota}
+                              type="button"
+                              className={`${styles.starButton} ${nota <= selectedRating ? styles.starActive : ''}`}
+                              onClick={() => setSelectedRating(nota)}
+                              aria-label={`Selecionar ${nota} estrela${nota > 1 ? 's' : ''}`}
+                              title={`${nota} estrela${nota > 1 ? 's' : ''}`}
+                            >
+                              ★
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </form>
                 </div>

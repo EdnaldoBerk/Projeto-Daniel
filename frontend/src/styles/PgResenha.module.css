@@ -425,14 +425,18 @@
 /* Comments area */
 .commentsWrap{ margin-top: 22px; }
 
+.blockTitle {
+  margin-bottom: 10px;
+}
+
 /* Avaliação */
 .ratingPanel{
-  margin-top: 14px;
-  background: #f4f4f4;
-  color: #111;
+  margin-top: 6px;
+  background: linear-gradient(180deg, rgba(26,27,33,0.96), rgba(26,27,33,0.9));
+  color: var(--text);
   border-radius: 10px;
-  border: 1px solid #d7d7d7;
-  padding: 12px;
+  border: 1px solid rgba(100,108,255,0.22);
+  padding: 16px;
 }
 
 .ratingTopRow{
@@ -442,90 +446,97 @@
 }
 
 .ratingTopStars{
-  color: #ff8a00;
+  color: #ffce4a;
   letter-spacing: 2px;
   font-size: 16px;
   line-height: 1;
 }
 
 .ratingTopValue{
-  color: #101010;
+  color: var(--text);
   font-size: 22px;
   font-weight: 700;
 }
 
 .ratingTotal{
   margin: 6px 0 10px;
-  color: #525a61;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
 .ratingDistribution{
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  margin-top: 8px;
 }
 
 .ratingLine{
   display: grid;
   grid-template-columns: 74px 1fr 38px;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
 
 .ratingLineLabel{
-  color: #1265b3;
+  color: #cfd3ff;
   font-size: 13px;
 }
 
 .ratingBarTrack{
-  height: 18px;
-  background: #fff;
-  border: 1px solid #9e9e9e;
+  height: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(100,108,255,0.25);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .ratingBarFill{
   height: 100%;
-  background: #ff6f00;
+  background: linear-gradient(90deg, #646cff, #7c83ff);
 }
 
 .ratingLinePercent{
-  color: #1265b3;
+  color: #cfd3ff;
   font-size: 13px;
   text-align: right;
 }
 
 .starButton{
-  width: 36px;
-  height: 36px;
-  border: 1px solid #cfcfcf;
-  border-radius: 8px;
+  width: auto;
+  height: auto;
+  border: none;
+  border-radius: 0;
   background: transparent;
-  color: #8b8f96;
-  font-size: 20px;
+  color: #7d8392;
+  font-size: 28px;
   line-height: 1;
   cursor: pointer;
+  padding: 0 2px;
   transition: all var(--transition);
 }
 
 .starButton:hover{
-  transform: translateY(-2px);
-  border-color: rgba(255, 206, 74, 0.7);
+  transform: translateY(-1px) scale(1.04);
   color: #ffce4a;
 }
 
 .starActive{
   color: #ffce4a;
-  border-color: rgba(255, 206, 74, 0.55);
-  background: rgba(255, 206, 74, 0.08);
+  background: transparent;
 }
 
 .ratingSummary{
-  margin: 8px 0 0;
-  color: #525a61;
+  margin: 12px 0 0;
+  color: var(--text-muted);
   font-size: 12px;
+}
+
+.commentsTitle {
+  margin-top: 18px;
+  margin-bottom: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(100,108,255,0.16);
 }
 
 /* Comment card (input) */
@@ -551,20 +562,27 @@
   justify-content:center;
 }
 .commentForm{ flex:1; display:flex; flex-direction:column; gap:10px; align-items:stretch; }
+.commentBottomRow{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
 .commentRatingRow{
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: flex-end;
+  gap: 14px;
   flex-wrap: wrap;
 }
 .commentRatingLabel{
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 .ratingButtons{
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  align-items: center;
 }
 .commentInput{
   flex:1;
@@ -679,9 +697,11 @@
   .title{ font-size: 1.05rem; }
   .metaTable th, .metaTable td{ padding:10px; font-size:13px; }
   .ratingTopValue { font-size: 18px; }
-  .ratingLine { grid-template-columns: 74px 1fr 36px; }
+  .ratingLine { grid-template-columns: 68px 1fr 34px; gap: 8px; }
   .ratingLineLabel, .ratingLinePercent { font-size: 13px; }
-  .starButton { width: 34px; height: 34px; font-size: 19px; }
+  .starButton { font-size: 24px; }
+  .commentBottomRow { flex-direction: column; align-items: flex-start; }
+  .commentRatingRow { width: 100%; justify-content: flex-end; }
   .likeButton {
     top: 12px;
     right: 12px;
