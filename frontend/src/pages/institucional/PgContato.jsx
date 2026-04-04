@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from '../styles/PgContato.module.css';
+import styles from '../../styles/PgContato.module.css';
 
 export default function PgContato() {
   const [formData, setFormData] = useState({

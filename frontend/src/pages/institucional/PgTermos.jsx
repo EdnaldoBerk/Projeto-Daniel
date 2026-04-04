@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../styles/PgTermos.module.css';
+import styles from '../../styles/PgTermos.module.css';
 
 export default function PgTermos() {
   return (

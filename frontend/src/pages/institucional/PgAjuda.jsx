@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from '../styles/PgAjuda.module.css';
+import styles from '../../styles/PgAjuda.module.css';
 
 export default function PgAjuda() {
   const [expandedId, setExpandedId] = useState(null);
