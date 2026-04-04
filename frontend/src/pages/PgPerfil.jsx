@@ -230,7 +230,14 @@ export default function PgPerfil() {
         setPhotoPreview(null);
         setTimeout(() => setMessage(''), 3000);
       } else {
-        throw new Error('Erro ao fazer upload da foto');
+        let errorMessage = 'Erro ao fazer upload da foto';
+        try {
+          const data = await response.json();
+          if (data?.error) errorMessage = data.error;
+        } catch (_) {
+          // Mantém mensagem padrão quando a resposta não vem em JSON.
+        }
+        throw new Error(errorMessage);
       }
     } catch (err) {
       setError(err.message);

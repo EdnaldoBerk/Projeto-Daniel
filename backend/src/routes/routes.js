@@ -4,6 +4,22 @@ const { uploadBooks, uploadPerfil } = require('../config/multer');
 
 const router = Router();
 
+const handleUploadPerfil = (req, res, next) => {
+	uploadPerfil.single('fotoPerfil')(req, res, (err) => {
+		if (!err) return next();
+
+		if (err.code === 'LIMIT_FILE_SIZE') {
+			return res.status(400).json({ error: 'Arquivo muito grande. O tamanho máximo é 10MB.' });
+		}
+
+		if (err.message) {
+			return res.status(400).json({ error: err.message });
+		}
+
+		return res.status(500).json({ error: 'Erro ao processar upload da imagem' });
+	});
+};
+
 router.post('/registro', registrarUsuario);
 router.post('/login', logarUsuario);
 router.post('/admin/login', logarAdmin);
@@ -49,7 +65,7 @@ router.get('/leituras/:usuarioId', listarLeiturasUsuario);
 router.delete('/leituras/:usuarioId/:livroId', removerLeituraUsuario);
 
 // Rota de upload de foto de perfil
-router.post('/upload/foto-perfil', uploadPerfil.single('fotoPerfil'), uploadFotoPerfil);
+router.post('/upload/foto-perfil', handleUploadPerfil, uploadFotoPerfil);
 
 // Rotas de curtidas em resenhas
 router.post('/resenhas/:resenhaId/curtir', curtirResenha);

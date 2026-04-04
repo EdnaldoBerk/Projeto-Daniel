@@ -1,4 +1,6 @@
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, addOrUpdateLeitura, removeLeitura, getLeiturasByUsuarioId, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha, addOrUpdateAvaliacaoResenha, getAvaliacaoStatsByResenhaId, searchLivros, createComentario, getComentariosByResenhaId, deleteComentario, getComentarioById, getAllComentariosAdmin, updateComentarioAdmin, deleteComentarioAdmin, criarDenunciaComentario, getDenunciasComentarios, atualizarStatusDenuncia, deleteDenunciaComentario } = require('../services/service');
 
 const RESET_TOKEN_TTL_MS = 15 * 60 * 1000;
@@ -598,15 +600,35 @@ async function removerLeituraUsuario(req, res) {
 // Upload de foto de perfil
 async function uploadFotoPerfil(req, res) {
   const { usuarioId } = req.body;
+  const userIdParsed = parseInt(usuarioId);
   
   try {
+    if (!usuarioId || Number.isNaN(userIdParsed)) {
+      return res.status(400).json({ error: 'Usuário inválido' });
+    }
+
     if (!req.file) {
       return res.status(400).json({ error: 'Nenhum arquivo enviado' });
     }
 
+    const usuarioAtual = await getUserById(userIdParsed);
+    if (!usuarioAtual) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
     const fotoPerfil = `/uploads/perfil/${req.file.filename}`;
     
-    await updateUser(usuarioId, { fotoPerfil });
+    await updateUser(userIdParsed, { fotoPerfil });
+
+    if (usuarioAtual.fotoPerfil && usuarioAtual.fotoPerfil !== fotoPerfil) {
+      const relativePath = usuarioAtual.fotoPerfil.replace(/^\/+/, '');
+      const oldPhotoPath = path.join(__dirname, '..', '..', relativePath);
+      fs.unlink(oldPhotoPath, (err) => {
+        if (err && err.code !== 'ENOENT') {
+          console.warn('Aviso ao remover foto antiga de perfil:', err.message);
+        }
+      });
+    }
     
     return res.json({ fotoPerfil, message: 'Foto atualizada com sucesso' });
   } catch (e) {
