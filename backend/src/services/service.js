@@ -254,16 +254,87 @@ async function checkCurtidaResenha(usuarioId, resenhaId) {
   return !!curtida;
 }
 
+async function addOrUpdateAvaliacaoResenha(usuarioId, resenhaId, nota) {
+  return prisma.avaliacaoResenha.upsert({
+    where: {
+      usuarioId_resenhaId: {
+        usuarioId: parseInt(usuarioId),
+        resenhaId: parseInt(resenhaId)
+      }
+    },
+    update: {
+      nota: parseInt(nota)
+    },
+    create: {
+      usuarioId: parseInt(usuarioId),
+      resenhaId: parseInt(resenhaId),
+      nota: parseInt(nota)
+    }
+  });
+}
+
+async function getAvaliacaoStatsByResenhaId(resenhaId, usuarioId = null) {
+  const parsedResenhaId = parseInt(resenhaId);
+  const aggregate = await prisma.avaliacaoResenha.aggregate({
+    where: { resenhaId: parsedResenhaId },
+    _avg: { nota: true },
+    _count: { nota: true }
+  });
+
+  const grouped = await prisma.avaliacaoResenha.groupBy({
+    by: ['nota'],
+    where: { resenhaId: parsedResenhaId },
+    _count: { nota: true }
+  });
+
+  const totalAvaliacoes = aggregate._count.nota || 0;
+  const distribution = {
+    1: { count: 0, percentage: 0 },
+    2: { count: 0, percentage: 0 },
+    3: { count: 0, percentage: 0 },
+    4: { count: 0, percentage: 0 },
+    5: { count: 0, percentage: 0 }
+  };
+
+  grouped.forEach((item) => {
+    const nota = item.nota;
+    const count = item._count.nota;
+    const percentage = totalAvaliacoes > 0 ? Math.round((count / totalAvaliacoes) * 100) : 0;
+    distribution[nota] = { count, percentage };
+  });
+
+  let userRating = 0;
+  if (usuarioId) {
+    const avaliacaoUsuario = await prisma.avaliacaoResenha.findUnique({
+      where: {
+        usuarioId_resenhaId: {
+          usuarioId: parseInt(usuarioId),
+          resenhaId: parsedResenhaId
+        }
+      }
+    });
+    userRating = avaliacaoUsuario?.nota || 0;
+  }
+
+  return {
+    media: aggregate._avg.nota ? Number(aggregate._avg.nota.toFixed(1)) : 0,
+    totalAvaliacoes,
+    distribution,
+    userRating
+  };
+}
+
 // Funções de Comentários
-async function createComentario(usuarioId, resenhaId, texto) {
-  console.log('💾 Salvando comentário no banco:', { usuarioId, resenhaId, texto: texto?.substring(0, 50) });
+async function createComentario(usuarioId, resenhaId, texto, nota = null) {
+  console.log('💾 Salvando comentário no banco:', { usuarioId, resenhaId, nota, texto: texto?.substring(0, 50) });
   
   try {
     const comentario = await prisma.comentario.create({
       data: {
         usuarioId: parseInt(usuarioId),
         resenhaId: parseInt(resenhaId),
-        texto
+        texto,
+        nota: nota !== null ? parseInt(nota) : null
       },
       include: {
         usuario: {
@@ -606,6 +677,8 @@ module.exports = {
   addCurtidaResenha,
   removeCurtidaResenha,
   checkCurtidaResenha,
+  addOrUpdateAvaliacaoResenha,
+  getAvaliacaoStatsByResenhaId,
   searchLivros,
   createComentario,
   getComentariosByResenhaId,

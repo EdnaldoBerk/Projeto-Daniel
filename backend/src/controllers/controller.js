@@ -1,4 +1,17 @@
-const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha, searchLivros, createComentario, getComentariosByResenhaId, deleteComentario, getComentarioById, getAllComentariosAdmin, updateComentarioAdmin, deleteComentarioAdmin, criarDenunciaComentario, getDenunciasComentarios, atualizarStatusDenuncia, deleteDenunciaComentario } = require('../services/service');
+const crypto = require('crypto');
+const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha, addOrUpdateAvaliacaoResenha, getAvaliacaoStatsByResenhaId, searchLivros, createComentario, getComentariosByResenhaId, deleteComentario, getComentarioById, getAllComentariosAdmin, updateComentarioAdmin, deleteComentarioAdmin, criarDenunciaComentario, getDenunciasComentarios, atualizarStatusDenuncia, deleteDenunciaComentario } = require('../services/service');
+
+const RESET_TOKEN_TTL_MS = 15 * 60 * 1000;
+const passwordResetTokens = new Map();
+
+function cleanupExpiredResetTokens() {
+  const now = Date.now();
+  for (const [token, payload] of passwordResetTokens.entries()) {
+    if (payload.expiresAt <= now) {
+      passwordResetTokens.delete(token);
+    }
+  }
+}
 
 async function registrarUsuario(req, res) {
   // TODO: validação e hashing de senha
@@ -94,6 +107,90 @@ async function obterUsuarioPorEmail(req, res) {
   } catch (e) {
     console.error('Erro ao buscar usuário:', e);
     return res.status(500).json({ error: 'Erro ao buscar usuário' });
+  }
+}
+
+async function solicitarRecuperacaoSenha(req, res) {
+  const { email } = req.body;
+
+  if (!email || String(email).trim().length === 0) {
+    return res.status(400).json({ error: 'Email é obrigatório' });
+  }
+
+  try {
+    cleanupExpiredResetTokens();
+    const usuario = await findUserByEmail(String(email).trim());
+
+    // Resposta genérica para não revelar se o email existe.
+    if (!usuario) {
+      return res.json({
+        message: 'Se o email estiver cadastrado, enviaremos instruções de recuperação.'
+      });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = Date.now() + RESET_TOKEN_TTL_MS;
+
+    passwordResetTokens.set(token, {
+      userId: usuario.id,
+      expiresAt
+    });
+
+    const resetLink = `/esqueci-senha?token=${encodeURIComponent(token)}`;
+
+    return res.json({
+      message: 'Solicitação recebida. Use o link de recuperação para redefinir sua senha.',
+      resetToken: token,
+      resetLink,
+      expiresInMinutes: 15
+    });
+  } catch (e) {
+    console.error('Erro ao solicitar recuperação de senha:', e);
+    return res.status(500).json({ error: 'Erro ao processar recuperação de senha' });
+  }
+}
+
+async function redefinirSenha(req, res) {
+  const { token, novaSenha, confirmarSenha } = req.body;
+
+  if (!token || !novaSenha || !confirmarSenha) {
+    return res.status(400).json({ error: 'Token e nova senha são obrigatórios' });
+  }
+
+  if (String(novaSenha).length < 6) {
+    return res.status(400).json({ error: 'A senha deve ter pelo menos 6 caracteres' });
+  }
+
+  if (novaSenha !== confirmarSenha) {
+    return res.status(400).json({ error: 'As senhas não conferem' });
+  }
+
+  try {
+    cleanupExpiredResetTokens();
+    const payload = passwordResetTokens.get(String(token));
+
+    if (!payload) {
+      return res.status(400).json({ error: 'Token inválido ou expirado' });
+    }
+
+    if (payload.expiresAt <= Date.now()) {
+      passwordResetTokens.delete(String(token));
+      return res.status(400).json({ error: 'Token inválido ou expirado' });
+    }
+
+    await updateUser(payload.userId, { senha: novaSenha });
+
+    // Invalida todos os tokens pendentes do usuário após redefinir senha.
+    for (const [storedToken, storedPayload] of passwordResetTokens.entries()) {
+      if (storedPayload.userId === payload.userId) {
+        passwordResetTokens.delete(storedToken);
+      }
+    }
+
+    return res.json({ message: 'Senha redefinida com sucesso' });
+  } catch (e) {
+    console.error('Erro ao redefinir senha:', e);
+    return res.status(500).json({ error: 'Erro ao redefinir senha' });
   }
 }
 
@@ -533,19 +630,60 @@ async function verificarCurtidaResenha(req, res) {
   }
 }
 
+async function avaliarResenha(req, res) {
+  const { resenhaId } = req.params;
+  const { usuarioId, nota } = req.body;
+
+  try {
+    if (!usuarioId || nota === undefined) {
+      return res.status(400).json({ error: 'usuarioId e nota são obrigatórios' });
+    }
+
+    const notaNumero = Number(nota);
+    if (!Number.isInteger(notaNumero) || notaNumero < 1 || notaNumero > 5) {
+      return res.status(400).json({ error: 'A nota deve ser um inteiro entre 1 e 5' });
+    }
+
+    await addOrUpdateAvaliacaoResenha(usuarioId, resenhaId, notaNumero);
+    const stats = await getAvaliacaoStatsByResenhaId(resenhaId, usuarioId);
+    return res.json(stats);
+  } catch (e) {
+    console.error('Erro ao avaliar resenha:', e);
+    return res.status(500).json({ error: 'Erro ao registrar avaliação' });
+  }
+}
+
+async function obterAvaliacaoResenha(req, res) {
+  const { resenhaId } = req.params;
+  const { usuarioId } = req.query;
+
+  try {
+    const stats = await getAvaliacaoStatsByResenhaId(resenhaId, usuarioId || null);
+    return res.json(stats);
+  } catch (e) {
+    console.error('Erro ao obter avaliação da resenha:', e);
+    return res.status(500).json({ error: 'Erro ao obter avaliação da resenha' });
+  }
+}
+
 // Controladores de Comentários
 async function criarComentario(req, res) {
-  const { resenhaId, usuarioId, texto } = req.body;
+  const { resenhaId, usuarioId, texto, nota } = req.body;
   
-  console.log('📝 Recebido pedido de criar comentário:', { resenhaId, usuarioId, texto: texto?.substring(0, 50) });
+  console.log('📝 Recebido pedido de criar comentário:', { resenhaId, usuarioId, nota, texto: texto?.substring(0, 50) });
   
   try {
     if (!resenhaId || !usuarioId || !texto) {
       console.error('❌ Campos faltando:', { resenhaId, usuarioId, textoExists: !!texto });
       return res.status(400).json({ error: 'Campos obrigatórios faltando' });
     }
+
+    const notaNumero = Number(nota);
+    if (!Number.isInteger(notaNumero) || notaNumero < 1 || notaNumero > 5) {
+      return res.status(400).json({ error: 'A nota do comentário deve ser um inteiro entre 1 e 5' });
+    }
     
-    const comentario = await createComentario(usuarioId, resenhaId, texto);
+    const comentario = await createComentario(usuarioId, resenhaId, texto, notaNumero);
     console.log('✅ Comentário criado com sucesso:', comentario);
     return res.status(201).json(comentario);
   } catch (e) {
@@ -591,6 +729,8 @@ module.exports = {
   registrarUsuario, 
   logarUsuario, 
   logarAdmin, 
+  solicitarRecuperacaoSenha,
+  redefinirSenha,
   obterUsuarioPorEmail, 
   listarUsuarios, 
   buscarUsuarioPorId, 
@@ -615,6 +755,8 @@ module.exports = {
   curtirResenha,
   descurtirResenha,
   verificarCurtidaResenha,
+  avaliarResenha,
+  obterAvaliacaoResenha,
   criarComentario,
   listarComentariosResenha,
   deletarComentario,

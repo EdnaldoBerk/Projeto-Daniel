@@ -10,6 +10,7 @@ import { PgCadastro } from './pages/PgCadastro'
 import PgResenha from './pages/PgResenha'
 import PgBusca from './pages/PgBusca'
 import PgPerfil from './pages/PgPerfil'
+import PgEsqueciSenha from './pages/PgEsqueciSenha'
 import PgAjuda from './pages/institucional/PgAjuda'
 import PgContato from './pages/institucional/PgContato'
 import PgTermos from './pages/institucional/PgTermos'
@@ -155,6 +156,7 @@ function AppLayout() {
   const location = useLocation();
   const hideHeaderFooter = location.pathname === '/login' || 
                           location.pathname === '/cadastro' ||
+                          location.pathname === '/esqueci-senha' ||
                           location.pathname.startsWith('/admin');
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -163,6 +165,7 @@ function AppLayout() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<PgLogin />} />
         <Route path="/cadastro" element={<PgCadastro />} />
+        <Route path="/esqueci-senha" element={<PgEsqueciSenha />} />
         <Route path="/resenha" element={<PgResenha />} />
         <Route path="/busca" element={<PgBusca />} />
         <Route path="/perfil" element={<PgPerfil />} />

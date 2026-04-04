@@ -153,6 +153,11 @@ export default function PgAdminComentarios() {
     navigate('/admin/login');
   };
 
+  const renderStars = (nota) => {
+    if (!nota || nota < 1 || nota > 5) return '-';
+    return `${'★'.repeat(nota)}${'☆'.repeat(5 - nota)}`;
+  };
+
   if (!admin) return <div>Carregando...</div>;
 
   return (
@@ -259,6 +264,7 @@ export default function PgAdminComentarios() {
                 <tr>
                   <th>ID</th>
                   <th>Usuário</th>
+                  <th>Avaliação</th>
                   <th>Comentário</th>
                   <th>Resenha</th>
                   <th>Denúncias</th>
@@ -269,13 +275,16 @@ export default function PgAdminComentarios() {
               <tbody>
                 {comentarios.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className={styles.emptyRow}>Nenhum comentário encontrado</td>
+                    <td colSpan="8" className={styles.emptyRow}>Nenhum comentário encontrado</td>
                   </tr>
                 ) : (
                   comentarios.map((comentario) => (
                     <tr key={comentario.id}>
                       <td>{comentario.id}</td>
                       <td>{comentario.usuario?.nome || 'Anônimo'}</td>
+                      <td>
+                        <span className={styles.ratingStars}>{renderStars(comentario.nota)}</span>
+                      </td>
                       <td className={styles.commentCell}>
                         {editingId === comentario.id ? (
                           <textarea
@@ -397,6 +406,9 @@ export default function PgAdminComentarios() {
                 Por: <strong>{selectedComentario.usuario.nome}</strong> em{' '}
                 {new Date(selectedComentario.createdAt).toLocaleDateString('pt-BR')}
               </small>
+              <p className={styles.modalRating}>
+                <strong>Avaliação:</strong> <span className={styles.ratingStars}>{renderStars(selectedComentario.nota)}</span>
+              </p>
             </div>
 
             <div className={styles.denunciasDetalhes}>

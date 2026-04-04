@@ -39,12 +39,24 @@ export default function PgResenha() {
   const [resenha, setResenha] = useState(null);
   const [livroCompleto, setLivroCompleto] = useState(livro || null);
   const [loading, setLoading] = useState(true);
-  const [reaction, setReaction] = useState(null);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
   const [curtidas, setCurtidas] = useState(0);
   const [curtiu, setCurtiu] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [ratingStats, setRatingStats] = useState({
+    media: 0,
+    totalAvaliacoes: 0,
+    distribution: {
+      1: { count: 0, percentage: 0 },
+      2: { count: 0, percentage: 0 },
+      3: { count: 0, percentage: 0 },
+      4: { count: 0, percentage: 0 },
+      5: { count: 0, percentage: 0 }
+    }
+  });
   const [comentarioParaDenunciar, setComentarioParaDenunciar] = useState(null);
 
   useEffect(() => {
@@ -107,6 +119,8 @@ export default function PgResenha() {
             console.error('Erro ao verificar curtida:', err);
           }
         }
+
+        await carregarAvaliacoes(resenhas[0].id, user.id || null);
       } else {
         console.log('❌ Nenhuma resenha encontrada para este livro');
         setResenha(null);
@@ -116,6 +130,42 @@ export default function PgResenha() {
       alert('Erro ao carregar resenha do livro');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function carregarAvaliacoes(resenhaId, usuarioId = null) {
+    try {
+      const query = usuarioId ? `?usuarioId=${encodeURIComponent(usuarioId)}` : '';
+      const response = await api.get(`/resenhas/${resenhaId}/avaliacoes${query}`);
+      setRatingStats({
+        media: response.data?.media || 0,
+        totalAvaliacoes: response.data?.totalAvaliacoes || 0,
+        distribution: response.data?.distribution || {
+          1: { count: 0, percentage: 0 },
+          2: { count: 0, percentage: 0 },
+          3: { count: 0, percentage: 0 },
+          4: { count: 0, percentage: 0 },
+          5: { count: 0, percentage: 0 }
+        }
+      });
+      const notaUsuario = response.data?.userRating || 0;
+      setUserRating(notaUsuario);
+      setSelectedRating(notaUsuario);
+    } catch (error) {
+      console.error('Erro ao carregar avaliações:', error);
+      setRatingStats({
+        media: 0,
+        totalAvaliacoes: 0,
+        distribution: {
+          1: { count: 0, percentage: 0 },
+          2: { count: 0, percentage: 0 },
+          3: { count: 0, percentage: 0 },
+          4: { count: 0, percentage: 0 },
+          5: { count: 0, percentage: 0 }
+        }
+      });
+      setUserRating(0);
+      setSelectedRating(0);
     }
   }
 
@@ -154,7 +204,7 @@ export default function PgResenha() {
     }
   }
 
-  function handlePostComment(e) {
+  async function handlePostComment(e) {
     e.preventDefault();
     if (!commentText.trim()) return;
     
@@ -165,26 +215,39 @@ export default function PgResenha() {
       return;
     }
 
+    if (!selectedRating || selectedRating < 1 || selectedRating > 5) {
+      alert('Escolha de 1 a 5 estrelas para publicar seu comentário.');
+      return;
+    }
+
     console.log('📤 Enviando comentário:', { resenhaId: resenha.id, usuarioId: user.id, texto: commentText.trim() });
 
-    // Enviar para o backend
-    api.post('/comentarios', {
-      resenhaId: resenha.id,
-      usuarioId: user.id,
-      texto: commentText.trim()
-    })
-    .then(response => {
-      console.log('✅ Comentário criado com sucesso:', response.data);
-      // Adiciona o novo comentário ao início da lista
-      setComments((s) => [response.data, ...s]);
+    try {
+      const comentarioRes = await api.post('/comentarios', {
+        resenhaId: resenha.id,
+        usuarioId: user.id,
+        texto: commentText.trim(),
+        nota: selectedRating
+      });
+
+      const avaliacaoRes = await api.post(`/resenhas/${resenha.id}/avaliacoes`, {
+        usuarioId: user.id,
+        nota: selectedRating
+      });
+
+      console.log('✅ Comentário e avaliação enviados com sucesso');
+      setComments((s) => [comentarioRes.data, ...s]);
       setCommentText("");
-    })
-    .catch(error => {
-      console.error('❌ Erro ao enviar comentário:', error);
-      console.error('Status:', error.response?.status);
-      console.error('Dados do erro:', error.response?.data);
+      setUserRating(avaliacaoRes.data?.userRating || selectedRating);
+      setRatingStats({
+        media: avaliacaoRes.data?.media || 0,
+        totalAvaliacoes: avaliacaoRes.data?.totalAvaliacoes || 0,
+        distribution: avaliacaoRes.data?.distribution || ratingStats.distribution
+      });
+    } catch (error) {
+      console.error('❌ Erro ao enviar comentário/avaliação:', error);
       alert(`Erro ao enviar comentário: ${error.response?.data?.error || error.message}`);
-    });
+    }
   }
 
   function abrirModalDenuncia(comentario) {
@@ -413,6 +476,35 @@ export default function PgResenha() {
 
         {/* Comentários / estilo Disqus-like */}
         <section className={styles.commentsWrap}>
+          <h2 className={styles.sectionTitle}>Avaliações</h2>
+
+          <div className={styles.ratingPanel}>
+            <div className={styles.ratingTopRow}>
+              <div className={styles.ratingTopStars}>★★★★★</div>
+              <strong className={styles.ratingTopValue}>{ratingStats.media.toFixed(1).replace('.', ',')} de 5</strong>
+            </div>
+            <p className={styles.ratingTotal}>{ratingStats.totalAvaliacoes} classificações globais</p>
+
+            <div className={styles.ratingDistribution}>
+              {[5, 4, 3, 2, 1].map((nota) => (
+                <div key={nota} className={styles.ratingLine}>
+                  <span className={styles.ratingLineLabel}>{nota} estrela{nota > 1 ? 's' : ''}</span>
+                  <div className={styles.ratingBarTrack}>
+                    <div
+                      className={styles.ratingBarFill}
+                      style={{ width: `${ratingStats.distribution?.[nota]?.percentage || 0}%` }}
+                    />
+                  </div>
+                  <span className={styles.ratingLinePercent}>{ratingStats.distribution?.[nota]?.percentage || 0}%</span>
+                </div>
+              ))}
+            </div>
+
+            <p className={styles.ratingSummary}>
+              Sua avaliação atual: {userRating || '-'} estrela{userRating > 1 ? 's' : ''}
+            </p>
+          </div>
+
           <h2 className={styles.sectionTitle}>Comentários</h2>
 
           {!isLoggedIn ? (
@@ -427,45 +519,28 @@ export default function PgResenha() {
             </div>
           ) : (
             <>
-              {/* Policy card */}
-              <div className={styles.policyCard}>
-                <div className={styles.policyText}>
-                  <strong>Política de comentários</strong>
-                  <p>Por favor, leia nossa política de comentários antes de postar.</p>
-                </div>
-                <button className={styles.policyButton}>Compreendi</button>
-              </div>
-
-              {/* Reactions */}
-              <div className={styles.reactionsRow}>
-                <div className={styles.reactionsTitle}>O que você achou?</div>
-                <div className={styles.reactionButtons}>
-                  {[
-                    { id: "like", emoji: "👍", label: "Gostei" },
-                    { id: "fun", emoji: "😆", label: "Engraçado" },
-                    { id: "love", emoji: "😍", label: "Amei" },
-                    { id: "wow", emoji: "😮", label: "Uau" },
-                    { id: "sad", emoji: "😢", label: "Triste" },
-                  ].map((r) => (
-                    <button
-                      key={r.id}
-                      className={`${styles.reactionBtn} ${reaction === r.id ? styles.reactionActive : ""}`}
-                      onClick={() => setReaction(r.id)}
-                      aria-pressed={reaction === r.id}
-                      title={r.label}
-                    >
-                      <span className={styles.emoji}>{r.emoji}</span>
-                      <small className={styles.reactionLabel}>{r.label}</small>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Comment input with social icons (simulated) */}
               <div className={styles.commentCard}>
                 <div className={styles.commentInputRow}>
 
                   <form onSubmit={handlePostComment} className={styles.commentForm}>
+                    <div className={styles.commentRatingRow}>
+                      <span className={styles.commentRatingLabel}>Sua nota para publicar:</span>
+                      <div className={styles.ratingButtons}>
+                        {[1, 2, 3, 4, 5].map((nota) => (
+                          <button
+                            key={nota}
+                            type="button"
+                            className={`${styles.starButton} ${nota <= selectedRating ? styles.starActive : ''}`}
+                            onClick={() => setSelectedRating(nota)}
+                            aria-label={`Selecionar ${nota} estrela${nota > 1 ? 's' : ''}`}
+                            title={`${nota} estrela${nota > 1 ? 's' : ''}`}
+                          >
+                            ★
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     <input
                       type="text"
                       placeholder="Iniciar debate..."
@@ -498,6 +573,11 @@ export default function PgResenha() {
                         <div className={styles.commentMeta}>
                           <strong>{nomeUsuario}</strong>
                           <time dateTime={c.createdAt} className={styles.commentTime}>{dataComentario}</time>
+                          {c.nota && (
+                            <div className={styles.commentStars} aria-label={`Comentário avaliado com ${c.nota} estrelas`}>
+                              {'★'.repeat(c.nota)}{'☆'.repeat(5 - c.nota)}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <p className={styles.commentText}>{c.texto}</p>

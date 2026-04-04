@@ -78,9 +78,13 @@ export function PgLogin() {
           </form>
           {error && <p style={{ color: '#ff6b6b', marginTop: '0.75rem' }}>{error}</p>}
 
-          <a href="#" className={styles.forgotPassword}>
+          <button
+            type="button"
+            className={styles.forgotPasswordButton}
+            onClick={() => navigate('/esqueci-senha')}
+          >
             Esqueceu sua senha?
-          </a>
+          </button>
         </div>
       </section>
 

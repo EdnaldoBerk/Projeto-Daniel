@@ -32,6 +32,24 @@ export async function loginUser({ email, senha }) {
   return handleResponse(res);
 }
 
+export async function requestPasswordReset({ email }) {
+  const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
+  return handleResponse(res);
+}
+
+export async function resetPassword({ token, novaSenha, confirmarSenha }) {
+  const res = await fetch(`${BASE_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, novaSenha, confirmarSenha })
+  });
+  return handleResponse(res);
+}
+
 export async function fetchUserByEmail(email) {
   const res = await fetch(`${BASE_URL}/usuario/${encodeURIComponent(email)}`);
   return handleResponse(res);

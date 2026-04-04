@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { registrarUsuario, logarUsuario, logarAdmin, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha, adicionarFavorito, removerFavorito, listarFavoritosUsuario, verificarFavorito, uploadFotoPerfil, curtirResenha, descurtirResenha, verificarCurtidaResenha, criarComentario, listarComentariosResenha, deletarComentario, buscar, listarTodosComentarios, atualizarComentarioAdmin, deletarComentarioAdmin, criarDenuncia, listarDenuncias, atualizarStatusDenunciaCtrl, deletarDenunciaCtrl } = require('../controllers/controller');
+const { registrarUsuario, logarUsuario, logarAdmin, solicitarRecuperacaoSenha, redefinirSenha, obterUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario, criarLivro, listarLivros, buscarLivroPorId, atualizarLivro, deletarLivro, criarResenha, listarResenhas, listarResenhasPorLivro, buscarResenhaPorId, atualizarResenha, deletarResenha, adicionarFavorito, removerFavorito, listarFavoritosUsuario, verificarFavorito, uploadFotoPerfil, curtirResenha, descurtirResenha, verificarCurtidaResenha, avaliarResenha, obterAvaliacaoResenha, criarComentario, listarComentariosResenha, deletarComentario, buscar, listarTodosComentarios, atualizarComentarioAdmin, deletarComentarioAdmin, criarDenuncia, listarDenuncias, atualizarStatusDenunciaCtrl, deletarDenunciaCtrl } = require('../controllers/controller');
 const { uploadBooks, uploadPerfil } = require('../config/multer');
 
 const router = Router();
@@ -7,6 +7,8 @@ const router = Router();
 router.post('/registro', registrarUsuario);
 router.post('/login', logarUsuario);
 router.post('/admin/login', logarAdmin);
+router.post('/auth/forgot-password', solicitarRecuperacaoSenha);
+router.post('/auth/reset-password', redefinirSenha);
 router.get('/usuario/:email', obterUsuarioPorEmail);
 
 // Rotas de administração de usuários
@@ -48,6 +50,8 @@ router.post('/upload/foto-perfil', uploadPerfil.single('fotoPerfil'), uploadFoto
 router.post('/resenhas/:resenhaId/curtir', curtirResenha);
 router.delete('/resenhas/:resenhaId/curtir', descurtirResenha);
 router.get('/resenhas/:resenhaId/curtir/:usuarioId', verificarCurtidaResenha);
+router.post('/resenhas/:resenhaId/avaliacoes', avaliarResenha);
+router.get('/resenhas/:resenhaId/avaliacoes', obterAvaliacaoResenha);
 
 // Rotas de comentários
 router.post('/comentarios', criarComentario);

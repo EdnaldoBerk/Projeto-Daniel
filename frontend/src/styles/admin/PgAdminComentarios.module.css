@@ -523,6 +523,11 @@
   color: #999;
 }
 
+.modalRating {
+  margin: 0.5rem 0 0;
+  color: #444;
+}
+
 .denunciasDetalhes {
   display: flex;
   flex-direction: column;
@@ -651,6 +656,13 @@
   max-width: 340px;
   white-space: normal;
   line-height: 1.4;
+}
+
+.ratingStars {
+  color: #f39c12;
+  font-weight: 700;
+  letter-spacing: 1px;
+  white-space: nowrap;
 }
 
 .editTextarea {
