@@ -57,56 +57,25 @@ async function deleteBook(id) {
 }
 
 // Busca
-async function searchLivros({ q, tipo }) {
+async function searchLivros({ q }) {
   const query = q?.trim() || '';
   if (!query) return [];
   const contains = { contains: query, mode: 'insensitive' };
-  // tipo pode ser 'livros' | 'autores' | 'editoras'
-  let where;
-  if (tipo === 'autores') {
-    where = { AND: [{ ativo: true }, { autor: contains }] };
-  } else if (tipo === 'editoras') {
-    where = { AND: [{ ativo: true }, { editora: contains }] };
-  } else {
-    where = {
-      AND: [
-        { ativo: true },
-        {
-          OR: [
-            { titulo: contains },
-            { autor: contains },
-            { editora: contains },
-            { categoria: contains },
-            { isbn: contains }
-          ]
-        }
-      ]
-    };
-  }
+  const where = {
+    AND: [
+      { ativo: true },
+      {
+        OR: [
+          { titulo: contains },
+          { autor: contains },
+          { editora: contains },
+          { categoria: contains },
+          { isbn: contains }
+        ]
+      }
+    ]
+  };
   return prisma.livro.findMany({ where, orderBy: { createdAt: 'desc' } });
-}
-
-async function searchUsuarios({ q }) {
-  const query = q?.trim() || '';
-  if (!query) return [];
-  const contains = { contains: query, mode: 'insensitive' };
-  return prisma.usuario.findMany({
-    where: {
-      OR: [
-        { nome: contains },
-        { email: contains }
-      ]
-    },
-    select: {
-      id: true,
-      nome: true,
-      email: true,
-      fotoPerfil: true,
-      bio: true,
-      createdAt: true
-    },
-    orderBy: { createdAt: 'desc' }
-  });
 }
 
 // Funções de Resenhas
@@ -638,7 +607,6 @@ module.exports = {
   removeCurtidaResenha,
   checkCurtidaResenha,
   searchLivros,
-  searchUsuarios,
   createComentario,
   getComentariosByResenhaId,
   deleteComentario,

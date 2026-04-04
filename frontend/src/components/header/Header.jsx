@@ -13,18 +13,6 @@ export function Header() {
   const suggestionsRef = useRef(null)
   const debounceTimerRef = useRef(null)
 
-  // Filter dropdown state
-  const filters = [
-    { value: 'livros', label: 'Livros' },
-    { value: 'autores', label: 'Autores' },
-    { value: 'editoras', label: 'Editoras' },
-    { value: 'leitores', label: 'Leitores' }
-  ]
-  const [selectedFilter, setSelectedFilter] = useState(filters[0])
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const dropdownRef = useRef(null)
-  const wrapperRef = useRef(null)
-
   // Explore dropdown state
   const [exploreDropdownOpen, setExploreDropdownOpen] = useState(false)
   const exploreRef = useRef(null)
@@ -56,13 +44,6 @@ export function Header() {
   useEffect(() => {
     function handleClickOutside(e) {
       if (
-        dropdownOpen &&
-        wrapperRef.current &&
-        !wrapperRef.current.contains(e.target)
-      ) {
-        setDropdownOpen(false)
-      }
-      if (
         exploreDropdownOpen &&
         exploreWrapperRef.current &&
         !exploreWrapperRef.current.contains(e.target)
@@ -72,16 +53,7 @@ export function Header() {
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [dropdownOpen, exploreDropdownOpen])
-
-  function toggleDropdown() {
-    setDropdownOpen((v) => !v)
-  }
-
-  function selectFilter(filter) {
-    setSelectedFilter(filter)
-    setDropdownOpen(false)
-  }
+  }, [exploreDropdownOpen])
 
   function toggleExploreDropdown() {
     setExploreDropdownOpen((v) => !v)
@@ -95,7 +67,7 @@ export function Header() {
     }
     try {
       const { data } = await (async () => {
-        const res = await fetch(`http://localhost:3001/api/search?q=${encodeURIComponent(searchQuery)}&tipo=livros`)
+        const res = await fetch(`http://localhost:3001/api/search?q=${encodeURIComponent(searchQuery)}`)
         const text = await res.text()
         const parsed = text ? JSON.parse(text) : null
         return { data: parsed?.results || [] }
@@ -144,9 +116,7 @@ export function Header() {
   function doSearch() {
     const q = query.trim()
     if (!q) return
-    const tipo = selectedFilter.value
-    navigate(`/busca?q=${encodeURIComponent(q)}&tipo=${encodeURIComponent(tipo)}`)
-    setDropdownOpen(false)
+    navigate(`/busca?q=${encodeURIComponent(q)}`)
     setExploreDropdownOpen(false)
     setSuggestions([])
     setShowSuggestions(false)
@@ -160,7 +130,7 @@ export function Header() {
       </Link>
 
       <div className={styles.searchContainer}>
-        <div className={styles.searchBar} ref={wrapperRef}>
+        <div className={styles.searchBar}>
           <div className={styles.searchInputWrapper}>
             <input
               type="text"
@@ -172,19 +142,6 @@ export function Header() {
               onFocus={() => query.trim() && suggestions.length > 0 && setShowSuggestions(true)}
               onKeyDown={(e) => { if (e.key === 'Enter') doSearch() }}
             />
-
-            <button
-              type="button"
-              className={styles.filterButton}
-              onClick={toggleDropdown}
-              aria-expanded={dropdownOpen}
-              aria-haspopup="menu"
-            >
-              <span>{selectedFilter.label}</span>
-              <svg className={styles.chev} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                <path d="M6 8L10 12L14 8" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
 
             {showSuggestions && suggestions.length > 0 && (
               <div className={styles.suggestionsDropdown} ref={suggestionsRef} role="listbox">
@@ -285,26 +242,6 @@ export function Header() {
             )}
           </div>
 
-          {dropdownOpen && (
-            <div className={styles.filterDropdown} ref={dropdownRef} role="menu" aria-label="Selecionar filtro">
-              {filters.map((f) => (
-                <button
-                  key={f.value}
-                  type="button"
-                  className={styles.filterItem}
-                  onClick={() => selectFilter(f)}
-                  role="menuitem"
-                >
-                  <span>{f.label}</span>
-                  {selectedFilter.value === f.value && (
-                    <svg className={styles.filterCheck} width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                      <path d="M20 6L9 17L4 12" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 

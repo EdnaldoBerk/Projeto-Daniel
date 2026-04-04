@@ -1,4 +1,4 @@
-const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha, searchLivros, searchUsuarios, createComentario, getComentariosByResenhaId, deleteComentario, getComentarioById, getAllComentariosAdmin, updateComentarioAdmin, deleteComentarioAdmin, criarDenunciaComentario, getDenunciasComentarios, atualizarStatusDenuncia, deleteDenunciaComentario } = require('../services/service');
+const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha, searchLivros, createComentario, getComentariosByResenhaId, deleteComentario, getComentarioById, getAllComentariosAdmin, updateComentarioAdmin, deleteComentarioAdmin, criarDenunciaComentario, getDenunciasComentarios, atualizarStatusDenuncia, deleteDenunciaComentario } = require('../services/service');
 
 async function registrarUsuario(req, res) {
   // TODO: validação e hashing de senha
@@ -100,19 +100,13 @@ async function obterUsuarioPorEmail(req, res) {
 // Busca genérica
 async function buscar(req, res) {
   try {
-    const { q = '', tipo = 'livros' } = req.query;
+    const { q = '' } = req.query;
     if (!q || String(q).trim().length === 0) {
-      return res.json({ tipo, results: [] });
+      return res.json({ results: [] });
     }
 
-    if (tipo === 'leitores') {
-      const usuarios = await searchUsuarios({ q });
-      return res.json({ tipo, results: usuarios });
-    }
-
-    // livros | autores | editoras → retornam livros
-    const livros = await searchLivros({ q, tipo });
-    return res.json({ tipo, results: livros });
+    const livros = await searchLivros({ q });
+    return res.json({ results: livros });
   } catch (e) {
     console.error('Erro na busca:', e);
     return res.status(500).json({ error: 'Erro ao realizar busca' });

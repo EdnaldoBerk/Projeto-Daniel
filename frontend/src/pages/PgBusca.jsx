@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useSearchParams, Link, useNavigate } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { CardBook } from '../components/cardbook/CardBook'
 
@@ -7,7 +7,6 @@ export default function PgBusca() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const q = params.get('q') || ''
-  const tipo = params.get('tipo') || 'livros'
   const [loading, setLoading] = useState(true)
   const [results, setResults] = useState([])
   const [error, setError] = useState('')
@@ -18,7 +17,7 @@ export default function PgBusca() {
       setLoading(true)
       setError('')
       try {
-        const { data } = await api.get(`/search?tipo=${encodeURIComponent(tipo)}&q=${encodeURIComponent(q)}`)
+        const { data } = await api.get(`/search?q=${encodeURIComponent(q)}`)
         if (!mounted) return
         setResults(Array.isArray(data?.results) ? data.results : [])
       } catch (e) {
@@ -34,7 +33,7 @@ export default function PgBusca() {
       setLoading(false)
     }
     return () => { mounted = false }
-  }, [q, tipo])
+  }, [q])
 
   function goHome() { navigate('/') }
 
@@ -42,7 +41,7 @@ export default function PgBusca() {
     <main style={{ maxWidth: 1200, margin: '0 auto', padding: '2rem 1rem', color: '#fff' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <h1 style={{ margin: 0, fontSize: '1.75rem' }}>
-          Resultados para "{q}" {tipo !== 'livros' ? `em ${tipo}` : ''}
+          Resultados para "{q}"
         </h1>
         <button onClick={goHome} style={{ background: 'transparent', border: '1px solid #646cff', color: '#fff', borderRadius: 8, padding: '6px 12px', cursor: 'pointer' }}>Voltar</button>
       </div>
@@ -52,33 +51,18 @@ export default function PgBusca() {
 
       {!loading && !error && (
         <div style={{ marginTop: 24 }}>
-          {tipo === 'leitores' ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
-              {results.length === 0 && <p>Nenhum leitor encontrado.</p>}
-              {results.map((u) => (
-                <div key={u.id} style={{ background: '#1f1f1f', border: '1px solid rgba(100,108,255,0.25)', borderRadius: 12, padding: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <img src={u.fotoPerfil ? `http://localhost:3001${u.fotoPerfil}` : '/avatar-placeholder.png'} alt={u.nome} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <strong>{u.nome}</strong>
-                    <span style={{ color: '#aaa', fontSize: 14 }}>{u.email}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
-              {results.length === 0 && <p>Nenhum livro encontrado.</p>}
-              {results.map((livro) => (
-                <CardBook
-                  key={livro.id}
-                  id={livro.id}
-                  image={livro.fotoCapa ? `http://localhost:3001${livro.fotoCapa}` : '/placeholder.png'}
-                  title={livro.titulo}
-                  author={livro.autor}
-                />
-              ))}
-            </div>
-          )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
+            {results.length === 0 && <p>Nenhum livro encontrado.</p>}
+            {results.map((livro) => (
+              <CardBook
+                key={livro.id}
+                id={livro.id}
+                image={livro.fotoCapa ? `http://localhost:3001${livro.fotoCapa}` : '/placeholder.png'}
+                title={livro.titulo}
+                author={livro.autor}
+              />
+            ))}
+          </div>
         </div>
       )}
     </main>
