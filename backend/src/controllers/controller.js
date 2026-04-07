@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const { createUser, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, addOrUpdateLeitura, removeLeitura, getLeiturasByUsuarioId, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha, addOrUpdateAvaliacaoResenha, getAvaliacaoStatsByResenhaId, searchLivros, createComentario, getComentariosByResenhaId, deleteComentario, getComentarioById, getAllComentariosAdmin, updateComentarioAdmin, deleteComentarioAdmin, criarDenunciaComentario, getDenunciasComentarios, atualizarStatusDenuncia, deleteDenunciaComentario } = require('../services/service');
+const { createUser, getNextAvailableUserId, findUserByEmail, getAllUsers, getUserById, updateUser, deleteUser, createBook, getAllBooks, getBookById, updateBook, deleteBook, createResenha, getAllResenhas, getResenhasByLivroId, getResenhaById, updateResenha, deleteResenha, addFavorito, addOrUpdateLeitura, removeLeitura, getLeiturasByUsuarioId, removeFavorito, getFavoritosByUsuarioId, checkFavorito, addCurtidaResenha, removeCurtidaResenha, checkCurtidaResenha, addOrUpdateAvaliacaoResenha, getAvaliacaoStatsByResenhaId, searchLivros, createComentario, getComentariosByResenhaId, deleteComentario, getComentarioById, getAllComentariosAdmin, updateComentarioAdmin, deleteComentarioAdmin, criarDenunciaComentario, getDenunciasComentarios, atualizarStatusDenuncia, deleteDenunciaComentario } = require('../services/service');
 
 const RESET_TOKEN_TTL_MS = 15 * 60 * 1000;
 const passwordResetTokens = new Map();
@@ -17,13 +17,22 @@ function cleanupExpiredResetTokens() {
 
 async function registrarUsuario(req, res) {
   // TODO: validação e hashing de senha
-  const { nome, email, telefone, cpf, senha } = req.body;
+  const { nome, email, telefone, cpf, senha, isAdmin } = req.body;
   try {
     const existente = await findUserByEmail(email);
     if (existente) {
       return res.status(409).json({ error: 'Email já cadastrado' });
     }
-    const novo = await createUser({ nome, email, telefone, cpf, senha });
+    const idDisponivel = await getNextAvailableUserId();
+    const novo = await createUser({
+      id: idDisponivel,
+      nome,
+      email,
+      telefone,
+      cpf,
+      senha,
+      isAdmin: Boolean(isAdmin)
+    });
     return res.status(201).json({ id: novo.id, nome: novo.nome, email: novo.email });
   } catch (e) {
     console.error('Erro ao registrar usuário:', e); // Log detalhado do erro
@@ -256,7 +265,9 @@ async function atualizarUsuario(req, res) {
     if (email !== undefined) dataToUpdate.email = email;
     if (telefone !== undefined) dataToUpdate.telefone = telefone;
     if (cpf !== undefined) dataToUpdate.cpf = cpf;
-    if (isAdmin !== undefined) dataToUpdate.isAdmin = isAdmin;
+    if (isAdmin !== undefined) {
+      dataToUpdate.isAdmin = typeof isAdmin === 'string' ? isAdmin === 'true' : Boolean(isAdmin);
+    }
     if (senha !== undefined) dataToUpdate.senha = senha;
     if (bio !== undefined) dataToUpdate.bio = bio;
 

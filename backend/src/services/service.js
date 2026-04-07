@@ -5,6 +5,21 @@ async function createUser(data) {
   return prisma.usuario.create({ data });
 }
 
+async function getNextAvailableUserId() {
+  const usuarios = await prisma.usuario.findMany({
+    select: { id: true },
+    orderBy: { id: 'asc' }
+  });
+
+  let nextId = 1;
+  for (const usuario of usuarios) {
+    if (usuario.id !== nextId) break;
+    nextId += 1;
+  }
+
+  return nextId;
+}
+
 async function findUserByEmail(email) {
   return prisma.usuario.findUnique({ where: { email } });
 }
@@ -772,6 +787,7 @@ async function deleteDenunciaComentario(denunciaId) {
 
 module.exports = { 
   createUser, 
+  getNextAvailableUserId,
   findUserByEmail, 
   getAllUsers, 
   getUserById, 

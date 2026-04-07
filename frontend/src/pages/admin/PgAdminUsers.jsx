@@ -233,8 +233,7 @@ export function PgAdminUsers() {
             <p className={styles.pageSubtitle}>Total: {usuarios.length} usuários cadastrados</p>
           </div>
           <button className={styles.createButton} onClick={() => setShowCreateModal(true)}>
-            <span>➕</span>
-            Criar Novo Usuário
+            + Criar Usuário
           </button>
         </header>
 

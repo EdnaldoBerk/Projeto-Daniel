@@ -45,10 +45,10 @@ export function Footer() {
           <h4 className={styles.sectionTitle}>Links Rápidos</h4>
           <ul className={styles.links}>
             <li><Link to="/">Início</Link></li>
-            <li><Link to="/explorar">Explorar</Link></li>
+            {/*<li><Link to="/explorar">Explorar</Link></li>
             <li><Link to="/categorias">Categorias</Link></li>
             <li><Link to="/autores">Autores</Link></li>
-            <li><Link to="/lancamentos">Lançamentos</Link></li>
+            <li><Link to="/lancamentos">Lançamentos</Link></li>*/}
           </ul>
         </div>
 
@@ -63,7 +63,7 @@ export function Footer() {
           </ul>
         </div>
 
-        {/* Newsletter */}
+        {/* Newsletter
         <div className={styles.section}>
           <h4 className={styles.sectionTitle}>Newsletter</h4>
           <p className={styles.newsletterText}>
@@ -80,7 +80,7 @@ export function Footer() {
               Inscrever-se
             </button>
           </form>
-        </div>
+        </div>*/}
       </div>
 
       {/* Copyright */}

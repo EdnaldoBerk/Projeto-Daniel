@@ -220,9 +220,8 @@ export function PgAdminResenhas() {
               {loading ? 'Carregando...' : `${resenhas.length} resenha(s) cadastrada(s)`}
             </p>
           </div>
-          <button className={adminStyles.createButton} onClick={handleCreateResenha}>
-            <span>➕</span>
-            Criar Nova Resenha
+          <button className={styles.createBtn} onClick={handleCreateResenha}>
+            + Criar Nova Resenha
           </button>
         </header>
 
