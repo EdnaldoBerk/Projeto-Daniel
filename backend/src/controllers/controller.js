@@ -286,8 +286,30 @@ async function atualizarUsuario(req, res) {
 async function deletarUsuario(req, res) {
   const { id } = req.params;
   try {
+    // Buscar usuário antes de deletar para remover arquivos
+    const usuario = await getUserById(id);
+    
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    // Remover foto de perfil se existir
+    if (usuario.fotoPerfil) {
+      const caminhoFoto = path.join(__dirname, '../..', usuario.fotoPerfil);
+      try {
+        if (fs.existsSync(caminhoFoto)) {
+          fs.unlinkSync(caminhoFoto);
+          console.log(`Foto de perfil deletada: ${caminhoFoto}`);
+        }
+      } catch (err) {
+        console.error(`Erro ao deletar foto de perfil (${caminhoFoto}):`, err);
+        // Continuar mesmo se falhar ao deletar arquivo
+      }
+    }
+
+    // Deletar usuário do banco de dados
     await deleteUser(id);
-    return res.json({ message: 'Usuário deletado com sucesso' });
+    return res.json({ message: 'Usuário e seus arquivos deletados com sucesso' });
   } catch (e) {
     console.error('Erro ao deletar usuário:', e);
     if (e.code === 'P2025') {
