@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import styles from "../styles/PgResenha.module.css";
 import api from "../services/api";
-import ReportComentarioModal from "../components/ReportComentarioModal";
+import ReportComentarioModal from "../components/report/ReportComentarioModal";
 
 /**
  * PgResenha.jsx
