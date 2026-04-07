@@ -1,3 +1,4 @@
+import React from 'react';
 import styles from '../../styles/PgPrivacidade.module.css';
 
 export default function PgPrivacidade() {

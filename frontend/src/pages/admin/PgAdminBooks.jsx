@@ -43,10 +43,16 @@ export default function PgAdminBooks() {
 
   async function carregarLivros() {
     try {
+      console.log('Iniciando requisição para carregar livros...');
       const response = await api.get('/admin/livros');
+      console.log('Response completo:', response);
+      console.log('Livros carregados:', response.data);
+      console.log('Tipo de response.data:', typeof response.data);
+      console.log('É array?', Array.isArray(response.data));
       setLivros(response.data || []);
     } catch (error) {
       console.error('Erro ao carregar livros:', error);
+      console.error('Detalhes do erro:', error.response);
       alert('Erro ao carregar livros');
     } finally {
       setLoading(false);
