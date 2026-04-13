@@ -322,7 +322,7 @@ async function deletarUsuario(req, res) {
 // Controladores de Livros
 async function criarLivro(req, res) {
   try {
-    const { titulo, autor, ano, editora, paginas, isbn, categoria, sinopse, idioma, edicao } = req.body;
+    const { titulo, autor, ano, editora, paginas, isbn, categoria, sinopse, idioma, edicao, purchaseLinks } = req.body;
     
     // Foto da capa (obrigatória)
     if (!req.files || !req.files.fotoCapa || req.files.fotoCapa.length === 0) {
@@ -337,6 +337,8 @@ async function criarLivro(req, res) {
       galeria = req.files.galeria.map(file => `/uploads/books/${file.filename}`);
     }
 
+    const purchaseLinksList = parsePurchaseLinks(purchaseLinks);
+
     const livro = await createBook({
       titulo,
       autor,
@@ -348,6 +350,7 @@ async function criarLivro(req, res) {
       sinopse: sinopse || null,
       idioma: idioma || 'Português',
       edicao: edicao || null,
+      purchaseLinks: purchaseLinksList,
       fotoCapa,
       galeria
     });
@@ -389,7 +392,7 @@ async function buscarLivroPorId(req, res) {
 async function atualizarLivro(req, res) {
   const { id } = req.params;
   try {
-    const { titulo, autor, ano, editora, paginas, isbn, categoria, sinopse, idioma, edicao, ativo } = req.body;
+    const { titulo, autor, ano, editora, paginas, isbn, categoria, sinopse, idioma, edicao, purchaseLinks, ativo } = req.body;
     
     const dataToUpdate = {};
     if (titulo !== undefined) dataToUpdate.titulo = titulo;
@@ -402,6 +405,7 @@ async function atualizarLivro(req, res) {
     if (sinopse !== undefined) dataToUpdate.sinopse = sinopse || null;
     if (idioma !== undefined) dataToUpdate.idioma = idioma;
     if (edicao !== undefined) dataToUpdate.edicao = edicao || null;
+    if (purchaseLinks !== undefined) dataToUpdate.purchaseLinks = parsePurchaseLinks(purchaseLinks);
     if (ativo !== undefined) dataToUpdate.ativo = ativo;
 
     // Atualizar foto da capa se fornecida
@@ -426,6 +430,35 @@ async function atualizarLivro(req, res) {
     }
     return res.status(500).json({ error: 'Erro ao atualizar livro' });
   }
+}
+
+function parsePurchaseLinks(value) {
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(link => String(link).trim()).filter(Boolean);
+  }
+
+  const rawValue = String(value).trim();
+  if (!rawValue) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(rawValue);
+    if (Array.isArray(parsed)) {
+      return parsed.map(link => String(link).trim()).filter(Boolean);
+    }
+  } catch (error) {
+    // Mantém o fallback de texto simples abaixo.
+  }
+
+  return rawValue
+    .split(/\r?\n|,/)
+    .map(link => link.trim())
+    .filter(Boolean);
 }
 
 async function deletarLivro(req, res) {

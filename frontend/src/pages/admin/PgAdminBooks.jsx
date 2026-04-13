@@ -10,6 +10,8 @@ export default function PgAdminBooks() {
   const [livros, setLivros] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingBook, setEditingBook] = useState(null);
   const [newBook, setNewBook] = useState({
     titulo: '',
     autor: '',
@@ -21,6 +23,7 @@ export default function PgAdminBooks() {
     sinopse: '',
     idioma: 'Português',
     edicao: '',
+    purchaseLinks: [''],
     fotoCapa: null,
     galeria: []
   });
@@ -72,6 +75,7 @@ export default function PgAdminBooks() {
       sinopse: '',
       idioma: 'Português',
       edicao: '',
+      purchaseLinks: [''],
       fotoCapa: null,
       galeria: []
     });
@@ -83,6 +87,7 @@ export default function PgAdminBooks() {
       alert('A foto da capa é obrigatória');
       return;
     }
+    const purchaseLinksFiltrados = newBook.purchaseLinks.filter(link => link.trim() !== '');
     const formData = new FormData();
     formData.append('titulo', newBook.titulo);
     formData.append('autor', newBook.autor);
@@ -94,6 +99,7 @@ export default function PgAdminBooks() {
     formData.append('sinopse', newBook.sinopse);
     formData.append('idioma', newBook.idioma);
     formData.append('edicao', newBook.edicao);
+    formData.append('purchaseLinks', JSON.stringify(purchaseLinksFiltrados));
     formData.append('fotoCapa', newBook.fotoCapa);
     if (newBook.galeria.length > 0) {
       newBook.galeria.forEach(file => formData.append('galeria', file));
@@ -134,6 +140,68 @@ export default function PgAdminBooks() {
     }
   }
 
+  function handleEditBook(livro) {
+    const linksCompra = Array.isArray(livro.purchaseLinks) && livro.purchaseLinks.length > 0
+      ? livro.purchaseLinks
+      : [''];
+    setEditingBook(livro);
+    setNewBook({
+      titulo: livro.titulo,
+      autor: livro.autor,
+      ano: livro.ano,
+      editora: livro.editora,
+      paginas: livro.paginas,
+      isbn: livro.isbn || '',
+      categoria: livro.categoria || '',
+      sinopse: livro.sinopse || '',
+      idioma: livro.idioma || 'Português',
+      edicao: livro.edicao || '',
+      purchaseLinks: linksCompra,
+      fotoCapa: null,
+      galeria: []
+    });
+    setShowEditModal(true);
+  }
+
+  async function handleSubmitEdit(e) {
+    e.preventDefault();
+    if (!editingBook) return;
+
+    const purchaseLinksFiltrados = newBook.purchaseLinks.filter(link => link.trim() !== '');
+
+    const formData = new FormData();
+    formData.append('titulo', newBook.titulo);
+    formData.append('autor', newBook.autor);
+    formData.append('ano', newBook.ano);
+    formData.append('editora', newBook.editora);
+    formData.append('paginas', newBook.paginas);
+    formData.append('isbn', newBook.isbn);
+    formData.append('categoria', newBook.categoria);
+    formData.append('sinopse', newBook.sinopse);
+    formData.append('idioma', newBook.idioma);
+    formData.append('edicao', newBook.edicao);
+    formData.append('purchaseLinks', JSON.stringify(purchaseLinksFiltrados));
+    if (newBook.fotoCapa) {
+      formData.append('fotoCapa', newBook.fotoCapa);
+    }
+    if (newBook.galeria.length > 0) {
+      newBook.galeria.forEach(file => formData.append('galeria', file));
+    }
+
+    try {
+      await api.put(`/admin/livros/${editingBook.id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      alert('Livro atualizado com sucesso!');
+      setShowEditModal(false);
+      setEditingBook(null);
+      carregarLivros();
+    } catch (error) {
+      console.error('Erro ao atualizar livro:', error);
+      alert(error.response?.data?.error || 'Erro ao atualizar livro');
+    }
+  }
+
   function handleFotoCapaChange(e) {
     const file = e.target.files[0];
     if (file) {
@@ -155,6 +223,27 @@ export default function PgAdminBooks() {
       return true;
     });
     setNewBook({ ...newBook, galeria: validFiles });
+  }
+
+  function addPurchaseLink() {
+    setNewBook({
+      ...newBook,
+      purchaseLinks: [...newBook.purchaseLinks, '']
+    });
+  }
+
+  function removePurchaseLink(index) {
+    const novosLinks = newBook.purchaseLinks.filter((_, i) => i !== index);
+    setNewBook({
+      ...newBook,
+      purchaseLinks: novosLinks.length > 0 ? novosLinks : ['']
+    });
+  }
+
+  function updatePurchaseLink(index, value) {
+    const novosLinks = [...newBook.purchaseLinks];
+    novosLinks[index] = value;
+    setNewBook({ ...newBook, purchaseLinks: novosLinks });
   }
 
   const handleLogout = () => {
@@ -277,9 +366,14 @@ export default function PgAdminBooks() {
                       </button>
                     </td>
                     <td>
-                      <button onClick={() => handleDelete(livro.id)} className={styles.deleteBtn}>
-                        Deletar
-                      </button>
+                      <div className={styles.actionGroup}>
+                        <button onClick={() => handleEditBook(livro)} className={styles.editBtn}>
+                          Editar
+                        </button>
+                        <button onClick={() => handleDelete(livro.id)} className={styles.deleteBtn}>
+                          Deletar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -397,6 +491,37 @@ export default function PgAdminBooks() {
                 </div>
 
                 <div className={styles.formGroup}>
+                  <label>Links de compra</label>
+                  {newBook.purchaseLinks.map((link, index) => (
+                    <div key={index} className={styles.linkRow}>
+                      <input
+                        type="url"
+                        value={link}
+                        onChange={(e) => updatePurchaseLink(index, e.target.value)}
+                        className={styles.input}
+                        placeholder={`Link de compra ${index + 1}`}
+                      />
+                      {newBook.purchaseLinks.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removePurchaseLink(index)}
+                          className={styles.btnRemoveLink}
+                        >
+                          ✖
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addPurchaseLink}
+                    className={styles.btnAddLink}
+                  >
+                    + Adicionar Link
+                  </button>
+                </div>
+
+                <div className={styles.formGroup}>
                   <label>Foto da Capa * (máx. 5MB)</label>
                   <input
                     type="file"
@@ -426,6 +551,181 @@ export default function PgAdminBooks() {
                   </button>
                   <button type="submit" className={styles.saveBtn}>
                     Criar Livro
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Edição */}
+        {showEditModal && editingBook && (
+          <div className={styles.modal} onClick={() => setShowEditModal(false)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <h2>Editar Livro</h2>
+              <form onSubmit={handleSubmitEdit}>
+                <div className={styles.formGrid}>
+                  <div className={styles.formGroup}>
+                    <label>Título *</label>
+                    <input
+                      type="text"
+                      value={newBook.titulo}
+                      onChange={(e) => setNewBook({ ...newBook, titulo: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Autor *</label>
+                    <input
+                      type="text"
+                      value={newBook.autor}
+                      onChange={(e) => setNewBook({ ...newBook, autor: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Ano *</label>
+                    <input
+                      type="number"
+                      value={newBook.ano}
+                      onChange={(e) => setNewBook({ ...newBook, ano: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Editora *</label>
+                    <input
+                      type="text"
+                      value={newBook.editora}
+                      onChange={(e) => setNewBook({ ...newBook, editora: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Páginas *</label>
+                    <input
+                      type="number"
+                      value={newBook.paginas}
+                      onChange={(e) => setNewBook({ ...newBook, paginas: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>ISBN</label>
+                    <input
+                      type="text"
+                      value={newBook.isbn}
+                      onChange={(e) => setNewBook({ ...newBook, isbn: e.target.value })}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Categoria</label>
+                    <input
+                      type="text"
+                      value={newBook.categoria}
+                      onChange={(e) => setNewBook({ ...newBook, categoria: e.target.value })}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Idioma</label>
+                    <input
+                      type="text"
+                      value={newBook.idioma}
+                      onChange={(e) => setNewBook({ ...newBook, idioma: e.target.value })}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Edição</label>
+                    <input
+                      type="text"
+                      value={newBook.edicao}
+                      onChange={(e) => setNewBook({ ...newBook, edicao: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Sinopse</label>
+                  <textarea
+                    value={newBook.sinopse}
+                    onChange={(e) => setNewBook({ ...newBook, sinopse: e.target.value })}
+                    rows="4"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Links de compra</label>
+                  {newBook.purchaseLinks.map((link, index) => (
+                    <div key={index} className={styles.linkRow}>
+                      <input
+                        type="url"
+                        value={link}
+                        onChange={(e) => updatePurchaseLink(index, e.target.value)}
+                        className={styles.input}
+                        placeholder={`Link de compra ${index + 1}`}
+                      />
+                      {newBook.purchaseLinks.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removePurchaseLink(index)}
+                          className={styles.btnRemoveLink}
+                        >
+                          ✖
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addPurchaseLink}
+                    className={styles.btnAddLink}
+                  >
+                    + Adicionar Link
+                  </button>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Foto da Capa (máx. 5MB)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFotoCapaChange}
+                  />
+                  {newBook.fotoCapa && (
+                    <p className={styles.fileName}>{newBook.fotoCapa.name}</p>
+                  )}
+                  {editingBook.fotoCapa && !newBook.fotoCapa && (
+                    <p className={styles.fileName}>Capa atual: {editingBook.fotoCapa}</p>
+                  )}
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Galeria (máx. 10 imagens)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleGaleriaChange}
+                    multiple
+                  />
+                  {newBook.galeria.length > 0 && (
+                    <p className={styles.fileName}>{newBook.galeria.length} arquivo(s) selecionado(s)</p>
+                  )}
+                </div>
+
+                <div className={styles.modalActions}>
+                  <button type="button" onClick={() => setShowEditModal(false)} className={styles.cancelBtn}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className={styles.saveBtn}>
+                    Atualizar Livro
                   </button>
                 </div>
               </form>

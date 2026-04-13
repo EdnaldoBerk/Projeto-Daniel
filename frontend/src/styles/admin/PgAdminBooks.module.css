@@ -80,6 +80,13 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.actionGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .ativo, .inativo {
   padding: 0.4rem 0.8rem;
   border: none;
@@ -110,12 +117,36 @@
   background: rgba(239, 68, 68, 0.3);
 }
 
+.editBtn {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  min-width: 5.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.editBtn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  transform: translateY(-1px);
+}
+
 .deleteBtn {
   background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
   border: 1px solid rgba(239, 68, 68, 0.3);
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
+  min-width: 5.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   font-size: 0.85rem;
   transition: all 0.2s ease;
@@ -209,6 +240,45 @@
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.6);
   margin-top: 0.25rem;
+}
+
+.linkRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.btnRemoveLink {
+  background: #ef4444;
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 0.875rem;
+}
+
+.btnRemoveLink:hover {
+  background: #dc2626;
+}
+
+.btnAddLink {
+  background: transparent;
+  border: 1px dashed #646cff;
+  color: #646cff;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.btnAddLink:hover {
+  background: rgba(100, 108, 255, 0.1);
+  border-style: solid;
 }
 
 .modalActions {

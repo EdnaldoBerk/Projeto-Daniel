@@ -39,6 +39,7 @@ model Livro {
   sinopse     String?    @db.Text
   idioma      String     @default("Português")
   edicao      String?
+  purchaseLinks String[]
   fotoCapa    String
   galeria     String[]
   ativo       Boolean    @default(true)

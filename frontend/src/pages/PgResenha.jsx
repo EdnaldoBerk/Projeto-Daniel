@@ -567,6 +567,12 @@ export default function PgResenha() {
                   <td>{livroCompleto.categoria}</td>
                 </tr>
               )}
+              {livroCompleto?.sinopse && (
+                <tr>
+                  <th>Sinopse</th>
+                  <td>{livroCompleto.sinopse}</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </section>
